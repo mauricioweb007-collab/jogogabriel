@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#1f6b3a">
+  <meta name="description" content="Jogo educativo de Ciências (4º ano): aventura 2D explorável sobre cadeias alimentares, ciclos da matéria, eutrofização, energia e biomas brasileiros.">
+  <title>Missão EcoNexus: Guardiões dos Biomas</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 4C44 20 52 30 52 40a20 20 0 0 1-40 0C12 30 20 20 32 4z' fill='%238fe3ff'/%3E%3Cellipse cx='40' cy='10' rx='10' ry='5' fill='%2347c46b' transform='rotate(-30 40 10)'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Mundo 2D (Canvas) -->
+  <canvas id="world" aria-label="Mundo do jogo"></canvas>
+
+  <!-- HUD discreto: missão, moedas, nível, botões -->
+  <div id="hud">
+    <div class="hud-left">
+      <canvas id="hAvatar" width="56" height="56" aria-hidden="true"></canvas>
+      <div class="hud-id">
+        <b id="hName">Gabriel</b>
+        <span id="hTitle">Nv 1</span>
+        <span id="hLeaves" class="hud-leaves" title="Folhas de energia: cada desafio começa com 3">🍃🍃🍃</span>
+        <div class="xpbar" title="Experiência (XP)"><i id="hXp"></i><span id="hXpT"></span></div>
+      </div>
+      <div class="coins" title="EcoMoedas">🪙 <b id="hCoins">0</b></div>
+    </div>
+    <button id="hMission" class="mission" type="button" title="Abrir o Mural de Missões"><span class="lbl">🎯 Missão</span><span id="hMissionT"></span></button>
+    <div id="hFrag" class="frag-tracker"></div>
+    <div class="hud-btns">
+      <button id="hMenu" type="button" title="Menu (Esc)" aria-label="Menu">☰</button>
+      <button id="hInv" type="button" title="Inventário (I)" aria-label="Inventário">🎒</button>
+      <button id="hNote" type="button" title="Caderno do Guardião (C)" aria-label="Caderno do Guardião">📓</button>
+      <button id="hPath" type="button" title="Mostrar caminho (M)" aria-label="Mostrar caminho">🧭</button>
+      <button id="hSound" type="button" title="Ligar sons" aria-label="Som">🔇</button>
+      <button id="hFull" type="button" title="Tela cheia" aria-label="Tela cheia">⛶</button>
+      <button id="hMin" type="button" title="Recolher/expandir HUD" aria-label="Recolher HUD">▾</button>
+    </div>
+  </div>
+  <div id="saveBadge">💾 Salvo</div>
+
+  <!-- Controles de toque -->
+  <div id="touch">
+    <div id="joy" aria-label="Direcional"><div id="joyKnob"></div></div>
+    <button id="btnAct" type="button" aria-label="Interagir">✋</button>
+  </div>
+
+  <!-- Camadas de interface -->
+  <div id="layer"></div>
+  <div id="toasts" aria-live="polite"></div>
+
+  <!-- Tela inicial -->
+  <div id="title" class="hide">
+    <div class="title-bg"><span>🌳</span><span>💧</span><span>☀️</span><span>🦜</span><span>🌵</span><span>🐟</span><span>🍄</span><span>🌾</span></div>
+    <div class="title-card">
+      <div class="logo">💎</div>
+      <h1>Missão EcoNexus</h1>
+      <h2>Guardiões dos Biomas</h2>
+      <p class="tag">Uma aventura de Ciências para o 4º ano</p>
+      <div id="titleBtns"></div>
+      <p class="tiny">Funciona sem internet. O progresso fica salvo só neste aparelho.</p>
+    </div>
+  </div>
+
+  <noscript><p style="padding:20px;font:18px sans-serif">Este jogo precisa de JavaScript ativado no navegador.</p></noscript>
+
+  <!-- Motor -->
+  <script src="js/core/util.js"></script>
+  <script src="js/core/audio.js"></script>
+  <script src="js/core/sprites.js"></script>
+  <script src="js/core/engine.js"></script>
+  <!-- Dados pedagógicos e das regiões -->
+  <script src="js/data/glossary.js"></script>
+  <script src="js/data/items.js"></script>
+  <script src="js/data/questions.js"></script>
+  <script src="js/data/characters.js"></script>
+  <script src="js/data/lessons.js"></script>
+  <script src="js/data/mapkit.js"></script>
+  <script src="js/data/maps.js"></script>
+  <!-- Sistemas -->
+  <script src="js/systems/save.js"></script>
+  <script src="js/systems/economy.js"></script>
+  <script src="js/systems/quests.js"></script>
+  <script src="js/systems/learning.js"></script>
+  <script src="js/systems/minigames.js"></script>
+  <!-- Interface e inicialização -->
+  <script src="js/ui/ui.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

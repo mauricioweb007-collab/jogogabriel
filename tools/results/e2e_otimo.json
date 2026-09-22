@@ -1,0 +1,95 @@
+{
+ "log": [
+  "r1: coins=133 xp=1025 mastery=100% recovery=false",
+  "r2: coins=306 xp=2400 mastery=100% recovery=false",
+  "r3: coins=501 xp=3935 mastery=100% recovery=false",
+  "r4: coins=583 xp=4505 mastery=100% recovery=false",
+  "r5: coins=730 xp=5630 mastery=100% recovery=false",
+  "r6: coins=881 xp=6720 mastery=100% recovery=false"
+ ],
+ "storyDone": true,
+ "arena": {
+  "round": 4,
+  "best": 1,
+  "done": true,
+  "last": 1,
+  "bonusWon": true,
+  "tries": 1
+ },
+ "coins": 931,
+ "earned": 931,
+ "xp": 7425,
+ "level": 15,
+ "coverage": {
+  "done": 43,
+  "total": 43
+ },
+ "mastery": 100,
+ "medals": [
+  "Defensor dos Animais",
+  "Mestre das Cadeias",
+  "Guardião dos Ciclos",
+  "Protetor dos Rios",
+  "Mestre da Energia",
+  "Conhecedor dos Biomas",
+  "Mestre da Restauração",
+  "Guardião do EcoNexus"
+ ],
+ "inv": [
+  "uni_classico",
+  "lumi_classica",
+  "chapeu_explorador",
+  "mochila_lona",
+  "oculos_cientista",
+  "pet_peixe",
+  "deco_estante",
+  "capa_folhas",
+  "coroa_folhas"
+ ],
+ "crystals": 6,
+ "profile": "otimo",
+ "minutes": "0.4",
+ "apLog": [],
+ "acts": {
+  "acts": 123,
+  "wrongs": 0
+ },
+ "review": {
+  "ok": 10,
+  "n": 10
+ },
+ "report": {
+  "cobertura": {
+   "done": 43,
+   "total": 43
+  },
+  "vistas": 43,
+  "primeira": 43,
+  "erros": 0,
+  "dominio": 100,
+  "txtLen": 4756
+ },
+ "shopping": {
+  "bought": [
+   "botas_explorador(45)",
+   "bussola_lumi(35)",
+   "lupa_ecologica(50)",
+   "cantil(40)",
+   "mochila_ampliada(55)",
+   "caderno_melhorado(30)",
+   "ima_fragmentos(60)",
+   "medalhao_solar(90)",
+   "mascara_mergulho(60)",
+   "corda_escalada(55)",
+   "chave_lab(85)",
+   "lanterna(90)",
+   "passe_biomas(160)",
+   "semente_rara(40)",
+   "uni_verde(15)",
+   "bone_folha(20)"
+  ],
+  "left": 9,
+  "spent": 930
+ },
+ "errors": []
+}

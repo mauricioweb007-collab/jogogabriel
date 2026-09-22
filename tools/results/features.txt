@@ -1,0 +1,86 @@
+
+[1] Movimento, colisão, câmera e interação (teclado)
+  ✓ setas movem o personagem (y 1188 → 1083)
+  ✓ direção do sprite acompanha o movimento
+  ✓ WASD também move
+  ✓ colisão: portão fechado bloqueia a passagem (y=916)
+  ✓ colisão com a borda de árvores (x=60)
+  ✓ câmera acompanha (cam.y 814 → 805)
+  ✓ indicador de interação aparece perto do NPC (kaua)
+  ✓ NPC do objetivo mostra “!” dourado
+  ✓ tecla E abre o diálogo com retrato e nome (Guia Kauã)
+  ✓ Espaço avança o diálogo (2/3 ▼)
+  ✓ lição concluída abre o portão (mudança no cenário)
+  ✓ “mostrar caminho” calcula a rota até o objetivo (15 passos)
+  ✓ recarregar a página e “Continuar” restaura mapa, lições e moedas ({"map":"r1","lessons":1,"coins":4})
+  ✓ sem erros no console 
+
+[2] Feedback de erro em 3 níveis, folhas e anti-chute
+  ✓ 1º erro: feedback específico + explicação reapresentada
+  ✓ 1º erro remove 1 folha
+  ✓ 2ª tentativa mostra a pista
+  ✓ chutes rápidos repetidos: “Pare um pouquinho e procure a pista na explicação” (bloqueio de 4 s)
+  ✓ 3ª tentativa: versão guiada (alternativas reduzidas a 2)
+  ✓ sem folhas: microexplicação e folhas recuperadas
+  ✓ acerto sempre mostra o porquê
+  ✓ resultado registrado como “após explicação guiada” (tier 3)
+  ✓ alternativas embaralhadas a cada tentativa (5 ordens diferentes em 6)
+  ✓ resposta aberta aceita variações (ok, ok, nenhuma ideia, parcial→autoavaliação): ok, ok, none, partial
+  ✓ sem erros no console 
+
+[3] Loja, confirmação, inventário, equipar, efeitos e áreas bônus
+  ✓ andar até o pedestal da loja e interagir abre a Loja no setor certo
+  ✓ confirmação antes de gastar
+  ✓ desconto exato das moedas e item no inventário (saldo 355)
+  ✓ efeito real: +15% de velocidade e visual das botas no avatar
+  ✓ compra sem saldo é recusada (nunca saldo negativo)
+  ✓ raridade lendária bloqueada por nível (Libera no nível 9 de Guardião.)
+  ✓ melhorias ativas: bússola, lupa, ímã, cantil, caderno, mochila, medalhão (+2)
+  ✓ avatar reflete chapéu, capa, aura, rastro, mascote e variante da Lumi
+  ✓ desequipar mantém o item no inventário
+  ✓ área bônus aberta pelo item: bonus_copa
+  ✓ área bônus aberta pelo item: bonus_caverna
+  ✓ área bônus aberta pelo item: bonus_lab
+  ✓ área bônus aberta pelo item: bonus_mergulho
+  ✓ área bônus aberta pelo item: bonus_biomas
+  ✓ estação de revisão bônus jogada até o fim
+  ✓ decorações compradas aparecem no quarto (aquário e tapete)
+  ✓ Jardim: plantar gasta sementes e salva
+  ✓ sem erros no console 
+
+[4] Minijogos (jogados até o fim)
+  ✓ Corredor da Cadeia concluído
+  ✓ Torre dos Níveis concluída
+  ✓ Coleta Solar concluída (3 fotossínteses)
+  ✓ Salve o Lago concluído (oxigênio 100%)
+  ✓ Corrida dos Biomas concluída
+  ✓ Trilha Segura concluída (percurso completo, sem cronômetro)
+  ✓ Desafio Relâmpago mostra cronômetro (único opcional cronometrado)
+  ✓ Desafio Relâmpago termina ao fim dos 60 s
+  ✓ recompensa dos minijogos limitada: 3, 1, 2, 0, 0, 0, 0 moedas (zera após 3 jogadas até a próxima lição)
+  ✓ sem erros no console 
+
+[5] Área do responsável, exportação, reiniciar e leitura em voz alta
+  ✓ conta errada não abre a área do responsável
+  ✓ conta correta abre o relatório (cobertura 0/43 no início)
+  ✓ exporta .txt e .json (UTF-8, acentos preservados)
+  ✓ Web Speech detectado: true
+  ✓ leitura em voz alta não gera erro (e some quando não há suporte)
+  ✓ reiniciar progresso apaga o salvamento e volta à tela inicial
+  ✓ nenhum link, anúncio ou recurso externo
+  ✓ sem erros no console 
+
+[6] Layouts (1366×768, 1920×1080, 390×844) e controles de toque
+  ✓ 1366×768: nenhuma janela vaza horizontalmente
+  ✓ 1366×768: nenhum texto menor que 10,5 px
+  ✓ sem erros no console 
+  ✓ 1920×1080: nenhuma janela vaza horizontalmente
+  ✓ 1920×1080: nenhum texto menor que 10,5 px
+  ✓ sem erros no console 
+  ✓ celular: direcional e botão de interação visíveis
+  ✓ celular: joystick virtual move o personagem (y 948 → 858)
+  ✓ 390×844: nenhuma janela vaza horizontalmente
+  ✓ 390×844: nenhum texto menor que 10,5 px
+  ✓ sem erros no console 
+
+Resultado: todos os testes passaram

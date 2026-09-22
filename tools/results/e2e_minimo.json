@@ -1,0 +1,103 @@
+{
+ "log": [
+  "r1: coins=76 xp=530 mastery=28% recovery=true",
+  "r2: coins=173 xp=1260 mastery=28% recovery=true",
+  "r3: coins=277 xp=2015 mastery=28% recovery=true",
+  "r4: coins=331 xp=2375 mastery=28% recovery=true",
+  "r5: coins=417 xp=2990 mastery=28% recovery=true",
+  "r6: coins=508 xp=3585 mastery=28% recovery=true"
+ ],
+ "storyDone": true,
+ "arena": {
+  "round": 4,
+  "best": 0,
+  "done": true,
+  "last": 0,
+  "bonusWon": false,
+  "tries": 1
+ },
+ "coins": 538,
+ "earned": 538,
+ "xp": 3925,
+ "level": 10,
+ "coverage": {
+  "done": 43,
+  "total": 43
+ },
+ "mastery": 40,
+ "medals": [
+  "Defensor dos Animais",
+  "Mestre das Cadeias",
+  "Guardião dos Ciclos",
+  "Protetor dos Rios",
+  "Mestre da Energia",
+  "Conhecedor dos Biomas",
+  "Guardião do EcoNexus"
+ ],
+ "inv": [
+  "uni_classico",
+  "lumi_classica",
+  "chapeu_explorador",
+  "mochila_lona",
+  "oculos_cientista",
+  "pet_peixe",
+  "deco_estante",
+  "capa_folhas"
+ ],
+ "crystals": 6,
+ "profile": "minimo",
+ "minutes": "12.3",
+ "apLog": [
+  "Verificar desabilitado: 🔋 Recuperação (1/3)|Uma mata foi cortada. Qual é a principal ameaça para as aves que viviam ali?|mc",
+  "Verificar desabilitado: 🔋 Recuperação (1/3)|Uma mata foi cortada. Qual é a principal ameaça para as aves que viviam ali?|mc",
+  "Verificar desabilitado: 🔋 Recuperação (2/3)|Num lago eutrofizado, qual é a causa principal da falta de oxigênio?|mc",
+  "Verificar desabilitado: 🔋 Recuperação (3/3)|Qual atitude ajuda a prevenir a eutrofização de um rio?|mc",
+  "Verificar desabilitado: 🔋 Recuperação (3/3)|Qual atitude ajuda a prevenir a eutrofização de um rio?|mc",
+  "Verificar desabilitado: 🔋 Recuperação (1/3)|Numa pirâmide de energia, onde fica o MAIOR número de indivíduos?|mc",
+  "Verificar desabilitado: 🔋 Recuperação (1/3)|Numa pirâmide de energia, onde fica o MAIOR número de indivíduos?|mc",
+  "Verificar desabilitado: 🔋 Recuperação (2/3)|Uma pesca predatória retirou quase todos os peixes de um rio. O que pode acontecer?|mc",
+  "Verificar desabilitado: 🔋 Recuperação (2/3)|Uma pesca predatória retirou quase todos os peixes de um rio. O que pode acontecer?|mc",
+  "Verificar desabilitado: 🔋 Recuperação (2/3)|Qual destes contatos aparece na notícia do livro?|mc",
+  "Verificar desabilitado: 🔋 Recuperação (3/3)|Por que capturar animais silvestres pode causar desequilíbrio ecológico?|mc",
+  "Verificar desabilitado: 🔋 Recuperação (3/3)|Por que capturar animais silvestres pode causar desequilíbrio ecológico?|mc",
+  "Verificar desabilitado: 🧭 Revisão guiada (4/5)|Árvores baixas e retorcidas, muito calor e ocorrência de queimadas. Que bioma é?|mc",
+  "Verificar desabilitado: 🧭 Revisão guiada (4/5)|Árvores baixas e retorcidas, muito calor e ocorrência de queimadas. Que bioma é?|mc"
+ ],
+ "acts": {
+  "acts": 189,
+  "wrongs": 369
+ },
+ "review": {
+  "ok": 0,
+  "n": 10
+ },
+ "report": {
+  "cobertura": {
+   "done": 43,
+   "total": 43
+  },
+  "vistas": 43,
+  "primeira": 0,
+  "erros": 98,
+  "dominio": 40,
+  "txtLen": 4997
+ },
+ "shopping": {
+  "bought": [
+   "botas_explorador(45)",
+   "bussola_lumi(35)",
+   "lupa_ecologica(50)",
+   "cantil(40)",
+   "mochila_ampliada(55)",
+   "caderno_melhorado(30)",
+   "ima_fragmentos(60)",
+   "medalhao_solar(90)",
+   "mascara_mergulho(60)",
+   "corda_escalada(55)",
+   "uni_verde(15)"
+  ],
+  "left": 3,
+  "spent": 535
+ },
+ "errors": []
+}

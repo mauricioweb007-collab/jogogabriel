@@ -1,0 +1,145 @@
+/* =====================================================================
+   tools/gen-docs.cjs — gera docs/ENTREGA.md a partir dos DADOS do jogo
+   (matriz das 43 questões, tabela da economia, checklist dos mapas e
+   resultados das simulações), para a documentação nunca ficar
+   diferente do código. Uso: node econexus/tools/gen-docs.cjs
+   ===================================================================== */
+'use strict';
+const fs = require('fs');
+const path = require('path');
+const vm = require('vm');
+const root = path.join(__dirname, '..');
+const ctx = { console: { log() {}, warn() {} }, Math, JSON, Date, Set, Map, Array, Object, String, Number, performance: { now: () => 0 } };
+ctx.window = ctx; vm.createContext(ctx);
+['js/core/util.js', 'js/data/glossary.js', 'js/data/items.js', 'js/data/questions.js', 'js/data/characters.js', 'js/data/lessons.js', 'js/data/mapkit.js', 'js/data/maps.js']
+  .forEach((f) => vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), ctx));
+const D = ctx.EN.data;
+const TYPE = { mc: 'Múltipla escolha', multi: 'Marcar várias', tfj: 'Escolha + justificativa', open: 'Resposta aberta (palavras-chave + autoavaliação)', order: 'Ordenar (arrastar/tocar)', classify: 'Classificar cartões (arrastar/tocar)', arrows: 'Desenhar setas (origem → destino)', fill: 'Completar frase com blocos', hotspot: 'Cena: tocar nos itens certos', color: 'Colorir setas por ciclo', numbers: 'Contar (+/−)', chainbuild: 'Montar cadeias na cena' };
+const PRE = { sim: ' + simulação +/− de populações', trace: ' + seguir o caminho das setas na teia', observe: ' + observação (tempo passando)' };
+const lessonOfQ = {};
+Object.values(D.lessons).forEach((l) => l.steps.forEach((s) => { if (s.q) lessonOfQ[s.q] = l; }));
+const esc = (s) => String(s || '').replace(/\|/g, '/').replace(/\*\*/g, '').replace(/\n/g, ' ');
+const L = [];
+const p = (s) => L.push(s || '');
+
+p('# Missão EcoNexus: Guardiões dos Biomas — Documento de entrega');
+p();
+p('> Gerado automaticamente por `tools/gen-docs.cjs` a partir dos dados do jogo. Todo o código está nos arquivos do projeto (pasta `econexus/`).');
+p();
+p('## 1. Resumo da arquitetura');
+p();
+p('- **Tecnologia:** HTML + CSS + JavaScript puro com **Canvas 2D**. Sem frameworks, sem CDN, sem internet, sem login, sem build. Os scripts são “clássicos” (não usam módulos ES), por isso o jogo abre com **duplo clique no `index.html`** (protocolo `file://`).');
+p('- **Motor 2D** (`js/core/engine.js`): ciclo de jogo com `requestAnimationFrame`, mapas em tiles pré-desenhados (cache em canvas), colisão por caixas (AABB) com tiles e entidades sólidas, câmera suave com limites, NPCs que andam e param para olhar o jogador, indicador de interação, seguidores (Lumi e mascote), partículas, névoa por região, rota “mostrar caminho” (BFS), seta da Bússola, lanterna na caverna, joystick virtual e teclado.');
+p('- **Arte** (`js/core/sprites.js`): tudo desenhado por código (personagens em 4 direções com animação de parado/andando/comemorando, itens equipados refletidos no avatar, Lumi, mascotes, objetos, tiles) + emojis do sistema.');
+p('- **Dados das regiões** (`js/data/maps.js` + `mapkit.js`): 15 mapas construídos por código (sempre consistentes), entidades com posição, condições de visibilidade e “patches” que mudam o cenário conforme o progresso.');
+p('- **Dados pedagógicos:** `questions.js` (matriz das 43 questões do livro), `lessons.js` (lições, regiões, missões secundárias, Arena), `glossary.js` (16 palavras clicáveis + 24 fichas do Caderno), `characters.js` (elenco).');
+p('- **Sistemas:** `learning.js` (12 tipos de atividade + 3 pré-atividades, 3 folhas, pista, versão guiada, microexplicação, anti-chute, questão semelhante de confirmação, desafios, recuperação, revisão), `quests.js` (missão principal por etapas, desbloqueio linear, objetivo e rota, secundárias, domínio), `economy.js` (XP/níveis, EcoMoedas, loja, inventário, equipamentos, efeitos, limite dos minijogos), `minigames.js` (7 minijogos + 1 desafio cronometrado opcional), `save.js` (salvamento automático no `localStorage`).');
+p('- **Interface** (`js/ui/ui.js`): pilha de janelas, diálogo com retrato/nome/ouvir/voltar/continuar, cartões de explicação, HUD, menu, loja, inventário, Caderno, área do responsável (conta de multiplicação), mural, portal das regiões, jardim, troféus, certificado, tela inicial.');
+p('- **Fachada do jogo** (`js/main.js`): liga tudo — interação com entidades, lições, altares, Arena, viagens entre mapas, coletáveis, tempo por região e salvamento.');
+p('- **Ferramentas de teste** (`tools/`): `audit.cjs` (auditoria lógica sem navegador), `economy-sim.cjs`, `e2e.cjs` + `autoplayer.js` (joga a campanha inteira pela interface real), `features.cjs` (testes funcionais), `gen-docs.cjs`.');
+p();
+p('## 2. Árvore de arquivos');
+p();
+p('```');
+const walk = (dir, pre) => fs.readdirSync(dir).filter((f) => !f.startsWith('.') && f !== 'results').sort().forEach((f) => { const fp = path.join(dir, f); const st = fs.statSync(fp); p(pre + f + (st.isDirectory() ? '/' : '  (' + Math.round(st.size / 1024) + ' KB)')); if (st.isDirectory()) walk(fp, pre + '  '); });
+p('econexus/'); walk(root, '  ');
+p('```');
+p();
+p('## 3. Conteúdo dos arquivos');
+p();
+p('O conteúdo integral de cada arquivo está no próprio projeto (nenhum trecho foi omitido ou resumido). Para ler, abra os arquivos listados acima em qualquer editor de texto.');
+p();
+p('## 4. Como executar no Windows');
+p();
+p('1. Baixe a pasta `econexus` (por exemplo, “Code → Download ZIP” no GitHub) e **extraia** o ZIP.');
+p('2. Abra a pasta `econexus` e dê **duplo clique em `index.html`**. O jogo abre no navegador (Chrome, Edge ou Firefox) e funciona **sem internet**.');
+p('3. Clique em **Novo jogo**, confirme o nome (já vem “Gabriel”) e jogue. O progresso salva sozinho neste computador. Na próxima vez, use **Continuar**.');
+p('4. (Opcional) Para tela cheia, use o botão ⛶. No celular/tablet, os controles de toque aparecem automaticamente.');
+p();
+p('## 5. Checklist das 43 questões do livro');
+p();
+p('Cada questão aparece **dentro da campanha**, numa lição ligada a um NPC/objeto do mapa. Depois de respondida, o cenário muda. Na revisão final (Desafio da Região, Arena e “Revisão antes da prova”) ela volta como **variação**; se foi errada, volta no formato original.');
+p();
+p('| ID | Região / mapa | Onde aparece (NPC/objeto) | Lição | Interação | Conceito | Mudança no cenário |');
+p('|---|---|---|---|---|---|---|');
+D.REQUIRED_IDS.forEach((id) => {
+  const q = D.questionById[id]; const l = lessonOfQ[id];
+  p('| ' + id + ' | ' + D.regionById[q.region].name + ' (`' + q.map + '`) | ' + esc(q.where) + ' | ' + esc(l.title) + ' | ' + TYPE[q.main.type] + (q.pre ? PRE[q.pre.type] : '') + ' | ' + q.concept + ' | ' + esc(q.scene.text) + ' |');
+});
+p();
+p('Recompensas por questão: de primeira **' + D.rewards.tier1.xp + ' XP + ' + D.rewards.tier1.coins + ' 🪙**; na 2ª tentativa/com pista **' + D.rewards.tier2.xp + ' XP + ' + D.rewards.tier2.coins + ' 🪙**; após explicação guiada **' + D.rewards.tier3.xp + ' XP + ' + D.rewards.tier3.coins + ' 🪙**; bônus de recuperação ao acertar depois de ter errado **' + D.rewards.recovery.xp + ' XP + ' + D.rewards.recovery.coins + ' 🪙** (uma vez por questão).');
+p();
+p('## 6. Tabela completa da economia');
+p();
+p('Raridades: ' + Object.keys(D.rarities).map((r) => '**' + D.rarities[r].label + '** ' + D.rarities[r].range + ' (libera no nível ' + D.rarities[r].minLevel + ')').join(' • ') + '. XP nunca é gasto; EcoMoedas são gastas na loja. Não há sorteios, caixas ou dinheiro real.');
+p();
+p('| ID | Item | Categoria | Raridade | Preço | Efeito | Requisito | Área bônus |');
+p('|---|---|---|---|---|---|---|---|');
+const cat = {}; D.categories.forEach((c) => { cat[c.id] = c.label; });
+D.items.forEach((it) => p('| `' + it.id + '` | ' + it.icon + ' ' + it.name + ' | ' + cat[it.cat] + ' | ' + D.rarities[it.rarity].label + ' | ' + (it.free ? 'inicial' : it.price) + ' | ' + esc(it.effect) + ' | ' + (it.free ? '—' : 'Nível ' + D.rarities[it.rarity].minLevel) + ' | ' + (it.bonus ? (it.bonus === 'jardim_raro' ? 'Canteiro Secreto (Vila)' : D.maps[it.bonus].name) : '—') + ' |'));
+p();
+p('Baús de conteúdo conhecido (sem sorteio): ' + D.regions.map((r) => r.name + ': ' + r.chest.coins + ' 🪙 + ' + D.itemById[r.chest.item].name).join('; ') + '; Arena ≥ 70%: 40 🪙 + Coroa de Folhas + medalha Mestre da Restauração (abaixo de 70%: 15 🪙 após revisão guiada).');
+p();
+p('## 7. Checklist de cada mapa');
+p();
+p('| Mapa | NPCs | Pontos de interação | Missão principal (etapas) | Secundárias | Minijogo | Segredo | Saída | Transformação visual |');
+p('|---|---|---|---|---|---|---|---|---|');
+['r1', 'r2', 'r3', 'r4', 'r5', 'r6', 'arena'].forEach((mid) => {
+  const m = D.maps[mid]; const E = m.extra;
+  const npcs = E.filter((e) => e.kind === 'npc').map((e) => e.name);
+  const inter = E.filter((e) => e.info || e.talk || e.visitOnly || e.lessons).length;
+  const reg = D.regionById[mid];
+  const steps = reg ? reg.lessons.map((l) => D.lessons[l].title).join(' → ') + ' → Desafio da Região' : 'Reconhecer → Construir → Explicar → Chefão da Névoa';
+  const sides = Object.values(D.sides).filter((s) => s.region === mid).map((s) => s.title);
+  const mg = E.filter((e) => e.minigame).map((e) => e.name);
+  const vis = (m.patches || []).length + ' mudanças de tiles + entidades que aparecem/somem + névoa que se dissipa';
+  p('| ' + m.name + ' | ' + npcs.join(', ') + ' | ' + inter + ' | ' + steps + ' | ' + sides.join('; ') + ' | ' + mg.join('; ') + ' | baú secreto + 5 EcoFragmentos' + (mid === 'arena' ? ' (arena: baú)' : '') + ' | Portal para a Vila | ' + vis + ' |');
+});
+p();
+p('Vila EcoNexus (base): Loja do Guardião (prédio explorável com Nino Mercador e 6 setores), Casa de Lumi (armário de skins, sala de troféus, vitrine dos cristais, Caderno, decorações), Mural de Missões, Portal das Regiões, Portal da Arena, Jardim da Vila e Canteiro Secreto. A vila ganha bandeiras, flores, fonte limpa, balão e estátua conforme os cristais voltam. Áreas bônus: Copa da Floresta, Caverna dos Decompositores (escura, com lanterna), Sala Bônus dos Ciclos, Mergulho do Lago, Trilhas Extras dos Biomas.');
+p();
+p('## 8. Simulações da economia (mínimo, médio e ótimo)');
+p();
+const resDir = path.join(__dirname, 'results');
+const prof = ['minimo', 'medio', 'otimo'];
+const have = prof.filter((k) => fs.existsSync(path.join(resDir, 'e2e_' + k + '.json')));
+if (have.length) {
+  p('**Simulação real no navegador** (`tools/e2e.cjs`): o jogador automático jogou a campanha inteira pela interface. No perfil mínimo ele erra de propósito até cair na versão guiada em todas as atividades; no médio erra uma vez em ~35% delas; no ótimo acerta tudo de primeira.');
+  p();
+  p('| Perfil | História concluída | Cobertura | Arena | Domínio | XP (nível) | EcoMoedas ganhas | Compras feitas com o saldo (em ordem de utilidade) | Sobra |');
+  p('|---|---|---|---|---|---|---|---|---|');
+  have.forEach((k) => { const r = JSON.parse(fs.readFileSync(path.join(resDir, 'e2e_' + k + '.json'), 'utf8')); p('| ' + k + ' | ' + (r.storyDone ? 'sim' : 'não') + ' | ' + r.coverage.done + '/' + r.coverage.total + ' | ' + Math.round(r.arena.best * 100) + '%' + (r.arena.bonusWon ? ' (prêmio raro)' : ' (revisão guiada)') + ' | ' + r.mastery + '% | ' + r.xp + ' (' + r.level + ') | ' + r.earned + ' | ' + r.shopping.bought.length + ' itens: ' + r.shopping.bought.join(', ') + ' | ' + r.shopping.left + ' |'); });
+  p();
+}
+p('**Simulação estática** (`tools/economy-sim.cjs`, roda sem navegador junto com a auditoria):');
+p();
+const sim = require('./economy-sim.cjs').run(ctx.EN);
+p('| Perfil | EcoMoedas | XP (nível) | Itens comprados | Sobra |');
+p('|---|---|---|---|---|');
+Object.keys(sim).forEach((k) => p('| ' + k + ' | ' + sim[k].coins + ' | ' + sim[k].xp + ' (' + sim[k].level + ') | ' + sim[k].bought.length + ': ' + sim[k].bought.join('; ') + ' | ' + sim[k].left + ' |'));
+p();
+p('Conclusões: **todos os perfis concluem a história** e as 43 questões (nada obrigatório depende de moeda, item, nível ou nota); **todos compram melhorias úteis** (Botas, Bússola, Lupa, Cantil…); o desempenho melhor rende mais moedas, mais estrelas, níveis maiores (prateleiras raras) e o prêmio raro da Arena. Minijogos rendem 1 a 5 moedas e **zeram após 3 jogadas** até a próxima lição; revisões só pagam moedas na **primeira** revisão correta de cada questão (evita “farm”).');
+p();
+p('## 9. Testes realizados e limitações reais');
+p();
+p('Comandos (na pasta do repositório):');
+p();
+p('```');
+p('node econexus/tools/audit.cjs        # cobertura 43/43, mapas, requisitos, economia (sem navegador)');
+p('node econexus/tools/e2e.cjs otimo    # campanha completa pela interface (requer Playwright)');
+p('node econexus/tools/e2e.cjs medio');
+p('node econexus/tools/e2e.cjs minimo');
+p('node econexus/tools/features.cjs     # movimento, toque, loja, minijogos, relatório, layouts…');
+p('```');
+p();
+const featFile = path.join(resDir, 'features.txt');
+if (fs.existsSync(featFile)) { p('Saída do último `features.cjs`:'); p(); p('```'); p(fs.readFileSync(featFile, 'utf8').trim()); p('```'); p(); }
+p('Checklist dos critérios de aceite: ver README (seção “Testes”) e as saídas acima. Limitações reais:');
+p();
+p('- A **leitura em voz alta** depende das vozes em português instaladas no sistema/navegador; sem suporte, os botões “Ouvir” somem automaticamente.');
+p('- **Emojis** usam a fonte do sistema: a aparência de alguns ícones varia entre Windows, Android e iOS (o significado é sempre acompanhado de texto).');
+p('- O salvamento fica no **localStorage do navegador**: limpar os dados do navegador apaga o progresso; outro navegador/aparelho começa do zero (por privacidade, nada é enviado para fora).');
+p('- Abrir pelo `file://` funciona em Chrome, Edge e Firefox atuais. Navegadores muito antigos (sem ES2017) não são suportados.');
+p('- A avaliação de respostas abertas usa palavras-chave: quando a confiança é baixa, o jogo mostra a resposta-modelo e pede a autoavaliação (como pedido), mas não “entende” frases como uma pessoa.');
+fs.writeFileSync(path.join(root, 'docs', 'ENTREGA.md'), L.join('\n') + '\n');
+console.log('docs/ENTREGA.md gerado (' + L.length + ' linhas)');
