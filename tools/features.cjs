@@ -97,6 +97,23 @@ async function go(page, map, x, y) {
     await ctx.close();
   }
 
+  /* ---------------------------------------------------------------- 1b. Portal das Regiões pelo clique real */
+  console.log('\n[1b] Portal das Regiões: botão Viajar leva à região');
+  {
+    const { ctx, page } = await fresh(browser);
+    await page.evaluate(() => { EN.save.newGame('Gabriel'); EN.save.S.introDone = true; EN.game.continueGame(); });
+    await page.waitForFunction(() => EN.engine.map && EN.engine.map.id === 'vila' && !EN.ui.anyOpen(), null, { timeout: 20000 });
+    await page.evaluate(() => { const E = EN.engine, TS = 48; E.player.x = 17 * TS + TS / 2; E.player.y = 5 * TS + TS / 2; });
+    await page.waitForTimeout(300);
+    await page.keyboard.press('e');
+    await page.waitForSelector('button:has-text("Viajar ▶")', { timeout: 5000 });
+    await page.click('button:has-text("Viajar ▶")');
+    await page.waitForFunction(() => EN.engine.map.id === 'r1', null, { timeout: 5000 }).catch(() => {});
+    ok(await page.evaluate(() => EN.engine.map.id === 'r1'), 'clicar em Viajar muda para a Região 1');
+    ok(page.errors.length === 0, 'sem erros no console');
+    await ctx.close();
+  }
+
   /* ---------------------------------------------------------------- 2. feedback em três níveis, folhas, anti-chute */
   console.log('\n[2] Feedback de erro em 3 níveis, folhas e anti-chute');
   {

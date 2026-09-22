@@ -406,7 +406,7 @@ EN.ui = (function () {
           U.el('div', { class: 'rc-h' }, [U.el('span', { class: 'rc-n' }, String(r.n)), U.el('b', null, r.name)]),
           U.el('div', { class: 'bar' }, U.el('i', { style: { width: Math.round(Q.regionProgress(r.id) * 100) + '%' } })),
           U.el('p', { class: 'tip' }, done ? '✅ Cristal restaurado' : un ? '▶ Liberada' : '🔒 Conclua a região ' + (r.n - 1) + ' para liberar'),
-          un ? UI.btn('Viajar ▶', 'pri', () => { m.close(); resolve(r.map); }) : null
+          un ? UI.btn('Viajar ▶', 'pri', () => { resolve(r.map); m.close(); }) : null
         ]);
         grid.appendChild(card);
       });
