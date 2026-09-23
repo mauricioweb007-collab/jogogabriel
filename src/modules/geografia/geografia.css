@@ -1,0 +1,92 @@
+/* =====================================================================
+   geografia.css — layout do módulo de Geografia (Atlas, HUD das fases,
+   painéis, loja, resultados). Responsivo: 1366x768, 1920x1080 e ~390x844.
+   ===================================================================== */
+#stageWrap { position: fixed; inset: 0; display: grid; place-items: center; background: #0d1020; }
+#game { image-rendering: pixelated; image-rendering: crisp-edges; display: block; border-radius: 6px; box-shadow: 0 0 0 3px #0a0c1c, 0 10px 30px rgba(0,0,0,.5); touch-action: none; }
+#loading { position: fixed; inset: 0; display: grid; place-items: center; background: #0f1226; color: var(--gold); font-size: 14px; z-index: 90; }
+.btn.gold { background: linear-gradient(#ffe07a, #ffc21a); color: #2a1a00; box-shadow: 0 4px 0 #9a6b00; }
+
+/* ---------------------------------------------------------------- Atlas */
+body.in-atlas #stageWrap { top: 74px; right: 320px; bottom: 44px; }
+#atlasHud { position: fixed; left: 0; right: 0; top: 0; min-height: 70px; padding: 6px 10px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; background: linear-gradient(#20265a, #171b3f); box-shadow: 0 3px 0 #0a0c1c; z-index: 20; }
+.ah-left { display: flex; align-items: center; gap: 10px; flex: 1 1 360px; min-width: 0; flex-wrap: wrap; }
+.ah-av { width: 48px; height: 48px; image-rendering: pixelated; background: #2e3a7a; border-radius: 8px; }
+.ah-lv { font-size: .8em; color: var(--ink2); }
+.ah-bar { width: 140px; height: 8px; }
+.ah-btns { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.ah-btn { border: 0; border-radius: 8px; background: var(--panel2); box-shadow: inset 0 0 0 2px var(--line); min-width: 52px; min-height: 48px; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; padding: 2px 6px; }
+.ah-btn span { font-size: 20px; line-height: 1; } .ah-btn small { font-size: 10px; font-weight: 800; margin-top: 2px; }
+.ah-tabs { position: fixed; left: 0; right: 320px; bottom: 0; height: 44px; display: flex; gap: 6px; padding: 5px 8px; background: #141838; overflow-x: auto; z-index: 20; }
+.ah-tab { border: 0; border-radius: 8px; padding: 4px 12px; background: var(--panel2); box-shadow: inset 0 0 0 2px var(--line); font-weight: 800; white-space: nowrap; }
+.ah-tab.on { background: var(--gold); color: #2a1a00; }
+#nodePanel { position: fixed; right: 0; top: 74px; bottom: 0; width: 320px; padding: 14px; background: var(--panel); box-shadow: -3px 0 0 #0a0c1c; overflow-y: auto; z-index: 20; }
+.np-style { font-family: var(--pix); font-size: 9px; color: var(--info); }
+.np-title { font-family: var(--pix); font-size: calc(13px * var(--fs)); line-height: 1.5; color: var(--gold); margin: 8px 0; }
+.np-goal, .np-q, .np-rec { margin: 6px 0; } .np-q { font-size: .85em; color: var(--ink2); word-break: break-word; }
+.np-lock { color: var(--bad); font-weight: 800; }
+.np-acts { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+.np-acts .btn.go { font-size: 1.15em; min-height: 56px; }
+
+/* ---------------------------------------------------------------- HUD da fase */
+body.in-stage #stageWrap { top: 72px; }
+#stageHud { position: fixed; left: 0; right: 0; top: 0; z-index: 20; background: rgba(15,18,38,.92); box-shadow: 0 3px 0 #0a0c1c; }
+.sh-row { display: flex; align-items: center; gap: 10px; padding: 4px 10px; min-height: 46px; flex-wrap: wrap; }
+.sh-title { font-weight: 900; } .sh-ch { font-size: 9px; color: var(--gold); }
+.sh-hearts { color: #ff5d6c; font-size: 20px; letter-spacing: 1px; }
+.sh-stat { font-weight: 900; background: var(--panel2); border-radius: 8px; padding: 2px 8px; }
+.sh-goal { font-size: .82em; color: var(--ink2); padding: 0 10px 4px; }
+.sh-goal:empty { display: none; }
+
+/* ---------------------------------------------------------------- telas e janelas */
+.pace-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.pace-opt { border: 0; border-radius: 12px; padding: 14px; text-align: left; background: var(--panel2); box-shadow: inset 0 0 0 3px var(--line), 0 4px 0 #0a0c1c; display: flex; flex-direction: column; gap: 6px; min-height: 120px; }
+.pace-opt.on { box-shadow: inset 0 0 0 3px var(--gold), 0 4px 0 #0a0c1c; }
+.pace-opt b { font-size: 1.1em; } .pace-ic { font-size: 30px; }
+.shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
+.shop-item { background: var(--panel2); border-radius: 10px; padding: 10px; box-shadow: inset 0 0 0 2px var(--line); display: flex; flex-direction: column; gap: 6px; }
+.shop-item.own { box-shadow: inset 0 0 0 2px var(--ok); }
+.shop-item p { margin: 0; font-size: .85em; color: var(--ink2); flex: 1; }
+.si-ic { font-size: 30px; }
+.res-medal { display: flex; align-items: center; gap: 16px; padding: 12px; border-radius: 12px; background: #262c5c; margin-bottom: 10px; }
+.res-icon { font-size: 56px; } .res-rec { color: var(--gold); font-weight: 900; }
+.res-q { columns: 2 260px; } .res-q li { break-inside: avoid; margin-bottom: 4px; }
+.final-trophy { text-align: center; margin: 10px 0 16px; } .ft-ic { font-size: 72px; } .final-trophy b { display: block; color: var(--gold); font-size: 13px; line-height: 1.6; }
+.glo dt { font-weight: 900; color: var(--gold); margin-top: 10px; } .glo dd { margin: 2px 0 0 0; }
+
+/* ---------------------------------------------------------------- responsivo */
+@media (max-width: 900px) {
+  body.in-atlas #stageWrap { top: 124px; right: 0; bottom: 44%; }
+  #nodePanel { top: auto; bottom: 44px; left: 0; width: auto; height: calc(44% - 44px); box-shadow: 0 -3px 0 #0a0c1c; }
+  .ah-tabs { right: 0; }
+  #atlasHud { min-height: 118px; }
+  .ah-btn { min-width: 44px; min-height: 44px; } .ah-btn small { display: none; }
+}
+@media (max-width: 900px) and (orientation: portrait) {
+  body.in-stage #stageWrap { top: 64px; bottom: 190px; }
+  .sh-row { gap: 6px; } .sh-goal { display: none; }
+}
+@media (max-width: 480px) {
+  .ah-left { flex-basis: 100%; } .ah-bar { width: 90px; }
+  .sh-title { font-size: .85em; flex-basis: 100%; }
+}
+
+/* ---------------------------------------------------------------- chefes, quebra-cabeça, comparação */
+.boss-panel { position: fixed; left: 50%; bottom: 10px; transform: translateX(-50%); width: min(760px, calc(100% - 16px)); z-index: 30; background: rgba(15,18,38,.94); border-radius: 10px; box-shadow: 0 0 0 3px #0a0c1c, 0 0 0 5px var(--gold); padding: 8px 10px; display: grid; gap: 6px; }
+.bp-row { display: flex; gap: 8px; align-items: center; font-weight: 800; font-size: calc(16px * var(--fs)); }
+.bp-row b { background: var(--gold); color: #2a1a00; border-radius: 6px; padding: 4px 7px; font-size: 11px; }
+.bp-row.gone { opacity: .35; text-decoration: line-through; }
+.bp-row .btn { margin-left: auto; min-height: 34px; }
+body.in-stage.has-touch .boss-panel { bottom: 170px; }
+.pz-grid { display: grid; gap: 4px; justify-content: center; margin: 10px auto; }
+.pz-cell { width: 52px; height: 52px; border: 0; border-radius: 8px; background: #20264f; color: #b9bde6; font-size: 34px; line-height: 52px; text-align: center; font-family: monospace; box-shadow: inset 0 0 0 2px var(--line); padding: 0; }
+.pz-cell.on { color: #ffe066; background: #2e3a1a; box-shadow: inset 0 0 0 2px #ffe066; }
+.pz-side { background: transparent; box-shadow: none; font-size: 28px; }
+.pz-side.lit { filter: drop-shadow(0 0 6px #ffe066); }
+.cmp { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-bottom: 10px; }
+.cmp b { display: block; margin-bottom: 4px; color: var(--gold); }
+@media (max-width: 520px) { .pz-cell { width: 42px; height: 42px; line-height: 42px; font-size: 28px; } .pz-grid { grid-template-columns: repeat(7, 42px) !important; } }
+#rotateHint { display: none; }
+@media (max-width: 900px) and (orientation: portrait) {
+  body.in-stage #rotateHint { display: block; position: fixed; left: 0; right: 0; bottom: 196px; text-align: center; color: var(--ink2); font-size: 13px; z-index: 15; pointer-events: none; }
+}

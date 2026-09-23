@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#1f9e7a">
+  <meta name="description" content="Geografia - Brasil em Movimento: missão de estudos em 2D com plataforma, nave, labirinto, corrida contra o GeoBot, ritmo, cidade e chefes.">
+  <title>Geografia — Brasil em Movimento</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%23f7c948' stroke='%2315152a' stroke-width='4'/%3E%3Ccircle cx='32' cy='32' r='20' fill='%23fff8e6'/%3E%3Cpath d='M32 12 l5 18 h-10z' fill='%23e5484d'/%3E%3Cpath d='M32 52 l5 -18 h-10z' fill='%233f6ad8'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="../../assets/shared/fonts/fonts.css">
+  <link rel="stylesheet" href="../../ui/ui.css">
+  <link rel="stylesheet" href="../../ui/quiz.css">
+  <link rel="stylesheet" href="geografia.css">
+</head>
+<body>
+  <!-- Tela do jogo -->
+  <div id="stageWrap"><canvas id="game" aria-label="Tela do jogo de Geografia"></canvas></div>
+  <!-- HUD do Atlas (mapa da campanha) -->
+  <header id="atlasHud" class="hide"></header>
+  <aside id="nodePanel" class="hide" aria-live="polite"></aside>
+  <!-- HUD das fases -->
+  <div id="stageHud" class="hide"></div>
+  <!-- Controles de toque -->
+  <div id="touch" class="hide"></div>
+  <div id="rotateHint" aria-hidden="true">📱↻ Gire o celular para ver a fase maior</div>
+  <!-- Carregando -->
+  <div id="loading"><div class="pix">Carregando o Atlas…</div></div>
+  <noscript><p style="padding:20px;font:18px sans-serif">Este jogo precisa de JavaScript ativado no navegador.</p></noscript>
+
+  <!-- Núcleo compartilhado da plataforma v2 -->
+  <script src="../../core/util.js"></script>
+  <script src="../../core/storage.js"></script>
+  <script src="../../core/input.js"></script>
+  <script src="../../core/audio.js"></script>
+  <script src="../../core/engine.js"></script>
+  <script src="../../core/pixel.js"></script>
+  <script src="../../ui/ui.js"></script>
+  <script src="../../ui/maps.js"></script>
+  <script src="../../systems/quiz.js"></script>
+  <script src="../../assets/shared/brasil-mapa.js"></script>
+  <!-- Registro de módulos (este módulo se registra) -->
+  <script src="../registry.js"></script>
+  <script src="manifest.js"></script>
+  <!-- Módulo de Geografia -->
+  <script>window.GEO = { data: {} };</script>
+  <script src="content/capitulos.js"></script>
+  <script src="content/glossario.js"></script>
+  <script src="content/loja.js"></script>
+  <script src="questions/c1.js"></script>
+  <script src="questions/c2.js"></script>
+  <script src="questions/c3.js"></script>
+  <script src="content/visuais.js"></script>
+  <script src="systems/save.js"></script>
+  <script src="systems/economy.js"></script>
+  <script src="systems/campaign.js"></script>
+  <script src="scenes/common.js"></script>
+  <script src="scenes/stage.js"></script>
+  <script src="scenes/atlas.js"></script>
+  <script src="scenes/platform.js"></script>
+  <script src="scenes/topdown.js"></script>
+  <script src="scenes/shmup.js"></script>
+  <script src="scenes/race.js"></script>
+  <script src="scenes/boss.js"></script>
+  <script src="scenes/maze.js"></script>
+  <script src="scenes/rhythm.js"></script>
+  <script src="scenes/kitchen.js"></script>
+  <script src="scenes/city.js"></script>
+  <script src="scenes/tower.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+{
+  "ok": true,
+  "profile": "rapido",
+  "minutos": "0.5",
+  "errs": [],
+  "coverage": {
+    "done": 45,
+    "total": 45,
+    "missing": []
+  },
+  "stagesDone": 16,
+  "totalStages": 16,
+  "finalDone": true,
+  "trophies": [
+    "guardiao_diversidade"
+  ],
+  "coins": 1010,
+  "earned": 1010,
+  "xp": 8005,
+  "level": {
+    "lvl": 11,
+    "title": "Lenda do Atlas",
+    "cur": 7500,
+    "next": 9000,
+    "pct": 0.33666666666666667
+  },
+  "medals": {
+    "ouro": 16
+  },
+  "firstTry": 40,
+  "helped": 0,
+  "attempts": 45,
+  "geobot": {
+    "vitorias": 0,
+    "corridas": 0,
+    "recordes": []
+  },
+  "inv": [
+    "atlasDourado"
+  ],
+  "tiers": {
+    "1": 45
+  },
+  "doneIn": {
+    "rapido": 45
+  },
+  "cie": "{\"v\":1,\"name\":\"Gabriel\",\"map\":\"r3\",\"q\":{\"L1-Q1\":{\"done\":true}},\"crystals\":[\"r1\",\"r2\"],\"medals\":[],\"storyDone\":false,\"coins\":321,\"marker\":\"ciencias-intocado\"}",
+  "geoKey": true,
+  "txt": 3733,
+  "apLog": [],
+  "hard": [],
+  "apErr": 0,
+  "frames": [
+    "bronze",
+    "prata",
+    "ouro"
+  ],
+  "bonus": [
+    "b1",
+    "b2",
+    "b3"
+  ]
+}

@@ -1,0 +1,103 @@
+{
+  "ok": true,
+  "profile": "erros",
+  "minutos": "1.2",
+  "errs": [],
+  "coverage": {
+    "done": 45,
+    "total": 45,
+    "missing": []
+  },
+  "stagesDone": 16,
+  "totalStages": 16,
+  "finalDone": true,
+  "trophies": [
+    "guardiao_diversidade"
+  ],
+  "coins": 683,
+  "earned": 683,
+  "xp": 5485,
+  "level": {
+    "lvl": 9,
+    "title": "Lenda do Atlas",
+    "cur": 5200,
+    "next": 6300,
+    "pct": 0.2590909090909091
+  },
+  "medals": {
+    "bronze": 6,
+    "prata": 9,
+    "ouro": 1
+  },
+  "firstTry": 2,
+  "helped": 38,
+  "attempts": 121,
+  "geobot": {
+    "vitorias": 2,
+    "corridas": 2,
+    "recordes": [
+      "Caminhos da Imigração: 0:00",
+      "Do Litoral ao Interior: 0:00"
+    ]
+  },
+  "inv": [
+    "atlasDourado"
+  ],
+  "tiers": {
+    "1": 7,
+    "3": 38
+  },
+  "doneIn": {
+    "aventura": 45
+  },
+  "cie": "{\"v\":1,\"name\":\"Gabriel\",\"map\":\"r3\",\"q\":{\"L1-Q1\":{\"done\":true}},\"crystals\":[\"r1\",\"r2\"],\"medals\":[],\"storyDone\":false,\"coins\":321,\"marker\":\"ciencias-intocado\"}",
+  "geoKey": true,
+  "txt": 6704,
+  "apLog": [],
+  "hard": [
+    "GEO-C1-Q01 nível 3 tentativas 3",
+    "GEO-C1-Q03 nível 3 tentativas 3",
+    "GEO-C1-Q04 nível 3 tentativas 3",
+    "GEO-C1-Q05 nível 3 tentativas 3",
+    "GEO-C1-Q07 nível 3 tentativas 3",
+    "GEO-C1-Q08 nível 3 tentativas 3",
+    "GEO-C1-Q09 nível 3 tentativas 3",
+    "GEO-C1-Q10 nível 3 tentativas 3",
+    "GEO-C1-Q12 nível 3 tentativas 3",
+    "GEO-C1-Q14 nível 3 tentativas 3",
+    "GEO-C1-Q15 nível 3 tentativas 3",
+    "GEO-C1-Q13 nível 3 tentativas 3",
+    "GEO-C2-Q11 nível 3 tentativas 3",
+    "GEO-C2-Q01 nível 3 tentativas 3",
+    "GEO-C2-Q02 nível 3 tentativas 3",
+    "GEO-C2-Q03 nível 3 tentativas 3",
+    "GEO-C2-Q16 nível 3 tentativas 3",
+    "GEO-C2-Q04 nível 3 tentativas 3",
+    "GEO-C2-Q12 nível 3 tentativas 3",
+    "GEO-C2-Q13 nível 3 tentativas 3",
+    "GEO-C2-Q14 nível 3 tentativas 3",
+    "GEO-C2-Q15 nível 3 tentativas 3",
+    "GEO-C2-Q06 nível 3 tentativas 3",
+    "GEO-C2-Q07 nível 3 tentativas 3",
+    "GEO-C2-Q08 nível 3 tentativas 3",
+    "GEO-C2-Q09 nível 3 tentativas 3",
+    "GEO-C3-Q04 nível 3 tentativas 3",
+    "GEO-C3-Q05 nível 3 tentativas 3",
+    "GEO-C3-Q06 nível 3 tentativas 3",
+    "GEO-C3-Q07 nível 3 tentativas 3",
+    "GEO-C3-Q08 nível 3 tentativas 3",
+    "GEO-C3-Q09 nível 3 tentativas 3",
+    "GEO-C3-Q10 nível 3 tentativas 3",
+    "GEO-C3-Q01 nível 3 tentativas 3",
+    "GEO-C3-Q11 nível 3 tentativas 3",
+    "GEO-C3-Q12 nível 3 tentativas 3",
+    "GEO-C3-Q03 nível 3 tentativas 3",
+    "GEO-C3-Q13 nível 3 tentativas 3"
+  ],
+  "apErr": 0,
+  "frames": [
+    "bronze",
+    "prata"
+  ],
+  "bonus": []
+}

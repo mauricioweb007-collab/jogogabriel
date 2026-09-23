@@ -1,0 +1,67 @@
+{
+  "ok": true,
+  "profile": "otimo",
+  "minutos": "0.7",
+  "errs": [],
+  "coverage": {
+    "done": 45,
+    "total": 45,
+    "missing": []
+  },
+  "stagesDone": 16,
+  "totalStages": 16,
+  "finalDone": true,
+  "trophies": [
+    "guardiao_diversidade"
+  ],
+  "coins": 959,
+  "earned": 959,
+  "xp": 7470,
+  "level": {
+    "lvl": 10,
+    "title": "Lenda do Atlas",
+    "cur": 6300,
+    "next": 7500,
+    "pct": 0.975
+  },
+  "medals": {
+    "prata": 6,
+    "ouro": 9,
+    "diamante": 1
+  },
+  "firstTry": 40,
+  "helped": 0,
+  "attempts": 45,
+  "geobot": {
+    "vitorias": 2,
+    "corridas": 2,
+    "recordes": [
+      "Caminhos da Imigração: 0:00",
+      "Do Litoral ao Interior: 0:00"
+    ]
+  },
+  "inv": [
+    "atlasDourado"
+  ],
+  "tiers": {
+    "1": 45
+  },
+  "doneIn": {
+    "aventura": 45
+  },
+  "cie": "{\"v\":1,\"name\":\"Gabriel\",\"map\":\"r3\",\"q\":{\"L1-Q1\":{\"done\":true}},\"crystals\":[\"r1\",\"r2\"],\"medals\":[],\"storyDone\":false,\"coins\":321,\"marker\":\"ciencias-intocado\"}",
+  "geoKey": true,
+  "txt": 3809,
+  "apLog": [],
+  "hard": [],
+  "apErr": 0,
+  "frames": [
+    "bronze",
+    "prata",
+    "ouro"
+  ],
+  "bonus": [
+    "b2",
+    "b3"
+  ]
+}
