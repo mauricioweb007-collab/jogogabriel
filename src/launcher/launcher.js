@@ -10,13 +10,9 @@
   'use strict';
   const U = GG.util, UI = GG.ui, P = GG.pixel, ST = GG.store;
 
-  /** Resolve a entrada do módulo. Na página publicada (onde o lançador é a página principal),
-   *  Ciências fica disponível como "ciencias.html" (cópia idêntica de index.html). */
-  function entryOf(m) {
-    if (!m.entry) return null;
-    const asRoot = !/inicio\.html$/i.test(location.pathname);
-    return asRoot && m.entryAlt ? m.entryAlt : m.entry;
-  }
+  /** Entrada do módulo. Na página publicada (onde o lançador é a página principal),
+   *  Ciências fica disponível como "ciencias.html" (cópia idêntica de index.html) — ver go(). */
+  function entryOf(m) { return m.entry || null; }
   function art(m) {
     const c = P.mk(160, 90, (x) => {
       if (m.theme.art === 'ciencias') {
@@ -45,7 +41,14 @@
     }
     const pr = (() => { try { return m.progress(); } catch (e) { return { started: false, percent: 0 }; } })();
     const entry = entryOf(m);
-    const go = (url) => { ST.setLauncher({ last: m.id, visits: (ST.launcher().visits || 0) + 1 }); GG.audio.sfx('click'); setTimeout(() => { location.href = url; }, 120); };
+    const go = async (url) => {
+      ST.setLauncher({ last: m.id, visits: (ST.launcher().visits || 0) + 1 }); GG.audio.sfx('click');
+      // Online (site publicado), a cópia "ciencias.html" é usada quando existir; abrindo o arquivo local, index.html.
+      if (url === m.entry && m.entryAlt && /^https?:/.test(location.protocol)) {
+        try { const r = await fetch(m.entryAlt, { method: 'HEAD' }); if (r.ok) url = m.entryAlt; } catch (e) { /* mantém a entrada padrão */ }
+      }
+      setTimeout(() => { location.href = url; }, 120);
+    };
     const acts = U.el('div', { class: 'ln-acts' }, [UI.btn(pr.started ? '▶ Continuar' : '▶ Jogar', 'go', () => go(entry))]);
     if (pr.started) {
       acts.appendChild(UI.btn('📝 Revisar', '', () => {
