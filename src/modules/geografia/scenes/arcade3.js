@@ -30,35 +30,46 @@
   ];
   PQ.register({ id: 'w3_estrada', world: 3, boss: 'c3s6', ref: 'Road Fighter (NES)', title: 'Estrada Brasil', icon: 'carro_corrida', c1: '#ff4d6d', c2: '#4a0a1a', music: 'corrida', medals: [900, 1900, 3200], unit: 'pts',
     desc: 'Corrida de estrada vista de cima, do litoral à cidade! Desvie do trânsito e cuide do combustível — cada batida custa caro.',
-    how: '**← →** desviam. O carro acelera sozinho; segure **↑ / Espaço** para a **marcha rápida** (mais pontos, mais risco) e **↓** para frear. **Não bata** nos carros! Raspar na **beira da pista** freia o carro. Carros **amarelos** mudam de faixa; **óleo** faz rodar. Pegue os **galões** ⛽: quando o combustível acaba, o jogo termina.' }, function (api) {
+    how: '**← →** desviam. O carro acelera sozinho; segure **↑** para a **marcha rápida** e **↓** para frear. O **TURBO** carrega sozinho: quando piscar **TURBO PRONTO**, aperte **Espaço** (ou toque no botão). O combustível **acaba rápido**: pegue os **galões** ⛽! **Bater** tira muito combustível e zera o turbo; os carros **amarelos** e **laranjas** tentam **fechar** você; o **óleo** faz rodar.' }, function (api) {
     const sc = { cam: { x: 0, y: 0 }, t: 0 };
     const PY = 176, ZL = 7200, CRUISE = 215, FAST = 300;
     const car = { x: 200, v: 0, crash: 0, spin: 0, inv: 0, spinDir: 1 };
+    const TURBO = 390, TCHARGE = 8; // turbo: carrega em 8 s, dura 2,5 s
+    let turbo = 0, boost = 0;
     let dist = 0, fuel = 100, playing = false, traffic = [], items = [], spawnT = 1.2, itemT = 5, zone = 0, lap = 0, zoneAnn = 0, over = 0, passed = 0, crashes = 0, mouseX = null, lastZoneIdx = 0;
     const Z = () => ZONES[zone];
-    const level = () => zone + lap * 3; // 0,1,2,3…
+    const level = () => Math.min(4, zone + lap * 3); // 0..4 (limitado: o fim não vira parede de carros)
     const center = (d) => 200 + 52 * Math.sin(d / 900) + 22 * Math.sin(d / 370 + 1);
     const zmod = (d) => ((Math.floor(d / ZL) % 3) + 3) % 3;
     const half = (d) => { const zi = zmod(d), zz = ZONES[zi]; let h = zz.hw + 12 * Math.sin(d / 1300); if (Math.sin(d / 2100 + zi) > 0.82) h -= 20 + Math.min(8, lap * 4); return Math.max(36, h - lap * 4); };
     const zoneAt = zmod;
     // só segue o mouse/dedo ENQUANTO está apertado (antes o mouse parado puxava o carro para o lado)
-    PQ.pointer(sc, { pointerdown: (lx) => { mouseX = lx; }, pointermove: (lx) => { if (mouseX != null) mouseX = lx; }, pointerup: () => { mouseX = null; }, pointercancel: () => { mouseX = null; } });
+    PQ.pointer(sc, { pointerdown: (lx, ly) => { if (lx > E.W - 70 && ly > 186) { useTurbo(); return; } mouseX = lx; }, pointermove: (lx) => { if (mouseX != null) mouseX = lx; }, pointerup: () => { mouseX = null; }, pointercancel: () => { mouseX = null; } });
     sc.begin = () => { playing = true; zoneAnn = 2.5; api.goal('Zona: Litoral — desvie e cuide do combustível!'); };
     const sy = (d) => PY - (d - dist);
+    function useTurbo() {
+      if (!playing || turbo < 1 || car.crash > 0 || boost > 0) return;
+      turbo = 0; boost = 2.5; GG.audio.sfx('boost'); if (X()) { X().flash('#9ff2ff', 0.25); X().pop(car.x, PY - 30, 'TURBO!', '#9ff2ff', 10); }
+    }
     function spawnCar() {
       const d = dist + 300, lv = level(), r = Math.random();
-      const kind = r < 0.12 + lv * 0.04 ? 'zig' : r < 0.24 + lv * 0.03 ? 'truck' : r < 0.29 + lv * 0.02 ? 'oil' : 'car';
-      const lane = U.pick([-0.55, 0, 0.55]);
+      const kind = r < 0.14 + lv * 0.02 ? 'oil' : r < 0.28 + lv * 0.04 ? 'zig' : r < 0.4 + lv * 0.02 ? 'truck' : r < 0.62 ? 'block' : 'car';
+      // nunca fechar a pista toda: no máximo 2 carros (1 se a pista estiver estreita) na mesma altura
+      const near = traffic.filter((o) => o.k !== 'oil' && Math.abs(o.d - d) < 120);
+      const narrow = half(d) < 52;
+      if (kind !== 'oil' && near.length >= (narrow ? 1 : 2)) return;
+      const lanes = [-0.55, 0, 0.55].filter((l) => !near.some((o) => Math.abs(o.off - l) < 0.3));
+      const lane = U.pick(lanes.length ? lanes : [0]);
       if (kind === 'oil') { traffic.push({ k: 'oil', d, off: lane, v: 0, w: 18, h: 12 }); return; }
-      traffic.push({ k: kind, d, off: lane, toOff: lane, v: kind === 'truck' ? 80 + lv * 6 : 110 + Math.random() * 50 + lv * 8, w: kind === 'truck' ? 18 : 14, h: kind === 'truck' ? 38 : 24,
-        col: kind === 'zig' ? '#ffd23f' : kind === 'truck' ? '#e8e8f0' : U.pick(['#3ec1ff', '#35e07a', '#b07bff', '#ff9a3d']), swerved: false });
+      traffic.push({ k: kind, d, off: lane, toOff: lane, v: kind === 'truck' ? 80 + lv * 6 : 110 + Math.random() * 45 + lv * 7, w: kind === 'truck' ? 18 : 14, h: kind === 'truck' ? 38 : 24,
+        col: kind === 'zig' ? '#ffd23f' : kind === 'block' ? '#ff9a3d' : kind === 'truck' ? '#e8e8f0' : U.pick(['#3ec1ff', '#35e07a', '#b07bff']), swerved: false });
     }
     function crash(why) {
       if (car.crash > 0 || car.inv > 0) return;
-      car.crash = 1.3; car.spinDir = Math.random() < 0.5 ? -1 : 1; crashes++;
-      fuel = Math.max(0, fuel - 10); api.add(-40);
+      car.crash = 1.5; car.spinDir = Math.random() < 0.5 ? -1 : 1; crashes++;
+      fuel = Math.max(0, fuel - 15); api.add(-80); turbo = 0; boost = 0; // erro custa caro: combustível, pontos e o turbo
       GG.audio.sfx('boom'); E.shake(6, 0.45); E.fx.burst(car.x, PY, '#ff9a3d', 14, 90);
-      if (X()) { X().flash('#ff4d4d', 0.35); X().puff(car.x, PY, 6); X().pop(car.x, PY - 30, why + ' -10 combustível', '#ff8f8f', 8); }
+      if (X()) { X().flash('#ff4d4d', 0.35); X().puff(car.x, PY, 6); X().pop(car.x, PY - 30, why + ' -15 combustível', '#ff8f8f', 8); }
     }
     sc.update = function (dt) {
       sc.t += dt; const I = IN();
@@ -67,14 +78,17 @@
       if (!playing) return;
       if (car.inv > 0) car.inv -= dt; if (car.spin > 0) car.spin -= dt;
       // combustível: gasta sempre; mais rápido na marcha rápida
-      const fast = I.down('up') || I.down('jump');
-      fuel -= dt * (fast ? 1.35 : 1.05);
+      const fast = I.down('up');
+      if (I.pressed('jump')) useTurbo();
+      if (boost > 0) boost -= dt; else if (car.crash <= 0) turbo = Math.min(1, turbo + dt / TCHARGE);
+      // combustível acaba rápido (~55 s sem galões): é preciso pegar os galões
+      fuel -= dt * (boost > 0 ? 2.4 : fast ? 2.05 : 1.75);
       api.extra('bateria', Math.max(0, Math.ceil(fuel)) + '% ⛽');
       if (car.crash > 0) {
         car.crash -= dt; car.v = Math.max(0, car.v - 400 * dt); dist += car.v * dt;
         if (car.crash <= 0) { car.x = center(dist); car.v = 0; car.inv = 1.6; car.spin = 0; }
       } else {
-        const top = I.down('down') ? 0 : fast ? FAST : CRUISE;
+        const top = boost > 0 ? TURBO : I.down('down') ? 0 : fast ? FAST : CRUISE;
         car.v += (top - car.v) * Math.min(1, dt * (car.v < top ? 0.9 : 3));
         let steer = I.axisX();
         if (!steer && mouseX != null) steer = Math.abs(mouseX - car.x) < 3 ? 0 : U.clamp((mouseX - car.x) / 18, -1, 1);
@@ -84,7 +98,7 @@
         const c0 = center(dist), h0 = half(dist), lim = h0 - 7;
         if (Math.abs(car.x - c0) > lim) {
           // raspou na beira: volta para a pista, perde velocidade e um pouco de combustível (sem explodir)
-          car.x = c0 + Math.sign(car.x - c0) * (lim - 2); car.v *= 0.55; fuel -= 1.5; car.scrape = 0.3;
+          car.x = c0 + Math.sign(car.x - c0) * (lim - 2); car.v *= 0.5; fuel -= 2.5; boost = 0; car.scrape = 0.3;
           if (!car.warned) { car.warned = 1.2; GG.audio.sfx('bad'); if (X()) X().pop(car.x, PY - 26, 'Cuidado com a beira!', '#ffd23f', 7); }
           if (X() && Math.random() < 0.5) X().sparkle(car.x + Math.sign(car.x - c0) * 7, PY, '#ffd23f', 2);
         }
@@ -95,30 +109,33 @@
       const zi = Math.floor(dist / ZL);
       if (zi !== lastZoneIdx) {
         lastZoneIdx = zi; zone = zi % 3; lap = Math.floor(zi / 3); zoneAnn = 2.5;
-        api.add(250); fuel = Math.min(100, fuel + 12); GG.audio.sfx('win');
-        if (X()) { X().flash('#fff6c0', 0.25); X().pop(200, 70, 'ZONA CONCLUÍDA! +250 e +12 de combustível', '#7bff8f', 9); }
+        api.add(250); fuel = Math.min(100, fuel + 10); GG.audio.sfx('win');
+        if (X()) { X().flash('#fff6c0', 0.25); X().pop(200, 70, 'ZONA CONCLUÍDA! +250 e +10 de combustível', '#7bff8f', 9); }
         api.goal('Zona: ' + Z().name + (lap ? ' (volta ' + (lap + 1) + ', mais rápida!)' : ''));
       }
       // trânsito
       spawnT -= dt;
-      if (spawnT <= 0 && car.v > 40) { spawnCar(); spawnT = Math.max(0.55, (1.5 - level() * 0.1) / Z().traffic) * (0.7 + Math.random() * 0.6) * (CRUISE / Math.max(120, car.v)); }
-      itemT -= dt; if (itemT <= 0 && car.v > 40) { itemT = 6.5 + Math.random() * 3 + level() * 0.6; items.push({ d: dist + 300, off: U.pick([-0.5, 0, 0.5]) }); }
+      if (spawnT <= 0 && car.v > 40) { spawnCar(); spawnT = Math.max(0.7, (1.9 - level() * 0.1) / Z().traffic) * (0.7 + Math.random() * 0.6) * (CRUISE / Math.max(120, car.v)); }
+      itemT -= dt; if (itemT <= 0 && car.v > 40) { itemT = 4.2 + Math.random() * 2.2 + level() * 0.35; items.push({ d: dist + 300, off: U.pick([-0.5, 0, 0.5]) }); }
       const cbox = { x: car.x - 7, y: PY - 12, w: 14, h: 24 };
       traffic.forEach((o) => {
         o.d += o.v * dt;
         const cx0 = center(o.d), hh = half(o.d);
-        if (o.k === 'zig' && !o.swerved) { const gap = o.d - dist; if (gap < 130 && gap > 40) { o.swerved = true; const pOff = (car.x - cx0) / hh; o.toOff = U.clamp(pOff + (Math.random() < 0.5 ? -0.15 : 0.15), -0.6, 0.6); } }
-        if (o.toOff != null) o.off += U.clamp(o.toOff - o.off, -dt * 1.3, dt * 1.3);
+        // amarelo (zig): muda de faixa para a SUA frente; laranja (block): vai fechando devagar enquanto você se aproxima
+        const gap = o.d - dist, pOff = (car.x - cx0) / hh;
+        if (o.k === 'zig' && !o.swerved && gap < 150 && gap > 45) { o.swerved = true; o.toOff = U.clamp(pOff, -0.6, 0.6); }
+        if (o.k === 'block' && gap < 170 && gap > 30) o.toOff = U.clamp(o.off + U.clamp(pOff - o.off, -0.35, 0.35), -0.6, 0.6);
+        if (o.toOff != null) o.off += U.clamp(o.toOff - o.off, -dt * (o.k === 'zig' ? 1.6 : 0.55), dt * (o.k === 'zig' ? 1.6 : 0.55));
         o.x = cx0 + o.off * hh; o.y = sy(o.d);
         if (car.crash > 0 || car.inv > 0 || o.hitDone) return;
         if (E.overlap(cbox, { x: o.x - o.w / 2 + 1, y: o.y - o.h / 2 + 1, w: o.w - 2, h: o.h - 2 })) {
           if (o.k === 'oil') { o.hitDone = true; car.spin = 0.6; car.spinDir = Math.random() < 0.5 ? -1 : 1; GG.audio.sfx('bad'); if (X()) X().pop(car.x, PY - 26, 'ÓLEO!', '#ffd23f', 8); }
           else { o.hitDone = true; crash('Batida!'); }
         }
-        if (!o.passed && o.k !== 'oil' && o.y > PY + 20) { o.passed = true; passed++; api.add(o.k === 'zig' ? 25 : 15); }
+        if (!o.passed && o.k !== 'oil' && o.y > PY + 20) { o.passed = true; passed++; api.add(o.k === 'zig' || o.k === 'block' ? 25 : 15); }
       });
       traffic = traffic.filter((o) => o.y < E.H + 50 && o.d < dist + 400);
-      items.forEach((it) => { const cx0 = center(it.d); it.x = cx0 + it.off * half(it.d); it.y = sy(it.d); if (!it.got && car.crash <= 0 && Math.abs(it.x - car.x) < 13 && Math.abs(it.y - PY) < 16) { it.got = true; fuel = Math.min(100, fuel + 18); api.add(30); GG.audio.sfx('power'); if (X()) { X().sparkle(it.x, it.y, '#7bff8f', 6); X().pop(it.x, it.y - 12, '+18 combustível', '#7bff8f', 8); } } });
+      items.forEach((it) => { const cx0 = center(it.d); it.x = cx0 + it.off * half(it.d); it.y = sy(it.d); if (!it.got && car.crash <= 0 && Math.abs(it.x - car.x) < 13 && Math.abs(it.y - PY) < 16) { it.got = true; fuel = Math.min(100, fuel + 20); api.add(30); GG.audio.sfx('power'); if (X()) { X().sparkle(it.x, it.y, '#7bff8f', 6); X().pop(it.x, it.y - 12, '+20 combustível', '#7bff8f', 8); } } });
       items = items.filter((it) => !it.got && it.y < E.H + 20);
       if (fuel <= 0) { fuel = 0; playing = false; over = 1; GG.audio.sfx('bad'); setTimeout(() => api.end(api.score, 'Combustível acabou! Distância: ' + (dist / 1000).toFixed(1) + ' km • zonas: ' + lastZoneIdx + ' • ultrapassagens: ' + passed + ' • batidas: ' + crashes + '.'), 1100); }
     };
@@ -162,6 +179,7 @@
       // jogador
       if (!(car.inv > 0 && Math.floor(sc.t * 14) % 2)) {
         const rot = car.crash > 0 ? car.spinDir * (1.3 - car.crash) * 9 : car.spin > 0 ? car.spinDir * (0.9 - car.spin) * 7 : IN().axisX() * 0.12;
+        if (boost > 0 && x) { x.glow(c, car.x - 4, PY + 15, 7, '#ff9a3d', 0.9); x.glow(c, car.x + 4, PY + 15, 7, '#ff9a3d', 0.9); if (!E.reduced && Math.random() < 0.6) x.puff(car.x, PY + 14, 1, 0); }
         drawCar(c, car.x, PY, 14, 24, '#e5484d', rot);
         if (car.crash <= 0) g.text('BR', car.x, PY - 3, { size: 3, color: '#fff', align: 'center', shadow: false });
         if (car.crash > 0 && x) x.glow(c, car.x, PY, 22 * car.crash, '#ff9a3d', 0.7);
@@ -170,8 +188,12 @@
       g.panel(6, 30, 20, 120, 'rgba(15,18,38,.85)', '#3a4290');
       const fh = 108 * fuel / 100, fc = fuel < 25 ? (Math.floor(sc.t * 4) % 2 ? '#ff5d6c' : '#8a1020') : fuel < 50 ? '#ffd23f' : '#35e07a';
       g.rect(10, 34 + 108 - fh, 12, fh, fc); g.text('COMB.', 16, 152, { size: 4, color: '#fff', align: 'center' });
-      g.panel(E.W - 64, 196, 58, 22, 'rgba(15,18,38,.85)', '#3a4290'); g.text(Math.round(car.v * 0.6) + ' km/h', E.W - 35, 200, { size: 6, color: '#fff', align: 'center' });
-      g.text(IN().down('up') || IN().down('jump') ? 'MARCHA RÁPIDA' : 'marcha normal', E.W - 35, 209, { size: 3.5, color: '#9ff2ff', align: 'center' });
+      // painel/botão do turbo (tocar aqui também aciona)
+      const ready = turbo >= 1 && boost <= 0;
+      g.panel(E.W - 66, 188, 60, 32, ready && Math.floor(sc.t * 4) % 2 ? 'rgba(20,70,110,.95)' : 'rgba(15,18,38,.85)', ready ? '#9ff2ff' : '#3a4290');
+      g.text(Math.round(car.v * 0.6) + ' km/h', E.W - 36, 191, { size: 5, color: '#fff', align: 'center' });
+      g.rect(E.W - 60, 201, 48, 5, 'rgba(0,0,0,.5)'); g.rect(E.W - 60, 201, 48 * (boost > 0 ? boost / 2.5 : turbo), 5, boost > 0 ? '#ff9a3d' : ready ? '#9ff2ff' : '#3a7ab0');
+      g.text(boost > 0 ? 'TURBO!' : ready ? 'TURBO PRONTO (Espaço)' : 'turbo carregando…', E.W - 36, 209, { size: 3.5, color: ready || boost > 0 ? '#ffd23f' : '#9ff2ff', align: 'center' });
       const zp = (dist % ZL) / ZL; g.rect(120, 6, 160, 4, 'rgba(0,0,0,.4)'); g.rect(120, 6, 160 * zp, 4, '#ffd23f'); g.text(Z().name + (lap ? ' • volta ' + (lap + 1) : ''), 200, 12, { size: 5, color: '#fff', align: 'center' });
       if (zoneAnn > 0) g.text('ZONA: ' + Z().name.toUpperCase(), E.W / 2, 40, { size: 10, color: '#fff', align: 'center' });
       if (fuel < 20 && playing && Math.floor(sc.t * 3) % 2) g.text('POUCO COMBUSTÍVEL!', E.W / 2, 58, { size: 7, color: '#ff8f8f', align: 'center' });

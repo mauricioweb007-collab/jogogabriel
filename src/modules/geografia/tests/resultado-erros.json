@@ -98,5 +98,9 @@
     "bronze",
     "prata"
   ],
-  "bonus": []
+  "bonus": [],
+  "spins": 1,
+  "spinStages": [
+    "c3s6"
+  ]
 }

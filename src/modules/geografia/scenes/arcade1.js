@@ -318,7 +318,7 @@
       balls.forEach((b) => { if (x) x.glow(c, b.x, b.y, 9, slow > 0 ? '#7bff8f' : '#ffffff', 0.7); g.circle(b.x, b.y, 3, '#fff'); });
       if (stuck && playing) g.text('ESPAÇO / TOQUE PARA LANÇAR', E.W / 2, 170, { size: 6, color: '#ffd23f', align: 'center' });
     };
-    sc.dbg = { end() { api.lives = 1; balls = []; } };
+    sc.dbg = { end() { api.lives = 1; stuck = false; balls = []; } };
     return sc;
   });
 })();

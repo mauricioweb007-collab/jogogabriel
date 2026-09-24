@@ -39,6 +39,8 @@ Marcações: **[não confirmado]** indica algo não verificado; **[pendente]** i
   - o link abre o conteúdo no sandbox (o save real não muda);
   - o teste automático da Área dos Pais do módulo passa (Geografia: `src/modules/geografia/tests/pais-teste.cjs`, que falha se um minijogo registrado não estiver na lista).
 
+- **Biblioteca de minijogos (regra permanente, pedido do usuário em 24/09/2026):** o código de todos os minijogos fica em `docs/MINIGAMES-CODIGO.md`, para reaproveitar em outras matérias com outro tema. Ao criar ou mudar um minijogo, rode `node src/tools/gen-minigames-md.cjs` na mesma entrega. O guia de reaproveitamento está na seção 8.8.
+
 **Regras de git (permanentes)**
 - Só fazer push em `claude/adoring-galileo-w55t2f` do repositório `jogogabriel`.
 - O repositório `diario` foi a "pasta errada": nada vai para ele.
@@ -53,7 +55,8 @@ Marcações: **[não confirmado]** indica algo não verificado; **[pendente]** i
     - Faça antes `read` e `list` com `scope: "files"`.
     - Depois publique com `url` do artifact, `file_path` = `inicio.html` e `files` só com os arquivos alterados. O limite é de 255 arquivos por envio; se passar disso, mande em lotes.
     - Registre a nova versão aqui.
-  - **Versão publicada:** **13** (24/09/2026): ajustes na Colunas, na Quermesse e na Estrada, e fase 2-3 Ritmos do Brasil refeita (seções 8.6 e 8.7).
+  - **Versão publicada:** **14** (24/09/2026): Estrada rebalanceada com turbo, Travessia do Rio, Pinball da Floresta e Roleta da Sorte do 100% (seção 8.8).
+    - v13: ajustes na Colunas, na Quermesse e na Estrada, e fase 2-3 Ritmos do Brasil refeita (seções 8.6 e 8.7).
     - v12: minijogos mais desafiadores e tudo livre depois do estudo concluído (seção 8.5).
     - v11: Área dos Pais com Parque, Arcade e telas de recompensa no modo de teste (seção 8.4).
     - v10: Arcade dos Mundos e regras de entrada dos minijogos (seção 8.3).
@@ -796,4 +799,72 @@ A sessão dos pais é simulada no `sessionStorage`; a senha não é usada nem gu
 - **Placar:** a fase não usa `{geobot}` no `finish`, para não contar como "corrida contra o GeoBot" no relatório.
 - **Textos:** estilo "Batalha de ritmo" em `capitulos.js` e `manifest.js`; a introdução da fase fala das 4 setas.
 - **Teste:** um robô de teste acertou as 17 notas da 1ª música com teclas de verdade (antes de a música ficar mais longa); a fase terminou com as checagens e a questão. O `e2e` (com o atalho `autoplay`) cobre a campanha inteira.
+
+### 8.8 Estrada com turbo, 2 jogos novos, Roleta do 100% e biblioteca de minijogos (24/09/2026, pedido do usuário)
+
+**Estrada Brasil (rebalanceada; `arcade3.js`)**
+- **Combustível acaba rápido:** gasta 1,75/s (2,05 na marcha rápida, 2,4 no turbo). Sem galões, dura uns 55 s.
+  - Os **galões** aparecem a cada 4 a 6 s e dão +20.
+  - Cada zona dá só +10.
+- **Erros custam caro:**
+  - **batida:** −15 de combustível, −80 pontos, o **turbo zera** e o carro recomeça parado;
+  - **raspar na beira:** freia, −2,5 de combustível e corta o turbo.
+- **TURBO:** carrega em 8 s; com "TURBO PRONTO", aperte **Espaço** (ou toque no painel do canto). Dura 2,5 s a 390.
+  - **↑** continua sendo a marcha rápida.
+- **Trânsito:**
+  - **menos carros** (intervalo mínimo 0,7 s) e **mais óleo** (14% ou mais);
+  - carros **amarelos** trocam para a sua faixa na hora;
+  - carros **laranjas** "fecham" aos poucos (até 0,35 de faixa).
+- **Nunca vira parede:** no máximo 2 carros na mesma altura (1 quando a pista está estreita).
+  - O nível da dificuldade é limitado a 4, então o fim do jogo não fica impossível.
+- **Robô de teste simples, 3 partidas:** 11, 18 e 32 km; 6 a 14 batidas; 660 a 2.700 pontos, em cerca de 50 a 140 s. O resultado agora depende de pegar galões e não bater. Medalhas: 900/1900/3200.
+
+**Minijogos novos (`scenes/arcade4.js`), liberados pelo chefe como os outros**
+
+| Mundo | Jogo | Estilo | Regras |
+|---|---|---|---|
+| 1 | Travessia do Rio | Frogger | Grade de 25x13. Estrada de terra (caminhão, carro, bicicleta, ônibus), margem do meio, e rio com troncos, canoas, tartarugas que **mergulham** e jacaré (a **boca** morde). Leve o Gabriel às **5 ocas**. **3 vidas** e 30 s por travessia; o peixe numa oca vale +150. Com as 5 ocas cheias, sobe de nível (tudo 18% mais rápido). O jogo total tem no máximo 3 min. |
+| 3 | Pinball da Floresta | Sonic Spinball | Mesa com rebatedores (← →, ou tocar em cada metade), estilingues, 3 girassóis-pára-choque, **3 bichos presos** (arara, macaco, preguiça): soltar os 3 é o **RESGATE** e o multiplicador sobe até x5. **Sementes Mágicas**: a cada 3, **bola extra** e "A FLORESTA RENASCEU". Lançador com Espaço. Nos 5 s depois do lançamento, a bola é salva se cair. **3 bolas** e 3 min. |
+
+**Roleta da Sorte (`scenes/roleta.js`)**
+- **Quando ganha:** a fase termina com **100% de acerto**, ou seja, todas as questões de primeira (as respostas pessoais contam como certas) **e** todas as checagens certas.
+  - A tela de resultado mostra "🎉 PARABÉNS! 100% DE ACERTO" e o botão **"🎰 Girar a roleta!"**.
+  - **1 giro por fase por dia** (`S().flags.spinDays`), para não repetir uma fase fácil só para ganhar giros.
+  - O giro fica guardado em `S().flags.spins` e aparece no menu do Parque como "Girar agora".
+- **O que a roleta faz:** sorteia **qualquer** minijogo (`GEO.parque.GAMES`), **inclusive os bloqueados**, para **1 partida bônus**.
+  - É `PQ.play(id, false, {bonus: true})`: a tela de fim não tem "Jogar de novo".
+  - **A roleta não libera o jogo:** os desbloqueios continuam a cada chefe.
+- **Não vale:** no replay do Fliperama, nem nas salas bônus.
+- **Área dos Pais:**
+  - o atalho "🎰 Roleta da Sorte" dá um giro no sandbox e abre a roleta;
+  - o menu do Parque em teste tem "+1 🎰 giro";
+  - os 2 jogos novos estão em `testExtras`.
+- **Testes:**
+  - o `e2e` do perfil "ótimo" exige que a campanha ganhe giros;
+  - o `pais-teste` confere a roleta;
+  - o `parque.cjs` confere os 11 jogos do Arcade.
+
+**Biblioteca de minijogos para outras matérias (pedido do usuário)**
+- **Onde está o código:**
+  - o **código completo de todos os minijogos** fica em **`docs/MINIGAMES-CODIGO.md`**, gerado por `node src/tools/gen-minigames-md.cjs` a partir dos arquivos reais;
+  - **rode o gerador de novo sempre que mudar um minijogo.**
+  - Ele não foi colado aqui para este guia continuar curto de ler: são cerca de 180 KB.
+  - São 7 arquivos: `parque.js` (o motor e 4 jogos), `arcade1.js` a `arcade4.js` (13 jogos), `roleta.js` e `ritmolivre.js`.
+- **Contrato de um minijogo:** `PQ.register(def, maker)`.
+  - **`def`:** `{id, world, boss, ref, title, icon (nome do atlas GEO.ILUS), c1, c2, music, medals:[bronze,prata,ouro], unit, desc, how}`.
+  - **`maker(api)`** devolve uma cena `{cam, t, begin(), update(dt), draw(g), click(x,y)?, dbg:{end()}}`.
+  - **A `api`** é `add(n)`, `lives`/`maxLives` + `refresh()`, `extra(icone, texto)`, `goal(texto)` e `end(pontos, nota)`.
+  - O resto é feito pelo motor: entrada, recorde, medalhas, tela de fim e pausa.
+- **Dependências:**
+  - `GG.engine` (canvas 400x225), `GG.input` (left, right, up, down, jump, act, pause) e `GG.audio` (sfx, music, note);
+  - `GG.util`, `GG.ui` e `GEO.gfx` (opcional: `ilus`, `sky`, `glow`, `sparkle`, `pop`, `flash`);
+  - `GEO.common.gabrielSide` / `gabrielTop` para o personagem;
+  - `PQ.pointer(sc, handlers)` para toque e mouse.
+- **Para usar em outra matéria:**
+  1. copiar `parque.js` (só o motor, ou com os jogos) e os `arcade*.js` desejados para `src/modules/<materia>/scenes/`;
+  2. trocar `GEO.` pelo namespace da matéria (ou expor um `GEO.parque` compatível), o save (`S()`), as moedas (`S().coins`, `PQ.COST`) e as perguntas de entrada (`D.statements[ch]`);
+  3. trocar o **tema**: ícones (`icon` e `X().ilus(...)`), textos (`title`, `desc`, `how`), cores `c1`/`c2`, céu (`x.sky(g, '<tema>')`) e os itens de cada jogo. Por exemplo, a Cesta com alimentos de Ciências, as Colunas com símbolos matemáticos, a Travessia com o "ciclo da água";
+  4. a mecânica (física, colisões, pontuação e dificuldade) não depende do tema e pode ficar igual;
+  5. registrar cada jogo em `franchise.testExtras` do manifesto da matéria (regra da Área dos Pais, seção 1).
+- **Ciências continua congelada:** nada disso vai para ela sem pedido expresso.
 

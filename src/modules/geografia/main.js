@@ -198,6 +198,7 @@
     else if (GEO.parque && GEO.mode.minigame && GEO.parque.GAMES.some((g) => g.id === GEO.mode.minigame)) setTimeout(() => GEO.parque.play(GEO.mode.minigame), 300);
     else if (GEO.parque && GEO.mode.parque) setTimeout(() => GEO.parque.open(GEO.mode.parque === 'todos' ? null : +GEO.mode.parque), 300);
     else if (GEO.parque && GEO.mode.reward) setTimeout(() => A.arcadeUnlocked(GEO.mode.reward), 300);
+    else if (GEO.parque && GEO.mode.roulette) setTimeout(() => { GEO.parque.giveSpin(); GEO.parque.roulette(); }, 300);
   };
   A.testQuestion = function (id) {
     const q = GEO.campaign.qById(id); if (!q) return;

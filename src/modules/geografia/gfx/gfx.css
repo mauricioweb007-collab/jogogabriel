@@ -79,3 +79,14 @@ body.in-stage.has-touch .boss-read { top: 70px; }
 .pq-test { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 8px 10px; margin: 0 0 8px; border: 2px dashed #f5c542; border-radius: 10px; background: rgba(245,197,66,.12); font-size: 14px; }
 .pq-entry .pq-entry-art { display: grid; place-items: center; margin: 4px 0; }
 .pq-entry .pq-entry-art .ilus { width: 64px; height: 64px; animation: gFloat 3s ease-in-out infinite; }
+/* Roleta da Sorte e parabéns pelo 100% */
+.res-perfect { margin: 0 0 10px; padding: 10px 12px; border-radius: 12px; background: linear-gradient(90deg, rgba(255,210,63,.25), rgba(123,255,143,.18)); border: 2px solid #ffd23f; display: grid; gap: 4px; animation: pqPulse 1.2s ease-in-out 3; }
+.res-perfect b { color: #ffd23f; }
+.pq-spin { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; padding: 8px 12px; margin: 0 0 8px; border-radius: 12px; border: 2px solid #ffd23f; background: rgba(255,210,63,.14); }
+.roleta-wrap { position: relative; display: grid; place-items: center; margin: 6px auto; width: min(300px, 80vw); }
+.roleta-cv { width: 100%; height: auto; border-radius: 50%; box-shadow: 0 6px 24px rgba(0,0,0,.45); }
+.roleta-pin { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); font-size: 28px; color: #ffd23f; text-shadow: 0 2px 0 #15152a, 0 0 8px rgba(0,0,0,.6); }
+.roleta-res { text-align: center; min-height: 1.5em; }
+.roleta-res b { color: #ffd23f; }
+@keyframes pqPulse { 50% { transform: scale(1.02); } }
+@media (prefers-reduced-motion: reduce) { .res-perfect { animation: none; } }

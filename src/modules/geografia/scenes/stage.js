@@ -258,9 +258,18 @@
         b.appendChild(U.el('ul', { class: 'res-q' }, ctx.results.map((x) => { const q = GEO.campaign.qById(x.id); return U.el('li', null, (x.personal ? '💬 ' : x.tier === 1 ? '⭐⭐⭐ ' : x.tier === 2 ? '⭐⭐ ' : '⭐ ') + q.id + ' — ' + q.title); })));
       }
       if (r.rewards.bonusUnlocked) b.appendChild(U.el('p', { class: 'res-rec' }, '🎁 Sala bônus liberada: ' + r.rewards.bonusUnlocked.title + '!'));
+      // 100% de acerto: parabéns + 1 giro grátis na Roleta da Sorte (scenes/roleta.js)
+      const perfect = GEO.parque && GEO.parque.isPerfect && GEO.parque.isPerfect(ctx);
+      const spin = perfect && GEO.parque.awardPerfect(def.id);
+      if (perfect) {
+        b.insertBefore(U.el('div', { class: 'res-perfect' }, [U.el('b', { class: 'pix' }, '🎉 PARABÉNS! 100% DE ACERTO NESTA FASE!'),
+          U.el('div', null, spin ? 'Você ganhou 1 GIRO GRÁTIS na 🎰 Roleta da Sorte! Pode sair qualquer minijogo — até um que ainda não foi liberado — para 1 partida bônus.' : 'Você já ganhou o giro desta fase hoje. Acerte 100% em outra fase para ganhar mais um!')]), b.firstChild);
+        GG.audio.sfx('power'); GG.engine.fx.confetti(GG.engine.W / 2, 40, 80);
+      }
       const next = GEO.campaign.nextStage();
       const acts = [UI.btn('🗺️ Voltar ao Atlas', 'ghost', () => { m.close(); resolve('atlas'); after('atlas'); }), UI.btn('🔁 Repetir para melhorar', '', () => { m.close(); resolve('again'); after('again'); })];
-      if (next && !def.bonus && next.id !== def.id) acts.push(UI.btn('Próxima: ' + next.title + ' ▶', 'pri', () => { m.close(); resolve('next'); after('next', next); }));
+      if (next && !def.bonus && next.id !== def.id) acts.push(UI.btn('Próxima: ' + next.title + ' ▶', spin ? '' : 'pri', () => { m.close(); resolve('next'); after('next', next); }));
+      if (spin) acts.push(UI.btn('🎰 Girar a roleta!', 'pri', () => { m.close(); resolve('roleta'); after('roleta'); }));
       m.setActions(acts);
       if (r.medal.id !== 'bronze') GG.engine.fx.confetti(GG.engine.W / 2 + ((ctx.scene && ctx.scene.cam && ctx.scene.cam.x) || 0), 60 + ((ctx.scene && ctx.scene.cam && ctx.scene.cam.y) || 0), 60);
       function after(what, nx) {
@@ -269,6 +278,7 @@
         const go = () => {
           if (what === 'again') ST.run(def.id, 'aventura');
           else if (what === 'next') ST.run(nx.id);
+          else if (what === 'roleta') { GEO.app.showAtlas(); setTimeout(() => GEO.parque.roulette(), 200); }
           else GEO.app.showAtlas();
         };
         if (ch) GEO.app.chapterComplete(ch).then(go); else go();

@@ -112,7 +112,7 @@ const AUTOPLAYER = function (profile) {
       tiers: D.questions.reduce((a, q) => { const t = S.q[q.id].tier; a[t] = (a[t] || 0) + 1; return a; }, {}),
       doneIn: D.questions.reduce((a, q) => { const t = S.q[q.id].doneIn; a[t] = (a[t] || 0) + 1; return a; }, {}),
       cie: localStorage.getItem(CK), geoKey: !!localStorage.getItem('ecoNexus.geografia.v1'), txt: GEO.app.reportTxt(rep).length,
-      apLog: __AP.log.slice(0, 10), hard: D.questions.filter((q) => S.q[q.id].tier !== 1).map((q) => q.id + ' nível ' + S.q[q.id].tier + ' tentativas ' + S.q[q.id].attempts), apErr: __AP.errors, frames: S.flags.frames, bonus: S.unlockedBonus
+      apLog: __AP.log.slice(0, 10), hard: D.questions.filter((q) => S.q[q.id].tier !== 1).map((q) => q.id + ' nível ' + S.q[q.id].tier + ' tentativas ' + S.q[q.id].attempts), apErr: __AP.errors, frames: S.flags.frames, bonus: S.unlockedBonus, spins: S.flags.spins || 0, spinStages: Object.keys(S.flags.spinDays || {})
     };
   }, CIE_KEY);
   const mins = ((Date.now() - t0) / 60000).toFixed(1);
@@ -126,11 +126,14 @@ const AUTOPLAYER = function (profile) {
   console.log('  Medalhas: ' + JSON.stringify(res.medals) + ' • molduras: ' + JSON.stringify(res.frames) + ' • bônus: ' + JSON.stringify(res.bonus));
   console.log('  GeoBot: ' + JSON.stringify(res.geobot) + ' • inventário: ' + res.inv.join(','));
   console.log('  Relatório .txt: ' + res.txt + ' caracteres');
+  console.log('  Giros da Roleta (100% de acerto): ' + res.spins + ' • fases: ' + res.spinStages.join(','));
   const cieOk = res.cie === CIE_FAKE;
   console.log('  Save de Ciências intocado: ' + (cieOk ? 'SIM' : 'NÃO!'));
   if (res.apLog.length) console.log('  Log do jogador automático: ' + res.apLog.join(' | '));
   console.log('  Erros no console: ' + (errs.length ? errs.join('\n    ') : 'nenhum'));
-  const ok = res.coverage.done === 45 && res.stagesDone === 16 && res.finalDone && cieOk && !errs.length && !res.apErr;
+  const spinOk = profile !== 'otimo' || res.spins > 0; // o perfil que acerta tudo precisa ganhar giros
+  if (!spinOk) console.log('  ✗ nenhum giro da roleta no perfil ótimo');
+  const ok = res.coverage.done === 45 && res.stagesDone === 16 && res.finalDone && cieOk && !errs.length && !res.apErr && spinOk;
   console.log(ok ? 'RESULTADO: OK' : 'RESULTADO: FALHOU');
   fs.writeFileSync(path.join(__dirname, 'resultado-' + profile + '.json'), JSON.stringify(Object.assign({ ok, profile, minutos: mins, errs }, res), null, 2));
   await browser.close();

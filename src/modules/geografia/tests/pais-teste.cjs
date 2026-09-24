@@ -65,7 +65,8 @@ const session = () => { sessionStorage.setItem('ecoNexus.pais.sessao', JSON.stri
       const t = [...document.querySelectorAll('.modal-wrap .m-title')].map((x) => x.textContent).join(' | ');
       if (o.minijogo) return !!(GEO.parque.current() && GEO.parque.current().g.id === o.minijogo);
       if (o.parque === 'todos') return /Parque do Atlas/.test(t) && document.querySelectorAll('.pq-card.lock').length === 0 && document.querySelectorAll('.pq-card').length === GEO.parque.GAMES.length && !!document.querySelector('.pq-test');
-      if (o.parque) return new RegExp('Arcade do Mundo ' + o.parque).test(t) && document.querySelectorAll('.pq-card').length === 3;
+      if (o.parque) return new RegExp('Arcade do Mundo ' + o.parque).test(t) && document.querySelectorAll('.pq-card').length === GEO.parque.worldGames(+o.parque).length;
+      if (o.roleta) return /Roleta da Sorte/.test(t) && !!document.querySelector('.roleta-cv');
       if (o.recompensa) return new RegExp('Arcade do Mundo ' + o.recompensa + ' liberado').test(t);
       return false;
     }, it.p);

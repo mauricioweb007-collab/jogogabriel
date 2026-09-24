@@ -27,6 +27,7 @@
     const mj = q.get('minijogo'); if (mj && /^[a-z0-9_]{2,30}$/.test(mj)) M.minigame = mj;
     const pq = q.get('parque'); if (pq && /^(todos|[123])$/.test(pq)) M.parque = pq;
     const rc = q.get('recompensa'); if (rc && /^[123]$/.test(rc)) M.reward = +rc;
+    if (q.get('roleta') === '1') M.roulette = true;
   } else if (replay && ids.includes(replay)) {
     M.kind = 'replay'; M.key = 'ecoNexus.replay.geografia.v1'; M.unlockAll = true; M.stage = replay;
     M.token = /^[a-z0-9-]{4,80}$/i.test(token) ? token : null;

@@ -34,7 +34,7 @@
     files: {
       content: ['content/capitulos.js', 'content/glossario.js', 'content/loja.js', 'questions/c1.js', 'questions/c2.js', 'questions/c3.js', 'content/visuais.js'],
       systems: ['systems/save.js', 'systems/economy.js', 'systems/campaign.js'],
-      scenes: ['scenes/common.js', 'scenes/stage.js', 'scenes/atlas.js', 'scenes/platform.js', 'scenes/topdown.js', 'scenes/shmup.js', 'scenes/race.js', 'scenes/boss.js', 'scenes/maze.js', 'scenes/rhythm.js', 'scenes/kitchen.js', 'scenes/city.js', 'scenes/tower.js'],
+      scenes: ['scenes/common.js', 'scenes/stage.js', 'scenes/atlas.js', 'scenes/platform.js', 'scenes/topdown.js', 'scenes/shmup.js', 'scenes/race.js', 'scenes/boss.js', 'scenes/maze.js', 'scenes/rhythm.js', 'scenes/kitchen.js', 'scenes/city.js', 'scenes/tower.js', 'scenes/parque.js', 'scenes/ritmolivre.js', 'scenes/arcade1.js', 'scenes/arcade2.js', 'scenes/arcade3.js', 'scenes/arcade4.js', 'scenes/roleta.js'],
       main: ['main.js']
     },
     /** Progresso somente leitura para o lançador. */
@@ -109,18 +109,18 @@
         concepts(S) { return (S && S.concepts) || {}; }
       },
       /** Jogo no modo de teste (sandbox, tudo liberado). fase, questao, minijogo (Parque/Arcade), parque (menu), recompensa (tela do chefe). */
-      testEntry(o) { o = o || {}; return 'src/modules/geografia/jogar.html?teste=1' + ['fase', 'questao', 'minijogo', 'parque', 'recompensa'].filter((k) => o[k]).map((k) => '&' + k + '=' + encodeURIComponent(o[k])).join(''); },
+      testEntry(o) { o = o || {}; return 'src/modules/geografia/jogar.html?teste=1' + ['fase', 'questao', 'minijogo', 'parque', 'recompensa', 'roleta'].filter((k) => o[k]).map((k) => '&' + k + '=' + encodeURIComponent(o[k])).join(''); },
       /** Área dos Pais (modo de teste): TODO conteúdo novo do módulo entra aqui para os pais testarem.
           tests/parque.cjs confere que cada minijogo registrado em GEO.parque aparece nesta lista. */
       testExtras: [
         { group: 'Menus e telas', items: [
           { t: '🎡 Parque + Arcade (menu completo)', p: { parque: 'todos' } },
           { t: '🕹️ Arcade do Mundo 1 (menu)', p: { parque: '1' } }, { t: '🕹️ Arcade do Mundo 2 (menu)', p: { parque: '2' } }, { t: '🕹️ Arcade do Mundo 3 (menu)', p: { parque: '3' } },
-          { t: '🏆 Tela “Arcade liberado” (chefe do Mundo 1)', p: { recompensa: '1' } }, { t: '🏆 Tela “Arcade liberado” (chefe do Mundo 2)', p: { recompensa: '2' } }, { t: '🏆 Tela “Arcade liberado” (chefe do Mundo 3)', p: { recompensa: '3' } }] },
+          { t: '🏆 Tela “Arcade liberado” (chefe do Mundo 1)', p: { recompensa: '1' } }, { t: '🏆 Tela “Arcade liberado” (chefe do Mundo 2)', p: { recompensa: '2' } }, { t: '🏆 Tela “Arcade liberado” (chefe do Mundo 3)', p: { recompensa: '3' } }, { t: '🎰 Roleta da Sorte (prêmio do 100% de acerto)', p: { roleta: '1' } }] },
         { group: 'Parque do Atlas', items: [['memoria', 'Memória das Culturas'], ['arara', 'Voo da Arara'], ['cesta', 'Cesta da Feira'], ['quebra', 'Quebra-cabeça do Brasil']].map(([id, t]) => ({ t, p: { minijogo: id } })) },
-        { group: 'Arcade do Mundo 1', items: [['w1_jangada', 'Jangada Radical'], ['w1_colunas', 'Colunas do Mosaico'], ['w1_quebra', 'Quebra-Mosaico']].map(([id, t]) => ({ t, p: { minijogo: id } })) },
+        { group: 'Arcade do Mundo 1', items: [['w1_jangada', 'Jangada Radical'], ['w1_colunas', 'Colunas do Mosaico'], ['w1_quebra', 'Quebra-Mosaico'], ['w1_travessia', 'Travessia do Rio']].map(([id, t]) => ({ t, p: { minijogo: id } })) },
         { group: 'Arcade do Mundo 2', items: [['w2_ninja', 'Feira Ninja'], ['w2_quermesse', 'Quermesse Tiro ao Alvo'], ['w2_nevoa', 'Pega-Névoa no Arraial']].map(([id, t]) => ({ t, p: { minijogo: id } })) },
-        { group: 'Arcade do Mundo 3', items: [['w3_estrada', 'Estrada Brasil'], ['w3_invasores', 'Invasores da Poluição'], ['w3_predios', 'Empilha-Prédios']].map(([id, t]) => ({ t, p: { minijogo: id } })) }
+        { group: 'Arcade do Mundo 3', items: [['w3_estrada', 'Estrada Brasil'], ['w3_invasores', 'Invasores da Poluição'], ['w3_predios', 'Empilha-Prédios'], ['w3_pinball', 'Pinball da Floresta']].map(([id, t]) => ({ t, p: { minijogo: id } })) }
       ],
       testTargets: STAGES.map((s) => ({ id: s[0], t: (s[4] === 'bonus' ? 'Bônus: ' : s[0].slice(1).replace('s', '-') + ' ') + s[1] }))
     }

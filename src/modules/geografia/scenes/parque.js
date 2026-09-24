@@ -104,6 +104,7 @@
       ]);
     };
     const tk = [1, 2, 3].filter((w) => PQ.tickets(w) > 0).map((w) => 'Mundo ' + w + ': ' + PQ.tickets(w));
+    if (PQ.spins && PQ.spins() > 0) m.body.appendChild(U.el('div', { class: 'pq-spin' }, [U.el('b', null, '🎰 Você tem ' + PQ.spins() + ' giro(s) grátis na Roleta da Sorte!'), UI.btn('Girar agora ▶', 'pri small', () => { m.close(); setTimeout(() => PQ.roulette(), 60); })]));
     if (PQ.allFree()) m.body.appendChild(U.el('p', { class: 'pq-wallet' }, '🏆 Estudo concluído! Todos os minijogos estão liberados: jogue à vontade, sem moedas e sem perguntas.'));
     else m.body.appendChild(U.el('p', { class: 'pq-wallet' }, '🪙 ' + S().coins + ' EcoMoedas • entrada: ' + PQ.COST + ' 🪙 ou 2 perguntas' + (tk.length ? ' • 🎟️ bilhetes grátis — ' + tk.join(', ') : '')));
     if (isTest()) {
@@ -114,6 +115,7 @@
         UI.btn('+1 🎟️ em cada mundo', 'small', () => { [1, 2, 3].forEach((w) => { tickets()[w] = (tickets()[w] || 0) + 1; }); GEO.save.persist(); re(); }),
         UI.btn('Tirar 🎟️', 'small', () => { const f = S().flags; f.arcadeTickets = {}; GEO.save.persist(); re(); }),
         UI.btn(S().finalDone ? 'Desfazer “estudo concluído”' : 'Simular “estudo concluído”', 'small', () => { S().finalDone = !S().finalDone; GEO.save.persist(); re(); }),
+        UI.btn('+1 🎰 giro', 'small', () => { PQ.giveSpin(); re(); }),
         UI.btn('Tela de recompensa do chefe', 'small', () => { m.close(); setTimeout(() => GEO.app.arcadeUnlocked(only || 1), 60); })]));
     }
     const section = (title, list) => { if (!list.length) return; m.body.appendChild(U.el('h3', { class: 'pq-sec' }, title)); m.body.appendChild(U.el('div', { class: 'pq-grid' }, list.map(card))); };
@@ -155,12 +157,13 @@
   Api.prototype.goal = function (t) { this.hud.goal.textContent = t || ''; };
   Api.prototype.end = function (score, note) { if (this.ended) return; this.ended = true; if (score != null) this.score = Math.max(0, Math.round(score)); finish(this, note); };
 
-  PQ.play = async function (id, skipIntro) {
+  /** opts.bonus: rodada bônus da roleta (1 partida, mesmo que o jogo ainda esteja bloqueado; sem "Jogar de novo"). */
+  PQ.play = async function (id, skipIntro, opts) {
     const g = GAMES.find((x) => x.id === id); if (!g) return;
     GG.ui.closeAll && GG.ui.closeAll();
     GG.engine.stop();
     GEO.app.showStage();
-    const api = new Api(g); cur = { g, api };
+    const api = new Api(g); api.bonus = !!(opts && opts.bonus); cur = { g, api };
     const scene = MAKE[id](api);
     cur.scene = scene;
     E.start(scene);
@@ -198,7 +201,8 @@
       if (note) m.body.appendChild(U.el('p', { class: 'tip' }, note));
       const nxt = g.medals.find((v) => v > score);
       m.body.appendChild(U.el('p', { class: 'tip' }, nxt ? 'Próxima medalha com ' + nxt + ' ' + g.unit + '.' : 'Você conquistou a medalha máxima! 🥇'));
-      m.setActions([UI.btn('🗺️ Atlas', 'ghost', () => { m.close(); PQ.exit(false); }), UI.btn('🎡 Parque', '', () => { m.close(); PQ.exit(true); }), UI.btn('🔁 Jogar de novo', 'pri', () => { m.close(); PQ.exit(false); setTimeout(() => PQ.enter(g.id), 80); })]);
+      if (api.bonus) { m.body.appendChild(U.el('p', { class: 'res-rec' }, '🎰 Essa foi a sua rodada bônus da roleta! Acerte 100% em outra fase para ganhar um novo giro.')); m.setActions([UI.btn('🗺️ Atlas', 'pri', () => { m.close(); PQ.exit(false); }), UI.btn('🎡 Parque', '', () => { m.close(); PQ.exit(true); })]); }
+      else m.setActions([UI.btn('🗺️ Atlas', 'ghost', () => { m.close(); PQ.exit(false); }), UI.btn('🎡 Parque', '', () => { m.close(); PQ.exit(true); }), UI.btn('🔁 Jogar de novo', 'pri', () => { m.close(); PQ.exit(false); setTimeout(() => PQ.enter(g.id), 80); })]);
     }, medal ? 700 : 250);
   }
   /** Ouve arrastar/soltar enquanto a cena estiver ativa (remove ao sair). */

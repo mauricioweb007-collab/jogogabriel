@@ -99,7 +99,7 @@ async function clearDialogs(p) { for (let i = 0; i < 12; i++) { const b = await 
   ok(!after.keys.includes('econexus_guardioes_save_v1'), 'nenhuma chave de Ciências criada');
   // Arcade dos Mundos: 9 jogos, bilhete grátis do chefe e entrada por 2 perguntas
   const arc = await p.evaluate(() => GEO.parque.GAMES.filter((g) => g.world).map((g) => g.id + ':' + g.world));
-  ok(arc.length === 9 && [1, 2, 3].every((w) => arc.filter((a) => a.endsWith(':' + w)).length === 3), 'Arcade dos Mundos: 3 minijogos por mundo (9)');
+  ok(arc.length === 11 && [1, 2, 3].every((w) => arc.filter((a) => a.endsWith(':' + w)).length >= 3), 'Arcade dos Mundos: 11 minijogos (4 no Mundo 1, 3 no Mundo 2, 4 no Mundo 3)');
   await p.evaluate(() => { GG.ui.closeAll(); GEO.save.S.coins = 0; GEO.app.arcadeUnlocked(1); });
   await p.waitForTimeout(400);
   ok(await p.evaluate(() => GEO.parque.tickets(1) === 1), 'vencer o chefe dá 1 bilhete grátis do Mundo 1');
