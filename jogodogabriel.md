@@ -57,7 +57,8 @@ Marcações: **[não confirmado]** indica algo não verificado; **[pendente]** i
     - Faça antes `read` e `list` com `scope: "files"`.
     - Depois publique com `url` do artifact, `file_path` = `inicio.html` e `files` só com os arquivos alterados. O limite é de 255 arquivos por envio; se passar disso, mande em lotes.
     - Registre a nova versão aqui.
-  - **Versão publicada:** **14** (24/09/2026): Estrada rebalanceada com turbo, Travessia do Rio, Pinball da Floresta e Roleta da Sorte do 100% (seção 8.8).
+  - **Versão publicada:** **15** (24/09/2026): módulo de **Inglês — Expresso dos Sonhos** (seção 9), com o cartão no lançador e os atalhos na Área dos Pais. Arquivos enviados: `src/modules/ingles/` (sem `tests/`), `modulos.js`, `launcher.js`, `pais.js`. Para publicar, copie os arquivos para o scratchpad e use-o como `root`; o publicador não aceita caminhos fora da pasta de trabalho.
+    - v14: Estrada rebalanceada com turbo, Travessia do Rio, Pinball da Floresta e Roleta da Sorte do 100% (seção 8.8).
     - v13: ajustes na Colunas, na Quermesse e na Estrada, e fase 2-3 Ritmos do Brasil refeita (seções 8.6 e 8.7).
     - v12: minijogos mais desafiadores e tudo livre depois do estudo concluído (seção 8.5).
     - v11: Área dos Pais com Parque, Arcade e telas de recompensa no modo de teste (seção 8.4).
@@ -183,7 +184,7 @@ node src/modules/ingles/tests/ingles.cjs otimo|erros           # Inglês: conte�
 - Plataforma v2 (lançador, registro, core, motor de questões).
 - Geografia (45 questões, 16 fases).
 - **Gabriel Nexus** (seção 7): entrada pelo nome, perfil global, ponte de pontuação, 21 Nexóticos, hub e 8 áreas, 4 jogos recreativos, Fliperama com replays das matérias e torneios, Área dos Pais com sandbox. Depois, **ocultado para a criança** a pedido do usuário.
-- Link único publicado, **versão 14**: Geografia gráfica, Parque, modo arcade, Arcade dos Mundos (17 minijogos no total), Roleta da Sorte do 100%, fase 2-3 como batalha de ritmo e Área dos Pais com todo o conteúdo novo. O histórico de versões está na seção 1.
+- Link único publicado, **versão 15** (Inglês; antes, v14): Geografia gráfica, Parque, modo arcade, Arcade dos Mundos (17 minijogos no total), Roleta da Sorte do 100%, fase 2-3 como batalha de ritmo e Área dos Pais com todo o conteúdo novo. O histórico de versões está na seção 1.
 - Documentos atualizados: `COMECE-AQUI.md`, `COMO-ADICIONAR-MATERIA.md`, `CREDITOS.md`.
 
 - **Geografia: melhoria gráfica, Parque, modo arcade e minijogos** (seção 8, de 8.1 a 8.9), a pedido do usuário.
