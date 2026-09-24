@@ -15,6 +15,8 @@
   'use strict';
   const U = GG.util, UI = GG.ui, P = GG.pixel, ST = GG.store, PR = GG.profile, TM = GG.testMode;
   const ENTERED = 'ecoNexus.entrou';
+  /** Nexus aparece para a criança só se GG.FR.nexusVisible; no modo de teste dos pais aparece sempre. */
+  const nexusOn = () => !!GG.FR.nexusVisible || TM.active();
   const inSession = () => { try { return sessionStorage.getItem(ENTERED) === '1'; } catch (e) { return false; } };
 
   /** Entrada do módulo (no modo de teste: versão sandbox). */
@@ -53,7 +55,7 @@
       return U.el('article', { class: 'ln-card ph soon', style: { '--c': m.theme.color } }, [art(m), U.el('div', { class: 'ln-body' }, [
         U.el('div', { class: 'ln-subject' }, [U.el('span', null, m.theme.icon), ' ' + m.subject]),
         U.el('h2', { class: 'pix' }, 'Em breve'),
-        U.el('p', { class: 'tip' }, 'O jogo de ' + m.subject + ' ainda vai ser criado. O Gato Gráfico já espera por você no Gabriel Nexus!')])]);
+        U.el('p', { class: 'tip' }, 'O jogo de ' + m.subject + ' ainda vai ser criado.' + (nexusOn() ? ' O Gato Gráfico já espera por você no Gabriel Nexus!' : ''))])]);
     }
     if (m.placeholder || !m.enabled) {
       return U.el('article', { class: 'ln-card ph' }, [art(m), U.el('div', { class: 'ln-body' }, [U.el('h2', { class: 'pix' }, 'Novas missões chegarão'), U.el('p', { class: 'tip' }, 'Quando houver uma nova prova, uma nova missão aparece aqui.')])]);
@@ -179,7 +181,7 @@
   function render() {
     const p = PR.load();
     document.getElementById('lnHello').textContent = 'Olá, ' + (p.displayNameUppercase || 'EXPLORADOR') + '!';
-    nexusCard(p, lastSync);
+    if (nexusOn()) nexusCard(p, lastSync); else document.getElementById('lnNexus').innerHTML = '';
     const box = document.getElementById('lnCards'); box.innerHTML = '';
     GG.registry.list.forEach((m) => box.appendChild(card(m)));
   }
@@ -195,6 +197,7 @@
     document.getElementById('launcherMain').classList.remove('hide');
     const gc = document.getElementById('lnGaia').getContext('2d'); gc.imageSmoothingEnabled = false; gc.drawImage(P.gaiaPortrait(), 0, 0);
     render();
+    if (!nexusOn()) return;
     if (lastSync && lastSync.migrated.length) UI.toast('🌀 Suas aventuras anteriores trouxeram ' + U.fmtInt(lastSync.points) + ' pontos e ' + lastSync.coins + ' Moedas Nexus!', 'gold', 5000);
     else if (lastSync && lastSync.coins > 0) UI.toast('🌀 +' + lastSync.coins + ' Moedas Nexus pelos seus estudos!', 'gold', 3500);
   }

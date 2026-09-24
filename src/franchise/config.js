@@ -46,7 +46,10 @@
     /** Área dos Pais. */
     parent: { sessionMinutesDefault: 10, sessionMinutesOptions: [5, 10, 15, 30], maxAttempts: 5, lockSeconds: 30 },
     /** Sessão recreativa sugerida (sem bloquear). */
-    suggestedMinutes: 15
+    suggestedMinutes: 15,
+    /** Gabriel Nexus visível para a criança no lançador? (false = oculto por decisão do usuário; os pontos
+     *  continuam sendo guardados em segundo plano e os pais ainda testam o Nexus no modo de teste). */
+    nexusVisible: false
   };
   GG.FR.rarityById = (id) => GG.FR.rarities.find((r) => r.id === id) || null;
   /** Nível do Nexus a partir da Pontuação de Carreira. */

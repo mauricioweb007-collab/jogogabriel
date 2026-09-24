@@ -43,7 +43,7 @@ const ok = (c, m) => { if (c) { oks++; console.log('  ✓ ' + m); } else { fails
   ok(P2.profileId === P1.profileId && P2.displayNameUppercase === 'GABI', 'trocar o nome mantém o MESMO perfil (sem cadastro/seleção de contas)');
   const cards = await p.$$eval('#lnCards .ln-card', (l) => l.map((c) => c.innerText.split('\n')[0]));
   ok(cards.some((t) => /Ciências/.test(t)) && cards.some((t) => /Geografia/.test(t)) && cards.some((t) => /Matemática/.test(t)), 'lançador mostra Ciências, Geografia e Matemática (em breve)');
-  ok(!!(await p.$('text=Entrar no Nexus')), 'lançador abre o Gabriel Nexus');
+  ok(!(await p.$('text=Entrar no Nexus')), 'Nexus oculto para a criança no lançador (GG.FR.nexusVisible = false)');
 
   console.log('[2] Importação única e Nexus');
   await p.evaluate(() => {

@@ -31,6 +31,7 @@ Marcações: **[não confirmado]** indica algo não verificado; **[pendente]** i
 - HTML/CSS/JS puros, sem build, offline e abrindo o arquivo direto (`file://`) em Chrome, Edge ou Firefox.
 - Não coleta dados pessoais. Não há compras reais, anúncios, assinatura nem loot box paga.
 - Arte e música são originais, fornecidas pelo responsável ou de licença livre, registradas em `CREDITOS.md`.
+- **Gabriel Nexus OCULTO para a criança (decisão do usuário, 24/09/2026):** `GG.FR.nexusVisible = false` em `src/franchise/config.js`. O lançador não mostra o cartão/toasts do Nexus e o resultado de fase de Geografia não mostra a linha do Nexus. Os pontos continuam sendo guardados em segundo plano, a Área dos Pais funciona e, no modo de teste dos pais, o Nexus aparece. Para reativar: mudar para `true`.
 - **Um único save infantil por navegador.** O nome é só personalização: não existe conta, senha ou seleção de perfis para a criança.
 
 **Regras de git (permanentes)**

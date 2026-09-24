@@ -194,6 +194,7 @@
     try {
       if (!GG.bridge || !GEO.mode || GEO.mode.kind !== 'normal' || !window.GEO_MANIFEST) return null;
       const r = GG.bridge.sync({ modules: [window.GEO_MANIFEST], collectibles: false });
+      if (!GG.FR.nexusVisible) return null; // Nexus oculto: pontos guardados, sem mostrar à criança
       if (!r.points) return null;
       return U.el('tr', null, [U.el('td', null, '🌀 Gabriel Nexus'), U.el('td', null, '+' + r.points + ' pontos de carreira • +' + r.coins + ' Moedas Nexus')]);
     } catch (e) { return null; }
