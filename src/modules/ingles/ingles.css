@@ -166,3 +166,7 @@ body.rm .ticket { animation: none; }
 
 .les-card .btn.ghost, .les-swap .btn.ghost, .les-story .btn.ghost, .mg-card .btn.ghost { color: #1d1650; box-shadow: inset 0 0 0 2px #6a4cff; }
 .ticket .tip { color: #6b4a00; }
+
+.tk-arc { max-width: 440px; margin: 12px auto 0; display: flex; gap: 10px; align-items: center; background: rgba(0,0,0,.3); border-radius: 12px; padding: 8px 12px; box-shadow: inset 0 0 0 2px var(--gold); }
+.tk-arc p { margin: 2px 0 0; }
+.arc-btn { font-size: 1.05em; }

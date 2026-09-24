@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#231a5c">
+  <meta name="description" content="Arcade do Expresso: 6 jogos bônus do módulo de Inglês, sem perguntas.">
+  <title>Inglês — Arcade do Expresso</title>
+  <!-- Esta página reaproveita (só leitura) a camada gráfica e as imagens de Geografia:
+       a base aponta para a pasta de Geografia; os arquivos de Inglês usam ../ingles/. -->
+  <base href="../geografia/">
+  <link rel="icon" href="../ingles/assets/img/locomotiva.png">
+  <link rel="stylesheet" href="../../assets/shared/fonts/fonts.css">
+  <link rel="stylesheet" href="../../ui/ui.css">
+  <link rel="stylesheet" href="geografia.css">
+  <link rel="stylesheet" href="../../franchise/franchise.css">
+  <link rel="stylesheet" href="gfx/gfx.css">
+  <link rel="stylesheet" href="../ingles/arcade/arcade.css">
+</head>
+<body class="ing-arcade">
+  <div id="stageWrap"><canvas id="game" aria-label="Tela do jogo bônus"></canvas></div>
+  <div id="stageHud" class="hide"></div>
+  <div id="touch" class="hide"></div>
+  <div id="loading"><div class="pix">Abrindo o Arcade do Expresso…</div></div>
+  <noscript><p style="padding:20px;font:18px sans-serif">Este jogo precisa de JavaScript ativado no navegador.</p></noscript>
+
+  <script src="../../core/util.js"></script>
+  <script src="../../core/storage.js"></script>
+  <script src="../../core/input.js"></script>
+  <script src="../../core/audio.js"></script>
+  <script src="../../core/engine.js"></script>
+  <script src="../../core/pixel.js"></script>
+  <script src="../../ui/ui.js"></script>
+  <script src="../../franchise/config.js"></script>
+  <script src="../../franchise/sha256.js"></script>
+  <script src="../../franchise/store.js"></script>
+  <script src="../../franchise/parent-auth.js"></script>
+  <script src="../../franchise/profile.js"></script>
+  <!-- Save e modo de Inglês (a mesma chave do jogo: ecoNexus.ingles.v1; sandbox no teste dos pais) -->
+  <script>window.ING = { data: {} };</script>
+  <script src="../ingles/content/banco.js"></script>
+  <script src="../ingles/content/atos.js"></script>
+  <script src="../ingles/systems/save.js"></script>
+  <!-- Camada gráfica de Geografia (só leitura) -->
+  <script>window.GEO = { data: {} };</script>
+  <script src="assets/ilustracoes/fluent3d.js"></script>
+  <script src="gfx/gfx.js"></script>
+  <!-- Arcade do Expresso -->
+  <script src="../ingles/arcade/runtime.js"></script>
+  <script src="../ingles/arcade/jogos.js"></script>
+</body>
+</html>

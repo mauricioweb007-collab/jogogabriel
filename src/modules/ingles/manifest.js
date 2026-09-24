@@ -12,6 +12,8 @@
   const KEY = 'ecoNexus.ingles.v1';
   const ACTS = [['a1', 'Cidade Cósmica', 'Places • pág. 1–3'], ['a2', 'Aeroporto das Profissões', 'Professions • pág. 4–7'], ['a3', 'Laboratório dos Sonhos', 'Subjects and dreams • pág. 8–11']];
   const GAMES = [['assoc_lugares', 'Associação: Places', 'Memória figura ↔ palavra', 1], ['caca', 'Caça-Palavras das Profissões', 'Caça-palavras', 2], ['assoc_lab', 'Associação: Subjects and professions', 'Memória figura ↔ palavra', 3]];
+  /** Arcade do Expresso (arcade/jogos.js): 2 jogos bônus por mundo, sem perguntas. */
+  const ARCADE = [['e1_galaxias', 'Quebra-Galáxias', 1], ['e1_invasores', 'Invasores Cósmicos', 1], ['e2_taxi', 'Táxi para o Aeroporto', 2], ['e2_voo', 'Voo do Avião', 2], ['e3_colunas', 'Colunas do Laboratório', 3], ['e3_bairro', 'Empilha o Bairro', 3]];
   const LESSONS = [['lugares', 'Places + would like to'], ['palavrinhas', 'really, usually, never, under, or'], ['texto', 'Texto: Professions — When I Grow Up'], ['profissoes', 'Professions'], ['pergunta', 'Pergunta com would'], ['materias', 'Subjects, professions and dreams'], ['negativa', 'Negativa com wouldn’t']];
   const CORE_TOTAL = 61; // questões da campanha curta (content/atos.js → D.core); as outras são extras opcionais
   const when = (S) => new Date(S.updated || S.created || Date.now()).toISOString();
@@ -94,6 +96,7 @@
       testEntry(o) {
         o = o || {};
         if (o.painel) return 'src/modules/ingles/painel.html';
+        if (o.arcade) return 'src/modules/ingles/arcade.html?teste=1' + (o.arcade === 'menu' ? '' : o.arcade === 'recompensa' ? '&recompensa=' + o.mundo : /^[123]$/.test(o.arcade) ? '&menu=' + o.arcade : '&jogo=' + encodeURIComponent(o.arcade));
         const p = Object.assign({}, o);
         if (p.fase) { const m = /^(a[123])(?:-(\d{1,2}))?$/.exec(p.fase); if (m) { p.ato = m[1]; if (m[2] != null) p.passo = m[2]; } else if (p.fase === 'final') p.final = '1'; else if (p.fase === 'revisao') p.revisao = '1'; delete p.fase; }
         return 'src/modules/ingles/jogar.html?teste=1' + ['ato', 'passo', 'questao', 'minijogo', 'licao', 'final', 'revisao', 'tela'].filter((k) => p[k] != null && p[k] !== '').map((k) => '&' + k + '=' + encodeURIComponent(p[k])).join('');
@@ -107,6 +110,10 @@
         { group: 'Telas', items: [{ t: '🗺️ Mapa do Expresso', p: { tela: 'mapa' } }, { t: '📖 História de abertura', p: { tela: 'intro' } }, { t: '🎫 Bilhete 1 (Cidade Cósmica)', p: { tela: 'bilhete-1' } }, { t: '🎫 Bilhete 2 (Aeroporto)', p: { tela: 'bilhete-2' } }, { t: '🎫 Bilhete 3 (Laboratório)', p: { tela: 'bilhete-3' } }, { t: '🏁 Passagem de Volta (revisão final)', p: { final: '1' } }, { t: '🏆 Tela final', p: { tela: 'fim' } }, { t: '📝 Revisão rápida', p: { revisao: '1' } }] },
         { group: 'Explicações', items: LESSONS.map(([id, t]) => ({ t: '📘 ' + t, p: { licao: id } })) },
         { group: 'Minijogos', items: GAMES.map(([id, t]) => ({ t: '🎮 ' + t, p: { minijogo: id } })) },
+        { group: 'Arcade do Expresso (bônus, sem perguntas)', items: [{ t: '🕹️ Arcade completo (menu)', p: { arcade: 'menu' } }]
+          .concat([1, 2, 3].map((w) => ({ t: '🕹️ Arcade do Mundo ' + w + ' (menu)', p: { arcade: String(w) } })))
+          .concat([1, 2, 3].map((w) => ({ t: '🏆 Tela “Arcade liberado” (fim do Mundo ' + w + ')', p: { arcade: 'recompensa', mundo: String(w) } })))
+          .concat(ARCADE.map(([id, t, w]) => ({ t: '🎮 Mundo ' + w + ': ' + t, p: { arcade: id } }))) },
         { group: 'Atos (do começo)', items: ACTS.map(([id, t]) => ({ t: '🚂 ' + t, p: { ato: id, passo: '0' } })) }
       ]
     }

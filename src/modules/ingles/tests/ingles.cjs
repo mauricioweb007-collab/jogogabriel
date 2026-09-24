@@ -122,6 +122,21 @@ async function solveCaca(p) {
   for (const w of Object.keys(place)) { const c = place[w]; await p.click('.ws-c[data-x="' + c.x0 + '"][data-y="' + c.y0 + '"]'); await p.click('.ws-c[data-x="' + (c.x0 + c.dx * (w.length - 1)) + '"][data-y="' + (c.y0 + c.dy * (w.length - 1)) + '"]'); await p.waitForTimeout(60); }
   await p.waitForTimeout(900);
 }
+/** Arcade no meio da viagem (só o Mundo 1 concluído): bilhete grátis, uso único, Mundo 2 bloqueado. */
+async function arcadeMid(p) {
+  const back = p.url();
+  await p.goto(url('src/modules/ingles/arcade.html')); await p.waitForTimeout(1200);
+  const st = await p.evaluate(() => ({ t: ING.save.S.arcade.tickets[1], w1: GEO.parque.unlocked(GEO.parque.GAMES.find((g) => g.id === 'e1_galaxias')), w2: GEO.parque.unlocked(GEO.parque.GAMES.find((g) => g.id === 'e2_taxi')), n: GEO.parque.GAMES.length }));
+  ok(st.n === 6, 'Arcade: 6 jogos bônus registrados (2 por mundo)');
+  ok(st.t === 1 && st.w1 && !st.w2, 'Arcade: fim do Mundo 1 deu 1 bilhete; jogos do Mundo 1 liberados e do Mundo 2 bloqueados');
+  await p.click('.pq-card[data-game="e1_galaxias"]'); await p.waitForTimeout(600);
+  ok(!!(await p.$('.dlg')) && (await p.evaluate(() => ING.save.S.arcade.tickets[1])) === 0, 'Arcade: o bilhete grátis é usado ao entrar (sem perguntas)');
+  await p.click('.dlg .btn.pri'); await p.waitForTimeout(300);
+  await p.evaluate(() => GEO.parque.current().scene.dbg.end()); await p.waitForTimeout(3500);
+  await p.click('text=Jogar de novo'); await p.waitForTimeout(500);
+  ok(/já usou o bilhete/.test(await p.textContent('.modal')), 'Arcade: sem bilhete, pede para terminar a viagem (não abre de novo)');
+  await p.goto(back); await p.waitForTimeout(800);
+}
 /** Joga até a condição stop() ou um limite de passos. Retorna questões respondidas. */
 async function drive(p, stop, opts) {
   opts = opts || {}; const seen = new Set(); let n = 0;
@@ -175,6 +190,7 @@ async function drive(p, stop, opts) {
     n1 += await drive(p, async () => !!(await p.$('.map-scr')) && !(await p.$('.dlg')), { wrong: MODE === 'erros' });
     const sv = await p.evaluate((i) => { const S = JSON.parse(localStorage.getItem('ecoNexus.ingles.v1')); return { done: S.acts['a' + (i + 1)].done, t: S.tickets.length }; }, i);
     ok(sv.done && sv.t === i + 1, 'ato ' + (i + 1) + ' concluído e bilhete ' + (i + 1) + '/3 salvo');
+    if (i === 0) await arcadeMid(p);
   }
   await p.click('.st-card.fin'); await p.waitForTimeout(200);
   n1 += await drive(p, async () => !!(await p.$('.end-scr')), { wrong: MODE === 'erros' });
@@ -186,6 +202,16 @@ async function drive(p, stop, opts) {
   const tiers = Object.values(S.q).filter((x) => x.done).map((x) => x.tier);
   ok(MODE === 'otimo' ? tiers.every((t) => t === 1) : tiers.some((t) => t === 2), MODE === 'otimo' ? 'tudo de primeira no perfil ótimo' : 'erros viram nível 2 (dica/2ª tentativa)');
   ok(Object.values(S.q).some((x) => x.typed.length), 'o save guarda o que a criança digitou');
+  // Arcade depois da viagem: tudo liberado, sem gastar bilhete
+  await p.goto(url('src/modules/ingles/arcade.html')); await p.waitForTimeout(1200);
+  ok(/Todos os jogos estão liberados/.test(await p.textContent('.modal')), 'Arcade: viagem concluída = todos os 6 jogos liberados');
+  const tk0 = await p.evaluate(() => JSON.stringify(ING.save.S.arcade.tickets));
+  await p.click('.pq-card[data-game="e3_bairro"]'); await p.waitForTimeout(600);
+  ok(!!(await p.$('.dlg')) && tk0 === await p.evaluate(() => JSON.stringify(ING.save.S.arcade.tickets)), 'Arcade: jogo do Mundo 3 abre direto, sem gastar bilhete');
+  await p.click('.dlg .btn.pri'); await p.waitForTimeout(300);
+  await p.evaluate(() => GEO.parque.current().scene.dbg.end()); await p.waitForTimeout(3500);
+  ok(!!(await p.$('text=fim de jogo')), 'Arcade: partida termina com recorde e medalha');
+  ok(await p.evaluate(() => { const r = JSON.parse(localStorage.getItem('ecoNexus.ingles.v1')).arcade.rec.e3_bairro; return !!r && r.plays === 1; }), 'Arcade: recorde salvo no save de Inglês');
   // pontos no perfil (uma única vez)
   await p.goto(url('inicio.html')); await p.waitForTimeout(800);
   const pts = await p.evaluate(() => { const P = JSON.parse(localStorage.getItem('ecoNexus.franchise.v1')); const L = P.scoreLedger.filter((e) => e.moduleId === 'ingles'); return { n: L.length, sum: L.reduce((a, e) => a + e.points, 0), ids: new Set(L.map((e) => e.eventId)).size }; });
@@ -207,12 +233,14 @@ async function drive(p, stop, opts) {
   const opts = await p.$$eval('select[aria-label^="Minijogos e telas de Inglês"] option', (o) => o.map((x) => x.textContent));
   const man = await p.evaluate(() => window.ING_MANIFEST.franchise.testExtras.flatMap((g) => g.items).length);
   ok(opts.length === man && man >= 20, 'o modo de teste lista os ' + man + ' itens de Inglês (telas, explicações, minijogos, atos, painel)');
+  const arc = await p.evaluate(() => window.ING_MANIFEST.franchise.testExtras.find((g) => /Arcade/.test(g.group)).items.map((i) => i.p.arcade));
+  ok(['e1_galaxias', 'e1_invasores', 'e2_taxi', 'e2_voo', 'e3_colunas', 'e3_bairro'].every((id) => arc.includes(id)), 'os 6 jogos do Arcade estão no modo de teste (e os menus e telas de recompensa)');
   const games = await p.evaluate(() => Object.keys(window.ING_MANIFEST.franchise.testExtras.find((g) => g.group === 'Minijogos').items.reduce((a, i) => { a[i.p.minijogo] = 1; return a; }, {})));
   ok(games.length === 3, 'os 3 minijogos estão no modo de teste');
   const links = await p.evaluate(() => window.ING_MANIFEST.franchise.testExtras.flatMap((g) => g.items).map((i) => window.ING_MANIFEST.franchise.testEntry(i.p)));
   for (const l of links) {
     const e0 = errs.length; await p.goto(url(l)); await p.waitForTimeout(700);
-    const good = /painel/.test(l) ? await p.$('text=Matriz de cobertura') : await p.$('#ggTestBanner');
+    const good = /painel/.test(l) ? await p.$('text=Matriz de cobertura') : /arcade\.html.*[?&]jogo=/.test(l) ? await p.evaluate(() => !!(GEO.parque.current() && document.getElementById('ggTestBanner'))) : await p.$('#ggTestBanner');
     ok(good && errs.length === e0, 'abre no sandbox: ' + l.replace('src/modules/ingles/', ''));
   }
   await p.goto(url('src/modules/ingles/painel.html')); await p.waitForTimeout(800);

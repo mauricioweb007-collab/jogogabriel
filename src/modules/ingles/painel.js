@@ -30,6 +30,7 @@
     if (!TM.active()) { if (!TM.start()) { UI.toast('Sessão dos pais expirada.'); return; } }
     location.href = window.ING_MANIFEST_TEST(p);
   };
+  const arcade = (q) => { if (!TM.active() && !TM.start()) { UI.toast('Sessão dos pais expirada.'); return; } location.href = 'arcade.html?teste=1' + q; };
   window.ING_MANIFEST_TEST = (p) => 'jogar.html?teste=1' + Object.keys(p).map((k) => '&' + k + '=' + encodeURIComponent(p[k])).join('');
 
   function render(f) {
@@ -56,6 +57,7 @@
     box.appendChild(U.el('section', { class: 'card' }, [U.el('h2', null, '🧪 Abrir no sandbox (nada altera o save real)'),
       U.el('div', { class: 'filters' }, [ss, UI.btn('Abrir este passo', 'small pri', () => { const [a, i] = ss.value.split(':'); sandbox({ ato: a, passo: i }); })]),
       U.el('div', { class: 'filters' }, Object.keys(D.lessons).map((k) => UI.btn('📘 ' + D.lessons[k].title, 'small', () => sandbox({ licao: k }))).concat(Object.keys(D.games).map((k) => UI.btn('🎮 ' + D.games[k].title, 'small', () => sandbox({ minijogo: k }))))),
+      U.el('div', { class: 'filters' }, [U.el('b', null, '🕹️ Arcade do Expresso (bônus, sem perguntas):'), UI.btn('Menu completo', 'small', () => arcade('')), UI.btn('Tela “Arcade liberado”', 'small', () => arcade('&recompensa=1'))].concat([['e1_galaxias', 'Quebra-Galáxias'], ['e1_invasores', 'Invasores Cósmicos'], ['e2_taxi', 'Táxi para o Aeroporto'], ['e2_voo', 'Voo do Avião'], ['e3_colunas', 'Colunas do Laboratório'], ['e3_bairro', 'Empilha o Bairro']].map(([id, t]) => UI.btn('🎮 ' + t, 'small', () => arcade('&jogo=' + id))))),
       U.el('div', { class: 'filters' }, [UI.btn('🗺️ Mapa (tudo liberado)', 'small', () => sandbox({ tela: 'mapa' })), UI.btn('🏁 Passagem de Volta', 'small', () => sandbox({ final: '1' })), UI.btn('📝 Revisão rápida', 'small', () => sandbox({ revisao: '1' })),
         UI.btn('♻️ Reiniciar só o sandbox de Inglês', 'small', async () => { if (await UI.confirm('Apagar SOMENTE o sandbox de Inglês? O progresso real não é tocado.', 'Reiniciar', 'Cancelar')) { GG.store.remove(TM.keyFor(REAL)); UI.toast('Sandbox de Inglês reiniciado.', 'ok'); } })]),
       U.el('p', { class: 'tip' }, TM.active() ? 'Modo de teste ATIVO.' : 'Ao abrir algo aqui, o modo de teste é iniciado automaticamente.')]));

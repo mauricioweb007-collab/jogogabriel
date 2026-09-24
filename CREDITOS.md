@@ -108,3 +108,5 @@ As ilustrações ficam em `src/modules/ingles/assets/img/` (PNG de 128 px, salvo
 | `tubo.png` | Test tube | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Test%20tube |
 | `tv.png` | Television | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Television |
 | `x.png` | Cross mark | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Cross%20mark |
+
+**Arcade do Expresso (jogos bônus de Inglês):** usa, só para leitura, as mesmas imagens de Geografia já creditadas acima (Fluent Emoji MIT no atlas `fluent3d.png`, Kenney CC0 em cenários e efeitos). Os jogos são adaptações do código do próprio projeto.

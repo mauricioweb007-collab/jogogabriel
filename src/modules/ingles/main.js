@@ -305,7 +305,11 @@
       U.el('span', { class: 'st-st' }, S().finalDone ? '🏆 Concluída' : allT ? '▶ Montar a passagem' : '🔒 ' + S().tickets.length + '/3 bilhetes')]);
     const rail = U.el('div', { class: 'rail' }, [U.el('div', { class: 'rail-track', 'aria-hidden': 'true' }), U.el('div', { class: 'rail-train', 'aria-hidden': 'true' }, [A.img('locomotiva', 64)])].concat(acts).concat([fin]));
     const ex = D.acts.filter((a) => S().acts[a.id].done || M.unlockAll).map((a) => { const L = D.questions.filter((q) => q.act === a.n && !q.core); const d = L.filter((q) => S().q[q.id].done).length; return UI.btn('📚 Extras do livro — ' + a.title + ' (' + d + '/' + L.length + ')', 'small', () => A.extras(a)); });
+    const arcOpen = M.unlockAll || D.acts.some((a) => S().acts[a.id].done);
+    const tks = [1, 2, 3].reduce((n, w) => n + (((S().arcade || {}).tickets || {})[w] || 0), 0);
+    const arcBtn = UI.btn(arcOpen ? '🕹️ Arcade do Expresso — jogos bônus' + (S().finalDone ? ' (tudo liberado!)' : tks ? ' (' + tks + ' 🎟️)' : '') : '🔒 Arcade do Expresso: termine a 1ª estação', arcOpen ? 'pri arc-btn' : 'ghost arc-btn', () => { if (!arcOpen) { UI.toast('Termine uma estação para ganhar um bilhete do Arcade!'); return; } A.arcade(); });
     const extra = U.el('div', { class: 'map-acts' }, [
+      arcBtn,
       ex.length ? U.el('div', { class: 'map-ex' }, [U.el('p', { class: 'tip' }, '📚 Opcional: o resto dos exercícios do livro, para treinar mais (valem pontos, mas não são obrigatórios).')].concat(ex)) : null,
       S().finalDone || M.unlockAll ? UI.btn('📝 Revisão rápida (por página, assunto ou tipo)', 'info', () => A.reviewMenu()) : U.el('p', { class: 'tip' }, '📝 A revisão rápida por página e assunto libera quando você terminar a viagem.'),
       UI.btn('📖 Rever a história', 'ghost small', () => A.say(D.story.intro))
@@ -372,14 +376,19 @@
   /* ---------------------------------------------------------------- bilhete do ato */
   A.ticket = function (act) {
     return new Promise((resolve) => {
-      if (!S().tickets.includes(act.id)) S().tickets.push(act.id);
+      if (!S().tickets.includes(act.id)) {
+        S().tickets.push(act.id);
+        // prêmio: 1 bilhete grátis para 1 dos 2 jogos bônus deste mundo (Arcade do Expresso)
+        const ar = (S().arcade = S().arcade || { tickets: {}, rec: {} }); ar.tickets[act.n] = (ar.tickets[act.n] || 0) + 1;
+      }
       if (!S().rewards.includes(act.reward)) S().rewards.push(act.reward);
       SV.persist(); GG.audio.sfx('win'); music('vitoria');
       const st = D.questions.filter((q) => q.act === act.n && q.core), first = st.filter((q) => S().q[q.id].tier === 1).length;
       screen('tk-scr', [U.el('div', { class: 'ticket', style: { '--c': act.color } }, [
         U.el('div', { class: 'tk-top pix' }, 'BILHETE-PALAVRA ' + act.n + '/3'), A.img(act.icon, 110), U.el('h2', null, act.ticket),
         U.el('p', null, 'Estação ' + act.title + ' concluída!'), U.el('p', { class: 'tip' }, first + ' de ' + st.length + ' questões certas de primeira.')]),
-      U.el('div', { class: 'q-acts' }, [UI.btn(act.n < 3 ? 'Voltar ao trem ▶' : 'Montar a Passagem de Volta ▶', 'pri', () => resolve())])]);
+      U.el('div', { class: 'tk-arc' }, [A.img('bilhete', 48), U.el('div', null, [U.el('b', null, '🕹️ Arcade do Mundo ' + act.n + ' liberado!'), U.el('p', { class: 'tip' }, 'Você ganhou 1 bilhete grátis para um jogo bônus (sem perguntas).')])]),
+      U.el('div', { class: 'q-acts' }, [UI.btn('🕹️ Jogar o bônus agora', 'info', () => A.arcade({ recompensa: act.n })), UI.btn(act.n < 3 ? 'Voltar ao trem ▶' : 'Montar a Passagem de Volta ▶', 'pri', () => resolve())])]);
       try { GG.bridge.sync({ modules: [window.ING_MANIFEST], collectibles: false }); } catch (e) { GG.errlog && GG.errlog.add('sync', e.message); }
     });
   };
@@ -396,7 +405,7 @@
       if (step.type === 'lesson') { music('estacao'); await A.lesson(step.id); }
       else if (step.type === 'game') await A.game(step.id);
       else if (step.type === 'block') { music('estacao'); await A.block(act, step, s.qi); }
-      else if (step.type === 'ticket') { s.done = true; s.doneAt = s.doneAt || Date.now(); await A.ticket(act); }
+      else if (step.type === 'ticket') { s.done = true; s.doneAt = s.doneAt || Date.now(); s.step++; SV.persist(); await A.ticket(act); continue; }
       s.step++; s.qi = 0; SV.persist();
     }
     s.step = act.steps.length; SV.persist();
@@ -432,6 +441,13 @@
       U.el('div', { class: 'q-acts' }, [UI.btn('📝 Revisão rápida', 'info', () => { resolve(); A.reviewMenu(); }), UI.btn('🚂 Voltar ao mapa', 'pri', () => { resolve(); A.map(); })])]);
       A.say(D.story.end);
     });
+  };
+
+  /* ---------------------------------------------------------------- Arcade do Expresso (jogos bônus, arcade.html) */
+  A.arcade = function (o) {
+    SV.persist(); o = o || {};
+    const q = Object.assign(test() ? { teste: '1' } : {}, o);
+    location.href = 'arcade.html' + (Object.keys(q).length ? '?' + Object.keys(q).map((k) => k + '=' + encodeURIComponent(q[k])).join('&') : '');
   };
 
   /* ---------------------------------------------------------------- exercícios extras (resto do livro, opcional) */
@@ -476,7 +492,7 @@
       U.el('div', { class: 'row' }, [
         UI.btn('+1 bilhete', 'small', () => { const a = D.acts.find((x) => !S().tickets.includes(x.id)); if (a) { S().tickets.push(a.id); S().acts[a.id].done = true; SV.persist(); } A.map(); }),
         UI.btn('Zerar bilhetes', 'small', () => { S().tickets = []; D.acts.forEach((a) => { S().acts[a.id].done = false; }); S().finalDone = false; SV.persist(); A.map(); }),
-        UI.btn('Tela do bilhete 1', 'small', () => A.ticket(D.acts[0]).then(A.map)), UI.btn('Tela final', 'small', () => A.end(0, 0)),
+        UI.btn('Tela do bilhete 1', 'small', () => A.ticket(D.acts[0]).then(A.map)), UI.btn('🕹️ Arcade (bônus)', 'small', () => A.arcade()), UI.btn('Tela final', 'small', () => A.end(0, 0)),
         UI.btn('História de abertura', 'small', () => A.say(D.story.intro)),
         UI.btn('♻️ Reiniciar só o sandbox de Inglês', 'small', async () => { if (await UI.confirm('Apagar SOMENTE o sandbox de Inglês? O save real não é tocado.', 'Reiniciar', 'Cancelar')) { SV.reset(); SV.newGame(GG.profile.name()); S().introDone = true; SV.persist(); A.map(); } })
       ])]);

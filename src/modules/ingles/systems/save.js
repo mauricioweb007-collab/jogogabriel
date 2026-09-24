@@ -8,6 +8,7 @@
                  save sandbox "ecoNexus.teste.ecoNexus.ingles.v1", tudo
                  liberado, com atalhos &ato= &passo= &questao= &minijogo=
                  &licao= &final=1 &revisao=1 &tela=… (todos validados).
+     O Arcade do Expresso (arcade.html) usa este mesmo save: S.arcade.
    Salva ao concluir cada questão, bloco, minijogo e ato: dá para
    continuar exatamente de onde parou.
    ===================================================================== */
@@ -52,7 +53,7 @@
       v: 1, module: 'ingles', name: (name || 'Gabriel').trim().slice(0, 24) || 'Gabriel',
       created: Date.now(), updated: Date.now(), introDone: false, settings: SV.settingsDefault(),
       q: qq, acts, cur: 'a1', tickets: [], finalDone: false, final: { plays: 0, ok: 0, wrong: 0, doneAt: null },
-      mg: {}, rewards: [], time: { total: 0, sessions: 0 }, summary: null, flags: {}
+      mg: {}, arcade: { tickets: {}, rec: {} }, rewards: [], time: { total: 0, sessions: 0 }, summary: null, flags: {}
     };
   };
   SV.load = function () {
@@ -62,6 +63,7 @@
     SV.S = Object.assign(base, data);
     SV.S.settings = Object.assign(SV.settingsDefault(), data.settings || {});
     D.questions.forEach((x) => { SV.S.q[x.id] = Object.assign(SV.qFresh(), (data.q || {})[x.id] || {}); });
+    SV.S.arcade = Object.assign({ tickets: {}, rec: {} }, data.arcade || {});
     D.acts.forEach((a) => { SV.S.acts[a.id] = Object.assign({ step: 0, qi: 0, done: false, doneAt: null }, (data.acts || {})[a.id] || {}); });
     return true;
   };

@@ -15,7 +15,9 @@ const FILES = [
   ['arcade4.js', 'Extras: Travessia do Rio (Frogger, Mundo 1) e Pinball da Floresta (Sonic Spinball, Mundo 3)'],
   ['roleta.js', 'Roleta da Sorte (prêmio do 100% de acerto; sorteia qualquer minijogo para 1 partida bônus)'],
   ['ritmolivre.js', 'Ritmo Livre: batalha de ritmo contra o GeoBot (a fase 2-3 usa a mesma mecânica em rhythm.js)'],
-  ['minigames.js', 'Inglês (Expresso dos Sonhos): Associação figura ↔ palavra (adaptada da Memória, DOM, com escrita depois) e Caça-Palavras (arrastar, tocar ou teclado)', 'src/modules/ingles/']
+  ['minigames.js', 'Inglês (Expresso dos Sonhos): Associação figura ↔ palavra (adaptada da Memória, DOM, com escrita depois) e Caça-Palavras (arrastar, tocar ou teclado)', 'src/modules/ingles/'],
+  ['runtime.js', 'Inglês — Arcade do Expresso: motor adaptado do Parque (bilhete grátis ao fim de cada mundo, tudo livre ao terminar a viagem, sem moedas e sem perguntas; usa GEO.gfx de Geografia só para leitura)', 'src/modules/ingles/arcade/'],
+  ['jogos.js', 'Inglês — Arcade do Expresso: os 6 jogos bônus (Quebra-Galáxias, Invasores Cósmicos, Táxi para o Aeroporto, Voo do Avião, Colunas do Laboratório, Empilha o Bairro), cópias com tema trocado de jogos de Geografia', 'src/modules/ingles/arcade/']
 ];
 let md = '# Código dos minijogos (para reaproveitar)\n\n';
 md += '> Arquivo GERADO por `node src/tools/gen-minigames-md.cjs` em ' + new Date().toISOString().slice(0, 10) + '. Não edite à mão: edite os arquivos de origem (caminho em cada seção) e rode o gerador de novo.\n';

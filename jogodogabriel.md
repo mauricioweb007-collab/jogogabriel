@@ -139,7 +139,7 @@ node src/modules/geografia/tests/layouts.cjs <pasta>           # 1366x768, 1920x
 node src/modules/geografia/tests/parque.cjs                    # camada gráfica + Parque do Atlas (19 checagens)
 node src/modules/geografia/tests/pais-teste.cjs                # Área dos Pais: todo minijogo/menu/tela de Geografia abre no modo de teste (sandbox)
 node src/tests/gen-tabela-geografia.cjs                        # tabela das 45 questões
-node src/modules/ingles/tests/ingles.cjs otimo|erros           # Inglês: conteúdo/corretor, campanha inteira, salvar/continuar, pontos, Área dos Pais, sandbox, replay (83 checagens)
+node src/modules/ingles/tests/ingles.cjs otimo|erros           # Inglês: conteúdo/corretor, campanha inteira, salvar/continuar, pontos, Arcade do Expresso, Área dos Pais, sandbox, replay (105 checagens)
 ```
 
 **Últimos resultados (24/09/2026):**
@@ -974,6 +974,7 @@ A sessão dos pais é simulada no `sessionStorage`; a senha não é usada nem gu
 - Fliperama: `ingles_<id>` liberado quando jogado; replay em `jogar.html?replay=<id>&token=…` (save `ecoNexus.replay.ingles.v1`, resultado em `GG.replay`, sem pontos).
 - Código também em `docs/MINIGAMES-CODIGO.md` (gerador atualizado para incluir `src/modules/ingles/minigames.js`).
 - A “corrida do Expresso” e a “rota dos sonhos” do prompt **não** foram feitas, por pedido do usuário (menos minijogos).
+- Além destes 3 (de estudo), há os **6 jogos bônus do Arcade do Expresso** (seção 9.9), sem perguntas.
 
 ### 9.5 Save, pontos e Nexus
 - Save `ecoNexus.ingles.v1` (`systems/save.js`): `q[id] = {seen, done, tier, attempts, errors, hints, alt, first, typed[últimas 8], time, reviewOk, reviewWrong}`, `acts[a1..a3] = {step, qi, done}` (continua na **mesma questão**), `tickets`, `finalDone`, `final`, `mg`, `rewards`, `settings`, `time`.
@@ -996,6 +997,29 @@ A sessão dos pais é simulada no `sessionStorage`; a senha não é usada nem gu
 - **Acessibilidade:** botões grandes; teclado na tela ⌨️ (automático em toque); Enter confere; foco visível; ajustes de texto grande, contraste e menos movimento (`UI.settings`); ✔/✖ além das cores; texto alternativo em todas as figuras.
 
 ### 9.8 Testes e pendências
-- `node src/modules/ingles/tests/ingles.cjs otimo` e `erros`: **83 checagens** (conteúdo e corretor; campanha inteira jogada por robô, com minijogos; continuar do ponto salvo; pontos sem duplicar; lançador 100% e 3 bilhetes; Geografia intacta; 22 atalhos da Área dos Pais no sandbox; painel com 174 linhas e filtros; testar corretor; ficha com o que a criança digitou; Oficina de frases; save real idêntico; replay sem pontos; console sem erros).
+- `node src/modules/ingles/tests/ingles.cjs otimo` e `erros`: **105 checagens** (inclui o Arcade, 9.9) (conteúdo e corretor; campanha inteira jogada por robô, com minijogos; continuar do ponto salvo; pontos sem duplicar; lançador 100% e 3 bilhetes; Geografia intacta; 22 atalhos da Área dos Pais no sandbox; painel com 174 linhas e filtros; testar corretor; ficha com o que a criança digitou; Oficina de frases; save real idêntico; replay sem pontos; console sem erros).
 - **[não confirmado]** tempo real com o Gabriel e se as regras das respostas pessoais aceitam tudo que ele escrever de forma coerente (ex.: frases fora dos padrões). Se aparecer uma resposta boa recusada, é só acrescentar o padrão em `C.PERSONAL`.
 - **[pendente, se o usuário quiser]** áudio oficial do livro (não está no projeto); Nexóticos de Inglês (nenhum pacote entregue).
+
+### 9.9 Arcade do Expresso: 6 jogos bônus (24/09/2026, pedido do usuário)
+**Pedido:** “ao fim de cada mundo 2 minigames, totalizando 6, no mesmo estilo do de Geografia; a criança ganha 1 ao fim e ao terminar tudo fica liberado; usar o banco de minigames que já tem; bônus só para jogar, sem perguntas; e na Área dos Pais”.
+
+| Mundo (estação) | Jogo | Base em Geografia (mecânica igual) | O que mudou (só tema) |
+|---|---|---|---|
+| 1 Cidade Cósmica | **Quebra-Galáxias** (`e1_galaxias`) | Quebra-Mosaico (Arkanoid) | galáxia espiral, cometa e estrela; carrinho voador no lugar da jangada; bola vira cometa; céu noturno |
+| 1 Cidade Cósmica | **Invasores Cósmicos** (`e1_invasores`) | Invasores da Poluição (Galaga) | foguete do Expresso; robôs, meteoros e óvnis; “galáxia protegida %”; Cidade Cósmica no fundo |
+| 2 Aeroporto | **Táxi para o Aeroporto** (`e2_taxi`) | Estrada Brasil (Road Fighter) | táxi amarelo (*taxi driver*); zonas **Neighborhood → Street → Airport** (pista e aviões) |
+| 2 Aeroporto | **Voo do Avião** (`e2_voo`) | Voo da Arara (Flappy) | avião *by plane* até **Orlando** (Airport, Clouds, Ocean, Sunset, Orlando), estrelas e presentes |
+| 3 Laboratório | **Colunas do Laboratório** (`e3_colunas`) | Colunas do Mosaico (Columns) | peças: micróbio, gota, folha, lâmpada, diamante; lupa e livros de enfeite |
+| 3 Laboratório | **Empilha o Bairro** (`e3_bairro`) | Empilha-Prédios (Tower Bloxx) | o *office* dos sonhos cresce no *neighborhood* |
+
+- **Regras de entrada (`arcade/runtime.js`, `PQ.enter`):**
+  - ao terminar cada estação (1ª vez), a criança ganha **1 bilhete grátis** (`S.arcade.tickets[mundo]`) para jogar **1** dos 2 jogos daquele mundo; a tela do bilhete mostra “🕹️ Arcade do Mundo n liberado!” e o botão **“Jogar o bônus agora”**;
+  - sem bilhete: aparece “Você já usou o bilhete grátis… Termine a viagem e TODOS os jogos ficam liberados”;
+  - **viagem concluída** (`S.finalDone`, Passagem de Volta): **tudo liberado para sempre**, sem bilhete;
+  - jogos de mundos ainda não concluídos ficam bloqueados; **sem moedas e sem perguntas**; não valem pontos de estudo.
+- **Onde fica:** página própria `src/modules/ingles/arcade.html` (botão “🕹️ Arcade do Expresso” no mapa). Ela usa `<base href="../geografia/">` para reaproveitar, **só lendo**, a camada gráfica `gfx/gfx.js`, o atlas `fluent3d` e os cenários/efeitos de Geografia; os arquivos de Inglês são carregados como `../ingles/…`. **Nenhum arquivo de Geografia mudou** (confirmado pelo `git diff`).
+- **Arquivos:** `arcade.html`, `arcade/runtime.js` (motor adaptado do Parque: HUD, pausa, fim de jogo, recorde e medalha em `S.arcade.rec`, tela de recompensa, ferramentas de teste), `arcade/jogos.js` (os 6 jogos, copiados com tema trocado), `arcade/arcade.css`. Ganchos em `main.js` (bilhete, botão no mapa, `A.arcade`), `systems/save.js` (`arcade: {tickets, rec}`), `manifest.js`, `painel.js`, `ingles.css`. Código também em `docs/MINIGAMES-CODIGO.md`.
+- **Área dos Pais:** grupo **“Arcade do Expresso (bônus, sem perguntas)”** em `testExtras` com 13 itens: menu completo, menu de cada mundo, tela “Arcade liberado” de cada mundo e os 6 jogos. `testEntry({arcade: 'menu' | '1..3' | 'recompensa' + mundo | id})`. No painel de Inglês há os mesmos atalhos. No Arcade em teste: tudo aberto, “🧪 Entrar grátis (teste)”, +1 🎟️ em cada mundo, tirar 🎟️, simular/desfazer “viagem concluída” e tela de recompensa, sempre no sandbox.
+- **Testes (em `ingles.cjs`):** 6 jogos registrados; fim do Mundo 1 dá 1 bilhete (Mundo 1 liberado, Mundo 2 bloqueado); o bilhete é usado ao entrar; sem bilhete, não abre; depois da viagem, tudo livre sem gastar bilhete; recorde salvo; os 6 jogos e as telas no modo de teste; todos os atalhos abrem no sandbox sem erros. Um script à parte abriu os 6 jogos, jogou com teclas e chegou à tela de fim.
+- **[não confirmado]** a dificuldade com a criança; como a mecânica é a mesma de Geografia, valem os mesmos números de medalha.
