@@ -27,3 +27,17 @@ Nenhuma imagem de busca aleatória, de bancos de imagem ou de jogos comerciais f
 ## Módulo de Ciências (versão 1.0)
 
 O módulo de Ciências usa apenas desenhos e sons feitos por código no próprio projeto (ver `README.md` e `docs/ENTREGA.md`), sem alterações nesta atualização.
+
+## Gabriel Nexus (jogo central)
+
+| Recurso | Onde é usado | Origem | Observação |
+|---|---|---|---|
+| 21 Nexóticos (PNG transparentes) | Coleção, Parque, Loja, equipe, jogos recreativos | Fornecidos pelo responsável do projeto (pacote “Gabriel Nexus”) | Apenas redimensionados para 512 px (`src/modules/*/nexoticos/`); nomes e desenhos originais do projeto, sem cópia de franquias |
+| Cenários 01–06 (arte principal, Praça, Parque, Fliperama, Casa, Entrada) | Hub, áreas e tela de entrada | Fornecidos pelo responsável do projeto | Convertidos para JPEG, sem deformar (`src/nexus/assets/cenarios/`) |
+| Referência do Gabriel | Avatar no hub, HUD e jogos | Fornecida pelo responsável do projeto | Recortada e redimensionada (`src/nexus/assets/gabriel.png`) |
+| Logo do Colégio Kodomo | Tela de entrada | Arquivo original fornecido | Usado **sem alteração** (mesmo arquivo, byte a byte): `src/assets/shared/kodomo/logo_colegio_kodomo.png` |
+| Catálogo aprovado | Fonte de dados dos Nexóticos | Fornecido | `src/nexus/catalogo/catalogo_nexoticos.json` |
+| Músicas “nexus”, “parque”, “fliperama”, “base” | Hub e áreas | Compostas para o projeto e sintetizadas no navegador | `src/nexus/core.js` |
+| Melodias curtas de cada Nexótico | Fichas e comemorações | Criadas para o projeto | campo `sound` dos pacotes |
+
+O mockup da Área dos Pais (07) foi usado só como referência visual; a interface é HTML acessível.

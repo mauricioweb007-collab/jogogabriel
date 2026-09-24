@@ -28,6 +28,10 @@
     document.getElementById('loading').remove();
     // tempo total de uso (só com a aba visível)
     setInterval(() => { if (S() && !document.hidden) { S().time.total += 5; if (Math.random() < 0.2) GEO.save.persist(); } }, 5000);
+    // Integração com o Gabriel Nexus: replay do Fliperama e modo de teste dos pais (saves separados)
+    if (GEO.mode.blocked) return;
+    if (GEO.mode.isReplay()) { await A.replayStart(); return; }
+    if (GEO.mode.isTest()) { A.testStart(); return; }
     if (GEO.save.load()) {
       applySettings();
       S().time.sessions++; S().lastSession = Date.now(); GEO.save.persist();
@@ -165,8 +169,37 @@
     const m = UI.modal({ title: '☰ Menu', cls: 'small' });
     m.setActions([UI.btn('🛒 Loja', '', () => { m.close(); A.shop(); }), UI.btn('📓 Caderno', '', () => { m.close(); A.notebook(); }), UI.btn('⚙️ Ajustes', '', () => { m.close(); A.settings(); }), UI.btn('🏠 Missões', 'ghost', () => { m.close(); A.toLauncher(); })]);
   };
-  /** Volta ao lançador (raiz do projeto: inicio.html). */
-  A.toLauncher = function () { GEO.save.persist(); location.href = '../../../inicio.html'; };
+  /** Volta ao lançador (raiz do projeto: inicio.html). No replay, volta ao Fliperama do Nexus. */
+  A.toLauncher = function () { GEO.save.persist(); if (GEO.mode.isReplay()) { GG.replay.back('../../../'); return; } location.href = '../../../inicio.html'; };
+
+  /* ------------------------------------------------ Gabriel Nexus: replay e modo de teste */
+  /** Replay recreativo (Fliperama): save temporário, fase direta, sem pontos de estudo. */
+  A.replayStart = async function () {
+    let real = null; try { real = JSON.parse(localStorage.getItem('ecoNexus.geografia.v1') || 'null'); } catch (e) { real = null; }
+    GEO.save.newGame((real && real.name) || 'Gabriel');
+    if (real && real.settings) S().settings = Object.assign(S().settings, real.settings, { pace: 'aventura' });
+    S().introDone = true; GEO.save.persist(); applySettings();
+    if (GG.testMode.active()) GG.testMode.banner('../../../');
+    UI.toast('🕹️ Replay do Fliperama: vale recorde e medalha, não pontos de estudo.', 'gold', 3600);
+    GEO.stage.run(GEO.mode.stage, 'aventura');
+  };
+  /** Modo de teste dos pais: sandbox com tudo liberado; fase ou questão direta. */
+  A.testStart = function () {
+    GG.testMode.banner('../../../');
+    if (!GEO.save.load()) { GEO.save.newGame('TESTE'); S().introDone = true; GEO.save.persist(); }
+    applySettings(); A.showAtlas();
+    UI.toast('🧪 Modo de teste: todas as fases liberadas. Nada altera o save real.', 'gold', 3600);
+    if (GEO.mode.stage) GEO.stage.run(GEO.mode.stage, 'aventura');
+    else if (GEO.mode.question) A.testQuestion(GEO.mode.question);
+  };
+  A.testQuestion = function (id) {
+    const q = GEO.campaign.qById(id); if (!q) return;
+    GG.quiz.run(q, { subject: 'Geografia', subjectIcon: '🌎', chips: ['Teste dos pais'], visual: GEO.visuals.render, mode: 'aventura' }).then((res) => {
+      GEO.campaign.recordQ(res, { mode: 'teste' });
+      UI.toast('Questão ' + id + ' registrada no SANDBOX (tentativas: ' + res.attempts + ').', 'ok', 3000);
+      A.showAtlas();
+    });
+  };
 
   /* ------------------------------------------------ loja e mochila */
   A.shop = function () {

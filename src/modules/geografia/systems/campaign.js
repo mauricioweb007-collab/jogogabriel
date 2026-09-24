@@ -25,6 +25,7 @@
   };
   C.unlocked = function (id) {
     const st = D.stageById[id]; if (!st) return false;
+    if (GEO.mode && GEO.mode.unlockAll) return true; // replay do Fliperama / modo de teste dos pais
     if (st.bonus) return S().unlockedBonus.includes(id);
     const list = D.stages; const i = list.indexOf(st);
     if (i === 0) return true;

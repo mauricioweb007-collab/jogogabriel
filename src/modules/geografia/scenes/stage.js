@@ -168,6 +168,7 @@
     if (scene.begin) scene.begin();
   };
   ST.exitToAtlas = function (ctx) {
+    if (GEO.mode && GEO.mode.isReplay()) { GG.engine.stop(); GG.replay.back('../../../'); return; }
     GG.engine.stop(); hideHud(); ST.cur = null; GG.tts.stop();
     if (ctx) S().time.total += 0;
     GEO.save.persist(); GEO.app.showAtlas();
@@ -188,7 +189,29 @@
   };
 
   /* ============================================================ resultado */
+  /** Linha "Gabriel Nexus": pontos de carreira e Moedas Nexus recebidos (só no jogo real). */
+  ST.nexusRow = function () {
+    try {
+      if (!GG.bridge || !GEO.mode || GEO.mode.kind !== 'normal' || !window.GEO_MANIFEST) return null;
+      const r = GG.bridge.sync({ modules: [window.GEO_MANIFEST], collectibles: false });
+      if (!r.points) return null;
+      return U.el('tr', null, [U.el('td', null, '🌀 Gabriel Nexus'), U.el('td', null, '+' + r.points + ' pontos de carreira • +' + r.coins + ' Moedas Nexus')]);
+    } catch (e) { return null; }
+  };
+  /** Resultado de um REPLAY do Fliperama: vai para o Nexus como recorde (sem pontos de estudo). */
+  ST.replayResults = function (ctx, r) {
+    return new Promise((resolve) => {
+      hideHud();
+      const score = Math.round(r.pct * 100);
+      if (GEO.mode.token) GG.replay.push('geografia_' + ctx.def.id, score, GEO.mode.token);
+      const m = UI.modal({ title: '🕹️ ' + ctx.def.title + ' — replay', noClose: true });
+      m.body.appendChild(U.el('div', { class: 'res-medal medal-' + r.medal.id }, [U.el('div', { class: 'res-icon' }, r.medal.icon), U.el('div', null, [U.el('b', { class: 'pix' }, 'Medalha ' + r.medal.t), U.el('div', null, 'Aproveitamento: ' + score + '%')])]));
+      m.body.appendChild(U.el('p', { class: 'tip' }, 'Replay recreativo do Fliperama: vale recorde e Medalha de Fliperama no Gabriel Nexus, não pontos de estudo. Seu save de Geografia não mudou.'));
+      m.setActions([UI.btn('🔁 Jogar de novo', '', () => { m.close(); GG.engine.stop(); ST.cur = null; resolve('again'); GEO.save.newGame(S().name); S().introDone = true; ST.run(ctx.def.id, 'aventura'); }), UI.btn('🕹️ Voltar ao Fliperama', 'pri', () => { m.close(); resolve('back'); GG.replay.back('../../../'); })]);
+    });
+  };
   ST.results = function (ctx, r, stats) {
+    if (GEO.mode && GEO.mode.isReplay()) return ST.replayResults(ctx, r, stats);
     return new Promise((resolve) => {
       hideHud();
       const def = ctx.def;
@@ -203,7 +226,8 @@
         U.el('tr', null, [U.el('td', null, '🗺️ Fragmentos do Atlas'), U.el('td', null, String(stats.fragments || 0))]),
         U.el('tr', null, [U.el('td', null, '⏱ Tempo de ação'), U.el('td', null, U.fmtTime(stats.time))]),
         stats.geobot ? U.el('tr', null, [U.el('td', null, '🤖 Corrida contra o GeoBot'), U.el('td', null, stats.geobot.won ? 'Você venceu! 🥇' : 'GeoBot venceu desta vez')]) : null,
-        U.el('tr', null, [U.el('td', null, '🪙 EcoMoedas / ⭐ XP ganhos'), U.el('td', null, '+' + r.rewards.coins + ' / +' + r.rewards.xp + (r.factor < 1 && !r.firstClear ? ' (repetição)' : ''))])
+        U.el('tr', null, [U.el('td', null, '🪙 EcoMoedas / ⭐ XP ganhos'), U.el('td', null, '+' + r.rewards.coins + ' / +' + r.rewards.xp + (r.factor < 1 && !r.firstClear ? ' (repetição)' : ''))]),
+        ST.nexusRow()
       ]));
       if (ctx.results.length) {
         b.appendChild(U.el('h3', null, 'Questões desta fase'));

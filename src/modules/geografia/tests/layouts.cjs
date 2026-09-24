@@ -22,6 +22,8 @@ async function clearDialogs(p) { for (let i = 0; i < 12; i++) { const b = await 
     p.on('pageerror', (e) => errs.push(e.message)); p.on('console', (m) => { if (m.type() === 'error') errs.push(m.text()); });
     const overflow = async (name) => { const o = await p.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1); if (o) { fails++; console.log('  ✗ rolagem horizontal em ' + name + ' @' + vp.n); } };
     await p.goto('file://' + path.join(ROOT, 'inicio.html')); await p.waitForTimeout(900);
+    await p.screenshot({ path: path.join(OUT, vp.n + '-00-entrada.png') }); await overflow('entrada');
+    if (await p.$('#login:not(.hide)')) { await p.fill('#lgName', 'Gabriel'); await p.click('.lg-go'); await p.waitForTimeout(900); }
     await p.screenshot({ path: path.join(OUT, vp.n + '-00-lancador.png') }); await overflow('lançador');
     await p.goto('file://' + path.join(ROOT, 'src/modules/geografia/jogar.html'));
     await p.evaluate(() => localStorage.clear()); await p.reload(); await p.waitForSelector('text=Começar ▶');

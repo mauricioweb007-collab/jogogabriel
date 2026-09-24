@@ -138,11 +138,12 @@ const adv = async (p, n) => { for (let i = 0; i < (n || 6); i++) { const b = awa
 
   console.log('[9] Lançador, módulo vazio e isolamento');
   await p.goto('file://' + path.join(ROOT, 'inicio.html')); await p.waitForTimeout(900);
+  if (await p.$('#login:not(.hide)')) { await p.fill('#lgName', 'Gabriel'); await p.click('.lg-go'); await p.waitForTimeout(900); } // tela de entrada (só o nome)
   const ln = await p.evaluate(() => ({ ids: GG.registry.list.map((m) => m.id + ':' + m.enabled), txt: document.getElementById('lnCards').innerText }));
   ok(ln.ids.includes('ciencias_v1:true') && ln.ids.includes('geografia_2026_09:true') && ln.ids.includes('exemplo_vazio:false'), 'registro com Ciências, Geografia e módulo vazio de exemplo');
   ok(/Revisar/.test(ln.txt) && /Novas missões chegarão/.test(ln.txt), 'cartões com Continuar/Revisar e espaço “Novas missões chegarão”');
   const keys = await p.evaluate(() => Object.keys(localStorage));
-  ok(keys.every((k) => ['ecoNexus.geografia.v1', 'ecoNexus.launcher.v1'].includes(k)), 'Geografia só grava as próprias chaves: ' + keys.join(', '));
+  ok(keys.every((k) => ['ecoNexus.geografia.v1', 'ecoNexus.launcher.v1', 'ecoNexus.erros.v1'].includes(k) || /^ecoNexus\.franchise\.v1(\.bak)?$/.test(k)), 'Geografia só grava as próprias chaves (+ perfil global do Nexus): ' + keys.join(', '));
   const frozen = await p.evaluate(() => { try { GG.store.write('econexus_guardioes_save_v1', {}); return false; } catch (e) { return true; } });
   ok(frozen, 'o armazenamento novo recusa gravar a chave de Ciências');
 

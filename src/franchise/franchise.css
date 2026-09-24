@@ -1,0 +1,15 @@
+/* src/franchise/franchise.css — peças visuais compartilhadas da franquia
+   (faixa do modo de teste, selos de raridade, moeda Nexus). */
+#ggTestBanner { position: fixed; z-index: 9999; left: 0; right: 0; top: 0; display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: center; padding: 6px 10px; background: repeating-linear-gradient(135deg, #ffcf33 0 18px, #ffb300 18px 36px); color: #2a1a00; font: 800 14px/1.2 'Nunito', system-ui, sans-serif; box-shadow: 0 3px 0 #7a4b00; }
+#ggTestBanner b { letter-spacing: .5px; }
+#ggTestBanner button { border: 0; border-radius: 6px; padding: 5px 10px; background: #2a1a00; color: #ffe27a; font: inherit; cursor: pointer; }
+body.gg-testing { padding-top: 38px; }
+@media (max-width: 560px) { #ggTestBanner .gg-tb-t { display: none; } }
+.rar { display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px; border-radius: 99px; font-weight: 900; font-size: .78em; color: #fff; background: var(--rc, #888); box-shadow: inset 0 0 0 2px rgba(255,255,255,.35); text-shadow: 0 1px 0 rgba(0,0,0,.35); white-space: nowrap; }
+.rar.lendario { background: linear-gradient(90deg, #f5b700, #ffe27a, #f5b700); color: #3a2600; text-shadow: none; }
+.nx-coin { display: inline-block; width: 1.05em; height: 1.05em; border-radius: 50%; vertical-align: -.16em; background: radial-gradient(circle at 35% 30%, #fff6b0, #ffc400 45%, #d98a00 80%); box-shadow: inset 0 0 0 2px #a86400, 0 1px 0 rgba(0,0,0,.35); position: relative; }
+.nx-coin::after { content: 'N'; position: absolute; inset: 0; display: grid; place-items: center; font: 900 .62em/1 system-ui, sans-serif; color: #8a4f00; }
+/* Faixa de teste sobre páginas com HUD fixo no topo (Geografia, Ciências sandbox/replay). */
+body.gg-testing #stageHud, body.gg-testing #atlasHud, body.gg-testing #hud { top: 38px; }
+body.gg-testing.in-stage #stageWrap { top: 110px; }
+body.gg-testing.in-atlas #stageWrap { top: 112px; }

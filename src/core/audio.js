@@ -121,6 +121,11 @@
     }, 60);
   };
   A.stopMusic = function () { if (timer) clearInterval(timer); timer = null; curSong = null; };
+  /** Acrescenta uma música original (usado por jogos novos, ex.: Gabriel Nexus). Não substitui as existentes. */
+  A.addSong = function (name, def) { if (!SONGS[name]) SONGS[name] = def; };
+  A.songs = () => Object.keys(SONGS);
+  /** Toca uma sequência curta de notas (som original de cada Nexótico). */
+  A.jingle = function (notes, wave, dur) { if (!ctx || A.vol.sfx <= 0) return; const t = ctx.currentTime + 0.005; (notes || []).forEach((f, i) => tone(f, t + i * (dur || 0.08), (dur || 0.08) * 1.4, wave || 'square', sfxG, 0.2)); };
   A.current = () => curSong;
   /** Toca uma nota isolada (jogo de ritmo). */
   A.note = function (name, dur, wave) { if (ctx && N[name]) tone(N[name], ctx.currentTime + 0.005, dur || 0.2, wave || 'square', sfxG, 0.2); };

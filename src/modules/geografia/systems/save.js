@@ -9,7 +9,8 @@
 (function () {
   'use strict';
   const SV = (GEO.save = {});
-  SV.KEY = 'ecoNexus.geografia.v1';
+  // Chave real do aluno; replay do Fliperama e modo de teste dos pais usam chaves separadas (systems/mode.js).
+  SV.KEY = (GEO.mode && GEO.mode.key) || 'ecoNexus.geografia.v1';
   SV.S = null;
   SV.settingsDefault = () => ({ textSize: 1, contrast: false, reduceMotion: false, autoRead: false, music: 0.5, sfx: 0.7, voice: 0.9, touch: 'auto', bindings: null, pace: 'aventura' });
 

@@ -1,14 +1,17 @@
-/* src/launcher/launcher.css — Central de Missões (lançador). */
+/* src/launcher/launcher.css — Tela de entrada + Central de Missões (lançador). */
 body.launcher { overflow: auto; background: radial-gradient(circle at 20% 10%, #2a2f6a 0, #0f1226 60%); min-height: 100%; }
+body.in-login { overflow: hidden; }
 .ln-wrap { max-width: 1180px; margin: 0 auto; padding: 22px 16px 40px; }
 .ln-head { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+.ln-head-t { flex: 1; min-width: 0; }
 #lnGaia { width: 72px; height: 72px; image-rendering: pixelated; }
 .ln-hello { margin: 0; color: var(--ink2); font-size: 1.1em; }
 .ln-head h1 { font-size: clamp(14px, 3.2vw, 22px); line-height: 1.5; color: var(--gold); margin: 4px 0 0; }
-.ln-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
+.ln-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
 .ln-card { background: var(--panel); border-radius: 14px; overflow: hidden; box-shadow: 0 0 0 3px #0a0c1c, 0 0 0 6px var(--c, var(--line)), 0 14px 30px rgba(0,0,0,.4); display: flex; flex-direction: column; }
 .ln-card.last { box-shadow: 0 0 0 3px #0a0c1c, 0 0 0 6px var(--gold), 0 14px 30px rgba(0,0,0,.4); }
 .ln-card.ph { opacity: .75; box-shadow: 0 0 0 3px #0a0c1c, 0 0 0 6px #3a4290; }
+.ln-card.soon { opacity: .92; box-shadow: 0 0 0 3px #0a0c1c, 0 0 0 6px var(--c); }
 .ln-art { width: 100%; aspect-ratio: 16 / 9; image-rendering: pixelated; display: block; background: #0a0c1c; }
 .ln-body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
 .ln-subject { font-weight: 900; font-size: 1.05em; color: var(--c, var(--ink)); filter: brightness(1.4); }
@@ -19,3 +22,47 @@ body.launcher { overflow: auto; background: radial-gradient(circle at 20% 10%, #
 .ln-acts .btn.go { flex: 1 1 140px; font-size: 1.1em; min-height: 52px; }
 .ln-foot { margin-top: 22px; color: var(--ink2); display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; font-size: .9em; }
 .ln-foot p { margin: 0; flex: 1 1 300px; }
+.ln-parents { opacity: .75; }
+
+/* ---------------------------------------------------------------- cartão do Nexus */
+.ln-nexus { margin-bottom: 22px; }
+.ln-hero { position: relative; border-radius: 18px; overflow: hidden; min-height: 260px; box-shadow: 0 0 0 3px #0a0c1c, 0 0 0 6px #ffd23f, 0 18px 40px rgba(0,0,0,.45); display: flex; align-items: stretch; }
+.ln-hero-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 30% 30%; }
+.ln-hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(10,12,40,0) 30%, rgba(10,12,40,.82) 62%); }
+.ln-hero-body { position: relative; z-index: 1; margin-left: auto; width: min(460px, 100%); padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; }
+.ln-hero-k { margin: 0; color: #9fe8ff; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; font-size: .8em; }
+.ln-hero-t { margin: 0; font-size: clamp(28px, 4.6vw, 44px); line-height: 1; font-weight: 900; color: #fff; text-shadow: 0 3px 0 #3a1f7a, 0 0 22px rgba(120,200,255,.6); }
+.ln-hero-s { margin: 0 0 6px; font-weight: 900; color: #ffd23f; font-size: 1.15em; }
+.ln-hero-stats { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; font-size: .95em; }
+.ln-hero-stats b { color: #fff; }
+.ln-hero-go { font-size: 1.15em; min-height: 54px; flex: 1 1 200px; }
+.ln-new { background: #3ddc84; color: #062a14; align-self: flex-start; }
+@media (max-width: 700px) {
+  .ln-hero { flex-direction: column; min-height: 0; }
+  .ln-hero-bg { position: relative; height: 180px; }
+  .ln-hero::after { background: linear-gradient(180deg, rgba(10,12,40,0) 20%, rgba(10,12,40,.95) 180px); }
+  .ln-hero-body { margin: 0; width: 100%; background: #12163a; }
+  .ln-hero-stats { grid-template-columns: 1fr; }
+}
+
+/* ---------------------------------------------------------------- tela de entrada */
+.lg { position: fixed; inset: 0; z-index: 20; overflow: hidden; background: #aad7f5; }
+.lg-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 35% 50%; }
+.lg-logo { position: absolute; left: clamp(10px, 2.4vw, 28px); top: clamp(10px, 2.4vw, 28px); width: clamp(84px, 11vw, 136px); aspect-ratio: 1 / 1; padding: 0; border-radius: 16px; overflow: hidden; box-shadow: 0 0 0 4px rgba(255,255,255,.85), 0 10px 26px rgba(0,0,0,.35); background: #1b2656; }
+.lg-logo img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.lg-card { position: absolute; right: clamp(12px, 4.5vw, 70px); top: 50%; transform: translateY(-50%); width: min(400px, calc(100% - 24px)); padding: 24px 22px 20px; border-radius: 22px; background: rgba(255,255,255,.82); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 0 0 4px #7fd7ff, 0 18px 40px rgba(20,40,90,.35); color: #1c2553; display: flex; flex-direction: column; gap: 10px; }
+.lg-kicker { margin: 0; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; color: #2a7bd6; font-size: .85em; }
+.lg-title { margin: 0; font-size: clamp(24px, 3.2vw, 32px); line-height: 1.1; font-weight: 900; }
+.lg-card input { width: 100%; font: 900 clamp(20px, 2.6vw, 26px)/1.2 var(--txt); padding: 14px 16px; border-radius: 14px; border: 3px solid #9fc8ff; background: #fff; color: #1c2553; text-transform: uppercase; }
+.lg-card input:focus { outline: none; border-color: #2a7bd6; box-shadow: 0 0 0 4px rgba(42,123,214,.25); }
+.lg-preview { margin: 0; min-height: 1.4em; font-weight: 900; color: #1f7a3f; }
+.lg-preview.err { color: #c62828; }
+.lg-go { font-size: 1.25em; min-height: 58px; border-radius: 14px; }
+.lg-tip { margin: 0; font-size: .88em; color: #3c4a7a; }
+.lg-card.fit { justify-content: center; border-radius: 26px; background: rgba(250,253,255,.93); box-shadow: 0 0 0 3px rgba(127,215,255,.9), inset 0 0 30px rgba(127,215,255,.35); }
+.lg-parents { position: absolute; right: 12px; bottom: 10px; border: 0; background: rgba(12,18,48,.55); color: #e8ecff; padding: 6px 12px; border-radius: 99px; font: 700 13px/1 var(--txt); opacity: .8; }
+.lg-parents:hover, .lg-parents:focus-visible { opacity: 1; }
+@media (max-width: 760px), (max-aspect-ratio: 1/1) {
+  .lg-bg { object-position: 30% 40%; }
+  .lg-card { top: auto; bottom: 54px; transform: none; left: 50%; right: auto; transform: translateX(-50%); }
+}

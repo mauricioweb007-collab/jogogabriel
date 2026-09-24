@@ -40,13 +40,15 @@ let fails = 0; const ok = (c, m) => { console.log((c ? '  ✓ ' : '  ✗ ') + m)
   const page = await browser.newPage();
   const errs = []; page.on('pageerror', (e) => errs.push(e.message));
   const KEY = 'econexus_guardioes_save_v1';
+  // desde o Gabriel Nexus, o lançador pede o nome antes (tela de entrada sem senha)
+  const enter = async () => { await page.waitForTimeout(300); if (await page.$('#login:not(.hide)')) { await page.fill('#lgName', 'Gabriel'); await page.click('.lg-go'); await page.waitForTimeout(700); } };
   await page.goto('file://' + path.join(ROOT, 'inicio.html'));
   // save real de Ciências criado pelo próprio jogo de Ciências
   await page.goto('file://' + path.join(ROOT, 'index.html'));
   await page.waitForTimeout(1200);
   await page.evaluate(() => { localStorage.clear(); EN.save.newGame('Gabriel'); EN.save.S.coins = 77; EN.save.S.q['L1-Q1'].done = true; EN.save.persist(); });
   // sair de Ciências (o próprio jogo de Ciências pode salvar ao fechar); a foto "antes" é tirada fora dele
-  await page.goto('file://' + path.join(ROOT, 'inicio.html')); await page.waitForTimeout(1000);
+  await page.goto('file://' + path.join(ROOT, 'inicio.html')); await page.waitForTimeout(1000); await enter();
   const before = await page.evaluate((k) => localStorage.getItem(k), KEY);
   const cardTxt = await page.evaluate(() => document.getElementById('lnCards').innerText);
   ok(/Ciências/.test(cardTxt) && /Geografia/.test(cardTxt), 'lançador mostra Ciências e Geografia');
@@ -54,7 +56,7 @@ let fails = 0; const ok = (c, m) => { console.log((c ? '  ✓ ' : '  ✗ ') + m)
   await page.goto('file://' + path.join(ROOT, 'src', 'modules', 'geografia', 'jogar.html')); await page.waitForTimeout(1200);
   await page.click('text=Começar ▶'); await page.waitForTimeout(600);
   await page.evaluate(() => { GEO.save.S.coins = 999; GEO.save.persist(); GEO.save.reset(); });
-  await page.goto('file://' + path.join(ROOT, 'inicio.html')); await page.waitForTimeout(800);
+  await page.goto('file://' + path.join(ROOT, 'inicio.html')); await page.waitForTimeout(800); await enter();
   const after = await page.evaluate((k) => localStorage.getItem(k), KEY);
   ok(before === after, 'chave de Ciências idêntica byte a byte após lançador + Geografia + reinício de Geografia');
   const geoGone = await page.evaluate(() => localStorage.getItem('ecoNexus.geografia.v1'));

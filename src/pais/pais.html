@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0d1233">
+  <meta name="robots" content="noindex">
+  <title>Área dos Pais</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='8' y='26' width='48' height='32' rx='8' fill='%2329e7ff'/%3E%3Cpath d='M20 26v-8a12 12 0 0 1 24 0v8' stroke='%2329e7ff' stroke-width='6' fill='none'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="../assets/shared/fonts/fonts.css">
+  <link rel="stylesheet" href="../ui/ui.css">
+  <link rel="stylesheet" href="../franchise/franchise.css">
+  <link rel="stylesheet" href="pais.css">
+</head>
+<body class="pais">
+  <!-- Entrada: SOMENTE a senha (sem nome de usuário) -->
+  <section id="pLogin" class="p-login hide" aria-label="Entrada da Área dos Pais">
+    <form id="pLoginForm" class="p-login-card" autocomplete="off" novalidate>
+      <div class="p-lock" aria-hidden="true">🔐</div>
+      <h1>Área dos Pais</h1>
+      <p class="tip">Digite a senha dos responsáveis.</p>
+      <label class="sr" for="pPass">Senha</label>
+      <input id="pPass" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Senha" required>
+      <p id="pMsg" class="p-msg" role="alert" aria-live="assertive"></p>
+      <button type="submit" class="btn pri" id="pGo">Entrar</button>
+      <a class="p-backlink" href="../../inicio.html">⬅ Voltar ao jogo</a>
+      <p class="tip small">Proteção familiar: o jogo funciona só neste navegador, sem servidor.</p>
+    </form>
+  </section>
+
+  <!-- Painel -->
+  <div id="pApp" class="p-app hide">
+    <nav class="p-rail" id="pRail" aria-label="Seções"></nav>
+    <div class="p-main">
+      <header class="p-top">
+        <div><b id="pChild">—</b><span class="tip" id="pSub"></span></div>
+        <span class="p-sess" id="pSess" title="A sessão termina sozinha sem uso"></span>
+        <button type="button" class="btn small ghost" id="pToGame">🎮 Ir para o jogo</button>
+        <button type="button" class="btn small" id="pLogout">🚪 Sair</button>
+      </header>
+      <main id="pView" class="p-view" tabindex="-1"></main>
+    </div>
+  </div>
+  <noscript><p style="padding:20px;font:18px sans-serif">Esta página precisa de JavaScript ativado no navegador.</p></noscript>
+
+  <script src="../core/util.js"></script>
+  <script src="../core/storage.js"></script>
+  <script src="../core/input.js"></script>
+  <script src="../core/audio.js"></script>
+  <script src="../ui/ui.js"></script>
+  <script src="../franchise/config.js"></script>
+  <script src="../franchise/sha256.js"></script>
+  <script src="../franchise/store.js"></script>
+  <script src="../franchise/parent-auth.js"></script>
+  <script src="../franchise/profile.js"></script>
+  <script src="../franchise/catalog.js"></script>
+  <script src="../franchise/modules.js"></script>
+  <script src="../franchise/bridge.js"></script>
+  <script src="../franchise/replay.js"></script>
+  <script src="../modules/registry.js"></script>
+  <script src="../modules/modulos.js"></script>
+  <script src="../nexus/data/itens.js"></script>
+  <script src="../nexus/economy.js"></script>
+  <script src="pais.js"></script>
+</body>
+</html>

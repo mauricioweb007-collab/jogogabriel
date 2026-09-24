@@ -13,7 +13,8 @@ Regra: **cada matéria nova é uma missão independente**. As novidades de uma v
    ```js
    'src/modules/<nova>/manifest.js',
    ```
-7. Rode os testes (`e2e.cjs`, `features.cjs` da nova pasta) e `src/tests/ciencias-regressao.cjs`.
+7. **Gabriel Nexus:** preencha o bloco `franchise` do manifesto (contrato completo em `src/franchise/modules.js` e em `jogodogabriel.md`): `moduleId`, `title`, `version`, `entryRoute`, `saveNamespace`, `scoreAdapter(save)` (eventos estáveis, sem repetir), `stats(save)`, `unlockedMinigames(save)`, `minigames` (metadados), `collectiblePacks` (novo pacote de Nexóticos em `src/modules/<nova>/nexoticos.js`, IDs começando com `<moduleId>_`), `questionBank` (Área dos Pais) e `testEntry` (modo de teste). O Nexus descobre tudo sozinho — nenhum `if` por matéria.
+8. Rode os testes (`e2e.cjs`, `features.cjs` da nova pasta), `src/tests/nexus-unit.cjs`, `src/tests/nexus-e2e.cjs` e `src/tests/ciencias-regressao.cjs`.
 
 Nenhum arquivo de outra matéria precisa ser editado. O módulo `src/modules/exemplo-vazio/` mostra um registro mínimo (desativado), que aparece no lançador apenas como “Novas missões chegarão”.
 

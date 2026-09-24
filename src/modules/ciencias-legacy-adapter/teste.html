@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <!-- Todos os caminhos relativos partem da raiz do projeto (jogo de Ciências congelado, sem alterações). -->
+  <base href="../../../">
+  <title>Teste — Ciências (sandbox)</title>
+  <meta name="description" content="Modo de teste dos pais: Missão EcoNexus em sandbox, sem alterar o save real.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="src/franchise/franchise.css">
+  <script>window.__CIENCIAS_KEY = 'ecoNexus.teste.econexus_guardioes_save_v1';</script>
+  <script src="src/modules/ciencias-legacy-adapter/shim.js"></script>
+  <script src="src/franchise/config.js"></script>
+  <script src="src/franchise/sha256.js"></script>
+  <script src="src/franchise/store.js"></script>
+  <script src="src/franchise/parent-auth.js"></script>
+  <script src="src/franchise/replay.js"></script>
+  <script>
+/* MODO DE TESTE DOS PAIS: sem sessão de teste ativa, volta para a Área dos Pais. */
+if (!GG.testMode.active()) { location.replace('src/pais/pais.html#teste-necessario'); }
+</script>
+</head>
+<body>
+  <!-- Mundo 2D (Canvas) -->
+  <canvas id="world" aria-label="Mundo do jogo"></canvas>
+
+  <!-- HUD discreto: missão, moedas, nível, botões -->
+  <div id="hud">
+    <div class="hud-left">
+      <canvas id="hAvatar" width="56" height="56" aria-hidden="true"></canvas>
+      <div class="hud-id">
+        <b id="hName">Gabriel</b>
+        <span id="hTitle">Nv 1</span>
+        <span id="hLeaves" class="hud-leaves" title="Folhas de energia: cada desafio começa com 3">🍃🍃🍃</span>
+        <div class="xpbar" title="Experiência (XP)"><i id="hXp"></i><span id="hXpT"></span></div>
+      </div>
+      <div class="coins" title="EcoMoedas">🪙 <b id="hCoins">0</b></div>
+    </div>
+    <button id="hMission" class="mission" type="button" title="Abrir o Mural de Missões"><span class="lbl">🎯 Missão</span><span id="hMissionT"></span></button>
+    <div id="hFrag" class="frag-tracker"></div>
+    <div class="hud-btns">
+      <button id="hMenu" type="button" title="Menu (Esc)" aria-label="Menu">☰</button>
+      <button id="hInv" type="button" title="Inventário (I)" aria-label="Inventário">🎒</button>
+      <button id="hNote" type="button" title="Caderno do Guardião (C)" aria-label="Caderno do Guardião">📓</button>
+      <button id="hPath" type="button" title="Mostrar caminho (M)" aria-label="Mostrar caminho">🧭</button>
+      <button id="hSound" type="button" title="Ligar sons" aria-label="Som">🔇</button>
+      <button id="hFull" type="button" title="Tela cheia" aria-label="Tela cheia">⛶</button>
+      <button id="hMin" type="button" title="Recolher/expandir HUD" aria-label="Recolher HUD">▾</button>
+    </div>
+  </div>
+  <div id="saveBadge">💾 Salvo</div>
+
+  <!-- Controles de toque -->
+  <div id="touch">
+    <div id="joy" aria-label="Direcional"><div id="joyKnob"></div></div>
+    <button id="btnAct" type="button" aria-label="Interagir">✋</button>
+  </div>
+
+  <!-- Camadas de interface -->
+  <div id="layer"></div>
+  <div id="toasts" aria-live="polite"></div>
+
+  <!-- Tela inicial -->
+  <div id="title" class="hide">
+    <div class="title-bg"><span>🌳</span><span>💧</span><span>☀️</span><span>🦜</span><span>🌵</span><span>🐟</span><span>🍄</span><span>🌾</span></div>
+    <div class="title-card">
+      <div class="logo">💎</div>
+      <h1>Missão EcoNexus</h1>
+      <h2>Guardiões dos Biomas</h2>
+      <p class="tag">Uma aventura de Ciências para o 4º ano</p>
+      <div id="titleBtns"></div>
+      <p class="tiny">Funciona sem internet. O progresso fica salvo só neste aparelho.</p>
+    </div>
+  </div>
+  <script src="js/core/util.js"></script>
+  <script src="js/core/audio.js"></script>
+  <script src="js/core/sprites.js"></script>
+  <script src="js/core/engine.js"></script>
+  <script src="js/data/glossary.js"></script>
+  <script src="js/data/items.js"></script>
+  <script src="js/data/questions.js"></script>
+  <script src="js/data/characters.js"></script>
+  <script src="js/data/lessons.js"></script>
+  <script src="js/data/mapkit.js"></script>
+  <script src="js/data/maps.js"></script>
+  <script src="js/systems/save.js"></script>
+  <script src="js/systems/economy.js"></script>
+  <script src="js/systems/quests.js"></script>
+  <script src="js/systems/learning.js"></script>
+  <script src="js/systems/minigames.js"></script>
+  <script src="js/ui/ui.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+/* Prepara o SANDBOX de Ciências (nunca o save real): preset novo | completo, mapa inicial. */
+(function () {
+  if (!GG.testMode.active()) return;
+  var P = new URLSearchParams(location.search), preset = P.get('preset') || 'novo', mapa = P.get('mapa');
+  var KEY = 'econexus_guardioes_save_v1'; /* o redirecionador troca por ecoNexus.teste.… */
+  var raw = localStorage.getItem(KEY), S = raw ? JSON.parse(raw) : null;
+  if (P.get('reset') === '1' || (preset === 'completo' && (!S || !S.__preset))) S = null;
+  if (!S && preset === 'completo') {
+    S = EN.save.fresh('TESTE'); S.introDone = true; S.__preset = 'completo';
+    Object.keys(S.q).forEach(function (id) { var q = S.q[id]; q.seen = true; q.done = true; q.tier = 1; q.first = true; q.stars = 3; q.attempts = 1; });
+    Object.keys(EN.data.lessons).forEach(function (lid) { S.lessons[lid] = { done: true }; });
+    EN.data.regions.forEach(function (r) { S.regionStats[r.id] = { complete: true, challenge: 1 }; if (S.crystals.indexOf(r.id) < 0) S.crystals.push(r.id); if (S.medals.indexOf(r.medal) < 0) S.medals.push(r.medal); });
+    S.storyDone = true; S.arena.done = true; S.arena.round = 4; S.coins = 500;
+  }
+  if (S && mapa && EN.data.maps[mapa]) { S.map = mapa; S.pos = null; }
+  if (S) localStorage.setItem(KEY, JSON.stringify(S));
+  window.addEventListener('DOMContentLoaded', function () { GG.testMode.banner(''); });
+})();
+</script>
+</body>
+</html>

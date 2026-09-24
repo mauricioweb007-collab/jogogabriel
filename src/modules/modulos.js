@@ -7,5 +7,6 @@ window.GG = window.GG || {};
 GG.MODULE_MANIFESTS = [
   'src/modules/ciencias-legacy-adapter/manifest.js',
   'src/modules/geografia/manifest.js',
+  'src/modules/matematica/manifest.js',
   'src/modules/exemplo-vazio/manifest.js'
 ];
