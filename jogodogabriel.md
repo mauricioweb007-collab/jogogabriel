@@ -53,7 +53,8 @@ Marcações: **[não confirmado]** indica algo não verificado; **[pendente]** i
     - Faça antes `read` e `list` com `scope: "files"`.
     - Depois publique com `url` do artifact, `file_path` = `inicio.html` e `files` só com os arquivos alterados. O limite é de 255 arquivos por envio; se passar disso, mande em lotes.
     - Registre a nova versão aqui.
-  - **Versão publicada:** **12** (24/09/2026): minijogos mais desafiadores e tudo livre depois do estudo concluído (seção 8.5).
+  - **Versão publicada:** **13** (24/09/2026): ajustes na Colunas, na Quermesse e na Estrada (seção 8.6).
+    - v12: minijogos mais desafiadores e tudo livre depois do estudo concluído (seção 8.5).
     - v11: Área dos Pais com Parque, Arcade e telas de recompensa no modo de teste (seção 8.4).
     - v10: Arcade dos Mundos e regras de entrada dos minijogos (seção 8.3).
     - v9: Geografia arcade (seção 8.2).
@@ -769,4 +770,13 @@ A sessão dos pais é simulada no `sessionStorage`; a senha não é usada nem gu
 | Estrada Brasil | Checkpoint toda hora, impossível perder | **Refeita no estilo Road Fighter (NES)**, vista de cima. **Combustível** no lugar do tempo: gasta sempre, e mais na marcha rápida (↑/Espaço). Bater num carro ou **na beira da pista** faz o carro rodar e explodir: −10 de combustível e recomeça parado. **Carros amarelos** mudam de faixa na sua frente ("!"), caminhões são largos e **óleo** faz rodar. **Galões** dão +18. Cada zona (litoral, cerrado, cidade) dá só +12 de combustível e +250 pontos; depois das 3 zonas vem outra volta, mais estreita e com mais trânsito. Um robô de teste simples fez cerca de 21 km e 1800 a 2100 pontos, batendo 15 a 18 vezes; sem controle, o jogo acaba em cerca de 50 s. Medalhas 900/1900/3200. |
 
 **Arquivos:** `scenes/parque.js` (liberação total, Memória, Cesta, ferramenta de teste), `scenes/arcade1.js` (Jangada, Colunas), `scenes/arcade2.js` (Quermesse), `scenes/arcade3.js` (Estrada) e `tests/parque.cjs` (estudo concluído = entrada direta).
+
+### 8.6 Segundo ajuste: Colunas, Quermesse e Estrada (24/09/2026, pedido do usuário)
+| Jogo | Problema relatado | O que mudou |
+|---|---|---|
+| Colunas do Mosaico | A velocidade não aumentava; parecia acabar na primeira perda | O **nível sobe a cada 6 combinações** (cada grupo limpo conta, inclusive as correntes), e a queda fica 14% mais rápida por nível (mínimo 0,12 s). O painel mostra "NÍVEL n • próximo em x combinações". **3 vidas de verdade:** ao encher o tabuleiro, o jogo **para 2 s** com o aviso "TABULEIRO CHEIO! Vida perdida — restam n", limpa só a **metade de cima** e continua. Antes, o tabuleiro inteiro sumia na hora e parecia fim de jogo. A queda rápida (E) numa coluna cheia também conta como tabuleiro cheio. |
+| Quermesse Tiro ao Alvo | Pedido: tiros limitados e passar de rodada ao bater a meta | **Rolhas = o dobro da meta** (meta 7 = 14 rolhas; meta 10 = 20), sem recarga. **Bateu a meta, passa na hora** para a próxima rodada, com bônus pelas rolhas e segundos que sobraram. **Acabaram as rolhas** (ou o tempo) sem bater a meta, o jogo termina. |
+| Estrada Brasil | "O carro puxa sozinho para o lado" | Causa: o carro seguia o **mouse parado** sobre a tela. Agora o mouse ou o dedo só guiam **enquanto estão apertados**. **Raspar na beira** não explode mais: devolve o carro para a pista, freia e gasta 1,5 de combustível. Só **bater em carro** explode (−10). Óleo gira mais fraco, e o trânsito ficou um pouco menor. |
+
+**Testes:** um script confirmou as 3 vidas da Colunas (3 → 2 → 1 → 0), a Quermesse (14 rolhas, fim sem rolhas e rodada 2 em cerca de 5 s ao bater a meta) e que o mouse parado não move o carro. No robô de teste simples da Estrada: 20 a 28 km, 8 a 14 batidas e 2000 a 2770 pontos (antes: 15 a 18 batidas). Continua dando para perder quando o combustível acaba.
 

@@ -125,19 +125,23 @@
   const GEM = [{ c: '#e5484d', i: 'pena' }, { c: '#3ec1ff', i: 'pomba' }, { c: '#35e07a', i: 'girassol' }, { c: '#ffd23f', i: 'atabaque' }, { c: '#b07bff', i: 'maracas' }];
   PQ.register({ id: 'w1_colunas', world: 1, boss: 'c1s5', ref: 'Columns (Mega Drive) / Puyo Puyo', title: 'Colunas do Mosaico', icon: 'diamante', c1: '#8a3fd0', c2: '#2e1250', music: 'labirinto', medals: [800, 2000, 4000], unit: 'pts',
     desc: 'Peças do mosaico caem em colunas de 3. Junte 3 ou mais iguais em linha, coluna ou diagonal!',
-    how: '**← →** movem a coluna, **↑ / Espaço** trocam a ordem das cores, **↓** desce rápido. Junte **3 iguais** (em pé, deitado ou na diagonal). A **estrela** limpa todas as peças da cor onde cair! A cada **400 pontos** sobe o **nível** e as peças caem mais rápido (como no Tetris). **3 vidas**.' }, function (api) {
+    how: '**← →** movem a coluna, **↑ / Espaço** trocam a ordem das cores, **↓** desce rápido. Junte **3 iguais** (em pé, deitado ou na diagonal). A **estrela** limpa todas as peças da cor onde cair! A cada **6 combinações** sobe o **nível** e as peças caem mais rápido (como no Tetris). Tabuleiro cheio tira **1 das 3 vidas**.' }, function (api) {
     const sc = { cam: { x: 0, y: 0 }, t: 0 };
     const COLS = 6, ROWS = 12, CS = 15, BX = 155, BY = 24;
-    let grid = [], piece = null, next = null, fallT = 0, playing = false, lvl = 1, cleared = 0, clearing = null, chain = 0, time = 0, moveT = 0;
+    let grid = [], piece = null, next = null, fallT = 0, playing = false, lvl = 1, cleared = 0, clearing = null, chain = 0, time = 0, moveT = 0, combos = 0, lostT = 0;
     api.lives = 3; api.refresh();
     const fresh = () => { grid = []; for (let y = 0; y < ROWS; y++) grid.push(new Array(COLS).fill(-1)); };
     const newPiece = () => ({ x: 2, y: -3, g: Math.random() < 0.05 ? [9, 9, 9] : [0, 0, 0].map(() => Math.floor(Math.random() * GEM.length)) });
     fresh(); next = newPiece();
     function spawn() { piece = next; next = newPiece(); piece.x = 2; piece.y = -3; if (grid[0][2] !== -1) lose(); }
+    // Tabuleiro cheio = perde 1 das 3 vidas: o jogo PARA 2 s com o aviso, limpa só a metade de cima e continua.
     function lose() {
+      if (lostT > 0) return;
       api.lives--; api.refresh(); GG.audio.sfx('hit'); E.shake(5, 0.4); if (X()) X().flash('#ff4d4d', 0.35);
-      if (api.lives <= 0) { playing = false; piece = null; setTimeout(() => api.end(api.score, 'Peças limpas: ' + cleared + '. Dica: planeje as diagonais!'), 700); return; }
-      fresh(); api.goal('Tabuleiro cheio! Vida perdida — o mosaico recomeçou.');
+      if (api.lives <= 0) { playing = false; piece = null; setTimeout(() => api.end(api.score, 'Peças limpas: ' + cleared + ' • nível ' + lvl + '. Dica: planeje as diagonais!'), 700); return; }
+      piece = null; lostT = 2;
+      for (let y = 0; y < ROWS / 2; y++) grid[y].fill(-1);
+      api.goal('Tabuleiro cheio! Vida perdida — restam ' + api.lives + '. A parte de cima foi limpa.');
     }
     sc.begin = () => { playing = true; spawn(); api.goal('Junte 3 ou mais peças iguais!'); };
     const cellFree = (x, y) => x >= 0 && x < COLS && y < ROWS && (y < 0 || grid[y][x] === -1);
@@ -165,12 +169,12 @@
     }
     function resolve() { const m = findMatches(); if (m.size) { chain++; startClear(m); } else spawn(); }
     function startClear(mark) {
-      clearing = { mark, t: 0.35 };
+      clearing = { mark, t: 0.35 }; combos++;
       const pts = mark.size * 10 * chain * lvl; api.add(pts); cleared += mark.size;
       GG.audio.sfx(chain > 1 ? 'frag' : 'ok');
       mark.forEach((k) => { const x = k % COLS, y = Math.floor(k / COLS); if (X()) X().sparkle(BX + x * CS + CS / 2, BY + y * CS + CS / 2, GEM[grid[y][x]] ? GEM[grid[y][x]].c : '#fff', 2); });
       if (X()) X().pop(BX + COLS * CS / 2, BY + 60, (chain > 1 ? 'CORRENTE x' + chain + '  ' : '') + '+' + pts, '#ffe27a', 9);
-      const nl = 1 + Math.floor(api.score / 400); // estilo Tetris: a cada 400 pontos, sobe o nível e a peça cai mais rápido
+      const nl = 1 + Math.floor(combos / 6); // pedido do usuário: a cada 6 combinações, sobe o nível e a peça cai mais rápido
       if (nl > lvl) { lvl = nl; GG.audio.sfx('power'); if (X()) X().pop(BX + COLS * CS / 2, BY + 90, 'NÍVEL ' + lvl + '! MAIS RÁPIDO', '#9ff2ff', 9); }
     }
     function collapse() {
@@ -184,14 +188,15 @@
       if (I.pressed('pause')) PQ.pause();
       if (!playing) return;
       time += dt; api.extra('estrela', 'Nível ' + lvl);
+      if (lostT > 0) { lostT -= dt; if (lostT <= 0) { collapse(); spawn(); } return; }
       if (clearing) { clearing.t -= dt; if (clearing.t <= 0) { clearing.mark.forEach((k) => { grid[Math.floor(k / COLS)][k % COLS] = -1; }); clearing = null; collapse(); resolve(); } return; }
       if (!piece) return;
       if (I.pressed('left')) { move(-1); moveT = 0.22; } else if (I.pressed('right')) { move(1); moveT = 0.22; }
       else if (I.down('left') || I.down('right')) { moveT -= dt; if (moveT <= 0) { move(I.down('left') ? -1 : 1); moveT = 0.07; } }
       if (I.pressed('up') || I.pressed('jump')) rotate();
-      if (I.pressed('act')) { while (canPlace(piece.x, piece.y + 1)) piece.y++; lock(); return; }
+      if (I.pressed('act')) { while (canPlace(piece.x, piece.y + 1)) piece.y++; if (piece.y < 0) lose(); else lock(); return; }
       fallT += dt * (I.down('down') ? 12 : 1);
-      const iv = Math.max(0.14, 0.85 * Math.pow(0.88, lvl - 1));
+      const iv = Math.max(0.12, 0.85 * Math.pow(0.86, lvl - 1));
       if (fallT >= iv) { fallT = 0; if (canPlace(piece.x, piece.y + 1)) piece.y++; else if (piece.y < 0) lose(); else lock(); }
       if (time >= 180) { playing = false; piece = null; setTimeout(() => api.end(api.score, 'Tempo esgotado! Peças limpas: ' + cleared + '.'), 500); }
     };
@@ -217,6 +222,8 @@
       }
       g.panel(BX + COLS * CS + 16, BY, 44, 64, 'rgba(10,8,30,.85)', '#3a4290'); g.text('PRÓXIMA', BX + COLS * CS + 38, BY + 4, { size: 4, color: '#ffd23f', align: 'center' });
       if (next) next.g.forEach((v, i) => tile(c, x, v, BX + COLS * CS + 31, BY + 14 + i * CS, CS));
+      g.text('NÍVEL ' + lvl + ' • próximo em ' + (6 - combos % 6) + ' combinações', BX + COLS * CS / 2, BY - 12, { size: 4.5, color: '#9ff2ff', align: 'center' });
+      if (lostT > 0) { g.panel(BX - 30, BY + 60, COLS * CS + 60, 44, 'rgba(40,8,20,.92)', '#ff5d6c'); g.text('TABULEIRO CHEIO!', BX + COLS * CS / 2, BY + 66, { size: 8, color: '#ff8f8f', align: 'center' }); g.text('Vida perdida — restam ' + api.lives, BX + COLS * CS / 2, BY + 82, { size: 6, color: '#fff', align: 'center' }); g.text('continua em ' + Math.ceil(lostT) + '…', BX + COLS * CS / 2, BY + 93, { size: 5, color: '#ffd23f', align: 'center' }); }
       g.text('←→ mover  ↑ trocar  ↓ descer', BX + COLS * CS / 2, BY + ROWS * CS + 8, { size: 4, color: '#b9bde6', align: 'center' });
       if (x) { x.ilus(c, 'pena', 60, 80 + Math.sin(sc.t) * 4, 34); x.ilus(c, 'atabaque', 70, 140 + Math.sin(sc.t + 1) * 4, 30); x.ilus(c, 'pomba', 330, 150 + Math.sin(sc.t + 2) * 4, 30); }
     };

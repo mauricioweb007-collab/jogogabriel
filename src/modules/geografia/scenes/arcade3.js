@@ -20,7 +20,7 @@
   /* ================================================================ ESTRADA BRASIL
      Estilo Road Fighter (NES), pedido do usuário (24/09/2026): visão de cima, a estrada
      serpenteia e estreita; o recurso é o COMBUSTÍVEL (não há tempo extra por checkpoint).
-     Bater num carro ou na beira da pista = rodar e explodir (perde combustível e recomeça
+     Bater num carro = rodar e explodir; raspar na beira freia e gasta um pouco (perde combustível e recomeça
      parado). Carros amarelos mudam de faixa na sua frente; manchas de óleo fazem rodar;
      galões na pista devolvem combustível. Dificuldade média: sobe a cada zona e volta. */
   const ZONES = [
@@ -30,7 +30,7 @@
   ];
   PQ.register({ id: 'w3_estrada', world: 3, boss: 'c3s6', ref: 'Road Fighter (NES)', title: 'Estrada Brasil', icon: 'carro_corrida', c1: '#ff4d6d', c2: '#4a0a1a', music: 'corrida', medals: [900, 1900, 3200], unit: 'pts',
     desc: 'Corrida de estrada vista de cima, do litoral à cidade! Desvie do trânsito e cuide do combustível — cada batida custa caro.',
-    how: '**← →** desviam. O carro acelera sozinho; segure **↑ / Espaço** para a **marcha rápida** (mais pontos, mais risco) e **↓** para frear. **Não encoste** nos carros nem na **beira da pista**! Carros **amarelos** mudam de faixa; **óleo** faz rodar. Pegue os **galões** ⛽: quando o combustível acaba, o jogo termina.' }, function (api) {
+    how: '**← →** desviam. O carro acelera sozinho; segure **↑ / Espaço** para a **marcha rápida** (mais pontos, mais risco) e **↓** para frear. **Não bata** nos carros! Raspar na **beira da pista** freia o carro. Carros **amarelos** mudam de faixa; **óleo** faz rodar. Pegue os **galões** ⛽: quando o combustível acaba, o jogo termina.' }, function (api) {
     const sc = { cam: { x: 0, y: 0 }, t: 0 };
     const PY = 176, ZL = 7200, CRUISE = 215, FAST = 300;
     const car = { x: 200, v: 0, crash: 0, spin: 0, inv: 0, spinDir: 1 };
@@ -41,12 +41,13 @@
     const zmod = (d) => ((Math.floor(d / ZL) % 3) + 3) % 3;
     const half = (d) => { const zi = zmod(d), zz = ZONES[zi]; let h = zz.hw + 12 * Math.sin(d / 1300); if (Math.sin(d / 2100 + zi) > 0.82) h -= 20 + Math.min(8, lap * 4); return Math.max(36, h - lap * 4); };
     const zoneAt = zmod;
-    PQ.pointer(sc, { pointerdown: (lx) => { mouseX = lx; }, pointermove: (lx, ly, ev) => { if (mouseX != null || ev.pointerType === 'mouse') mouseX = lx; }, pointerup: (lx, ly, ev) => { if (ev.pointerType !== 'mouse') mouseX = null; } });
+    // só segue o mouse/dedo ENQUANTO está apertado (antes o mouse parado puxava o carro para o lado)
+    PQ.pointer(sc, { pointerdown: (lx) => { mouseX = lx; }, pointermove: (lx) => { if (mouseX != null) mouseX = lx; }, pointerup: () => { mouseX = null; }, pointercancel: () => { mouseX = null; } });
     sc.begin = () => { playing = true; zoneAnn = 2.5; api.goal('Zona: Litoral — desvie e cuide do combustível!'); };
     const sy = (d) => PY - (d - dist);
     function spawnCar() {
       const d = dist + 300, lv = level(), r = Math.random();
-      const kind = r < 0.16 + lv * 0.05 ? 'zig' : r < 0.3 + lv * 0.04 ? 'truck' : r < 0.36 + lv * 0.03 ? 'oil' : 'car';
+      const kind = r < 0.12 + lv * 0.04 ? 'zig' : r < 0.24 + lv * 0.03 ? 'truck' : r < 0.29 + lv * 0.02 ? 'oil' : 'car';
       const lane = U.pick([-0.55, 0, 0.55]);
       if (kind === 'oil') { traffic.push({ k: 'oil', d, off: lane, v: 0, w: 18, h: 12 }); return; }
       traffic.push({ k: kind, d, off: lane, toOff: lane, v: kind === 'truck' ? 80 + lv * 6 : 110 + Math.random() * 50 + lv * 8, w: kind === 'truck' ? 18 : 14, h: kind === 'truck' ? 38 : 24,
@@ -76,12 +77,18 @@
         const top = I.down('down') ? 0 : fast ? FAST : CRUISE;
         car.v += (top - car.v) * Math.min(1, dt * (car.v < top ? 0.9 : 3));
         let steer = I.axisX();
-        if (!steer && mouseX != null) steer = U.clamp((mouseX - car.x) / 18, -1, 1);
-        if (car.spin > 0) steer = car.spinDir * 0.9;
-        car.x += steer * dt * (95 + car.v * 0.35);
+        if (!steer && mouseX != null) steer = Math.abs(mouseX - car.x) < 3 ? 0 : U.clamp((mouseX - car.x) / 18, -1, 1);
+        if (car.spin > 0) steer = car.spinDir * 0.6;
+        car.x += steer * dt * (90 + car.v * 0.3);
         dist += car.v * dt;
-        const c0 = center(dist), h0 = half(dist);
-        if (Math.abs(car.x - c0) > h0 - 7) crash('Saiu da pista!');
+        const c0 = center(dist), h0 = half(dist), lim = h0 - 7;
+        if (Math.abs(car.x - c0) > lim) {
+          // raspou na beira: volta para a pista, perde velocidade e um pouco de combustível (sem explodir)
+          car.x = c0 + Math.sign(car.x - c0) * (lim - 2); car.v *= 0.55; fuel -= 1.5; car.scrape = 0.3;
+          if (!car.warned) { car.warned = 1.2; GG.audio.sfx('bad'); if (X()) X().pop(car.x, PY - 26, 'Cuidado com a beira!', '#ffd23f', 7); }
+          if (X() && Math.random() < 0.5) X().sparkle(car.x + Math.sign(car.x - c0) * 7, PY, '#ffd23f', 2);
+        }
+        if (car.warned > 0) car.warned = Math.max(0, car.warned - dt);
       }
       if (Math.floor(dist / 25) !== Math.floor((dist - car.v * dt) / 25)) api.add(1);
       // zonas (sem tempo extra: só um pouco de combustível e bônus)
@@ -94,7 +101,7 @@
       }
       // trânsito
       spawnT -= dt;
-      if (spawnT <= 0 && car.v > 40) { spawnCar(); spawnT = Math.max(0.42, (1.25 - level() * 0.12) / Z().traffic) * (0.7 + Math.random() * 0.6) * (CRUISE / Math.max(120, car.v)); }
+      if (spawnT <= 0 && car.v > 40) { spawnCar(); spawnT = Math.max(0.55, (1.5 - level() * 0.1) / Z().traffic) * (0.7 + Math.random() * 0.6) * (CRUISE / Math.max(120, car.v)); }
       itemT -= dt; if (itemT <= 0 && car.v > 40) { itemT = 6.5 + Math.random() * 3 + level() * 0.6; items.push({ d: dist + 300, off: U.pick([-0.5, 0, 0.5]) }); }
       const cbox = { x: car.x - 7, y: PY - 12, w: 14, h: 24 };
       traffic.forEach((o) => {
@@ -105,7 +112,7 @@
         o.x = cx0 + o.off * hh; o.y = sy(o.d);
         if (car.crash > 0 || car.inv > 0 || o.hitDone) return;
         if (E.overlap(cbox, { x: o.x - o.w / 2 + 1, y: o.y - o.h / 2 + 1, w: o.w - 2, h: o.h - 2 })) {
-          if (o.k === 'oil') { o.hitDone = true; car.spin = 0.9; car.spinDir = Math.random() < 0.5 ? -1 : 1; GG.audio.sfx('bad'); if (X()) X().pop(car.x, PY - 26, 'ÓLEO!', '#ffd23f', 8); }
+          if (o.k === 'oil') { o.hitDone = true; car.spin = 0.6; car.spinDir = Math.random() < 0.5 ? -1 : 1; GG.audio.sfx('bad'); if (X()) X().pop(car.x, PY - 26, 'ÓLEO!', '#ffd23f', 8); }
           else { o.hitDone = true; crash('Batida!'); }
         }
         if (!o.passed && o.k !== 'oil' && o.y > PY + 20) { o.passed = true; passed++; api.add(o.k === 'zig' ? 25 : 15); }

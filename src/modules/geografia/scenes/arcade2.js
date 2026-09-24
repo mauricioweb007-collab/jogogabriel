@@ -95,20 +95,20 @@
   /* ================================================================ QUERMESSE TIRO AO ALVO */
   PQ.register({ id: 'w2_quermesse', world: 2, boss: 'c2s5', ref: 'Duck Hunt / Yoshi\'s Safari', title: 'Quermesse Tiro ao Alvo', icon: 'alvo', c1: '#e5484d', c2: '#5a1020', music: 'festa', medals: [300, 700, 1200], unit: 'pts',
     desc: 'Barraca da festa junina: acerte os alvos das esteiras com a espingarda de rolha. Bata a meta de cada rodada!',
-    how: 'Mire com o **mouse/dedo** (toque atira) ou com as **setas** e **Espaço** para atirar. São **8 rolhas** por carga (recarrega com **E**). **Não acerte** a placa da **Gaia**, os **presentes** nem as **pombas**: cada erro tira **2 segundos**! Cada rodada tem **menos tempo para sobrar**, mais alvos e mais rápidos.' }, function (api) {
+    how: 'Mire com o **mouse/dedo** (toque atira) ou com as **setas** e **Espaço** para atirar. Você tem **rolhas contadas: o dobro da meta** (meta 7 = 14 rolhas). Acabaram as rolhas sem bater a meta, o jogo termina! Bateu a meta, passa **na hora** para a próxima rodada. **Não acerte** a placa da **Gaia**, os **presentes** nem as **pombas**: cada erro tira **2 segundos**! Cada rodada tem **menos tempo para sobrar**, mais alvos e mais rápidos.' }, function (api) {
     const sc = { cam: { x: 0, y: 0 }, t: 0 };
     const ROWS = [72, 112, 152];
     const aim = { x: 200, y: 112 };
-    let targets = [], round = 0, roundT = 0, hits = 0, ammo = 8, reload = 0, playing = false, spawnT = 0, flash = 0, laugh = 0, between = 0;
+    let targets = [], round = 0, roundT = 0, hits = 0, ammo = 14, playing = false, spawnT = 0, flash = 0, laugh = 0, between = 0;
     // pedido do usuário: rodada de 25 s; meta e alvos na esteira +1 por rodada; alvos errados cada vez mais comuns (−2 s)
     const RT = 25, meta = () => 7 + round, BAD = ['bussola', 'presente', 'pomba'];
     const badChance = () => Math.min(0.45, 0.16 + round * 0.06);
     PQ.pointer(sc, { pointermove: (lx, ly) => { aim.x = lx; aim.y = ly; }, pointerdown: (lx, ly) => { aim.x = lx; aim.y = ly; shoot(); } });
-    function startRound() { roundT = RT; hits = 0; targets = []; between = 0; api.goal('Rodada ' + (round + 1) + ': acerte ' + meta() + ' alvos em ' + RT + ' s! Errado = −2 s'); if (X()) X().banner({ id: 'qm', icon: 'alvo', title: 'Rodada ' + (round + 1), style: 'Meta: ' + meta() + ' alvos' }, 'QUERMESSE'); }
+    function startRound() { roundT = RT; hits = 0; targets = []; between = 0; ammo = meta() * 2; api.goal('Rodada ' + (round + 1) + ': acerte ' + meta() + ' alvos com ' + ammo + ' rolhas em ' + RT + ' s! Errado = −2 s'); if (X()) X().banner({ id: 'qm', icon: 'alvo', title: 'Rodada ' + (round + 1), style: 'Meta: ' + meta() + ' alvos' }, 'QUERMESSE'); }
     sc.begin = () => { playing = true; startRound(); };
     function shoot() {
-      if (!playing || between > 0 || reload > 0) return;
-      if (ammo <= 0) { reload = 0.9; GG.audio.sfx('click'); return; }
+      if (!playing || between > 0) return;
+      if (ammo <= 0) { GG.audio.sfx('click'); return; }
       ammo--; flash = 0.08; GG.audio.sfx('shoot');
       const t = targets.slice().reverse().find((tg) => !tg.hit && Math.abs(tg.x - aim.x) < tg.r && Math.abs(tg.y - aim.y) < tg.r);
       if (!t) { if (X()) X().puff(aim.x, aim.y, 1); return; }
@@ -123,10 +123,9 @@
       if (flash > 0) flash -= dt; if (laugh > 0) laugh -= dt;
       if (!playing) return;
       const ax = I.axisX(), ay = I.axisY(); if (ax || ay) { aim.x = U.clamp(aim.x + ax * 200 * dt, 10, E.W - 10); aim.y = U.clamp(aim.y + ay * 200 * dt, 30, 200); }
-      if (I.pressed('jump')) shoot(); if (I.pressed('act') && ammo < 8) reload = 0.9;
-      if (reload > 0) { reload -= dt; if (reload <= 0) { ammo = 8; GG.audio.sfx('check'); } }
+      if (I.pressed('jump') || I.pressed('act')) shoot();
       if (between > 0) { between -= dt; if (between <= 0) { if (laugh > 0 || api._over) return; startRound(); } return; }
-      roundT -= dt; api.extra('alvo', hits + '/' + meta() + ' • ' + Math.max(0, Math.ceil(roundT)) + 's');
+      roundT -= dt; api.extra('alvo', hits + '/' + meta() + ' • ' + ammo + ' rolhas • ' + Math.max(0, Math.ceil(roundT)) + 's');
       spawnT -= dt;
       const live = targets.filter((t) => !t.hit && !BAD.includes(t.k)).length;
       if (spawnT <= 0 && live < 4 + round) {
@@ -137,10 +136,12 @@
       }
       targets.forEach((t) => { if (t.hit) { t.fall += dt; t.y += 160 * dt; } else { t.x += t.vx * dt; if (t.k === 'balao') t.y = ROWS[t.row] - 6 + Math.sin(sc.t * 3 + t.bob) * 4; } });
       targets = targets.filter((t) => t.x > -30 && t.x < E.W + 30 && (!t.hit || t.fall < 0.6));
-      if (roundT <= 0) {
-        const mt = meta();
-        if (hits >= mt) { round++; api.add(100); GG.audio.sfx('win'); E.fx.confetti(E.W / 2, 60, 40); between = 2; api.goal('Meta batida! Próxima rodada…'); }
-        else { playing = false; laugh = 3; api._over = true; GG.audio.sfx('bad'); api.goal('O GeoBot ri da barraca… faltou pouco!'); setTimeout(() => api.end(api.score, 'Rodadas vencidas: ' + round + '. Meta da última rodada: ' + mt + ' alvos (você fez ' + hits + ').'), 2200); }
+      const mt = meta();
+      // meta batida = próxima rodada na hora (bônus pelas rolhas e segundos que sobraram)
+      if (hits >= mt) { const b = 100 + ammo * 5 + Math.max(0, Math.ceil(roundT)) * 3; round++; api.add(b); GG.audio.sfx('win'); E.fx.confetti(E.W / 2, 60, 40); between = 2; if (X()) X().pop(E.W / 2, 90, 'META BATIDA! +' + b, '#7bff8f', 11); api.goal('Meta batida! Próxima rodada…'); return; }
+      const noAmmo = ammo <= 0 && !targets.some((t) => t.hit && t.fall < 0.3);
+      if (roundT <= 0 || noAmmo) {
+        { playing = false; laugh = 3; api._over = true; GG.audio.sfx('bad'); api.goal(noAmmo ? 'Acabaram as rolhas… faltou pouco!' : 'O tempo acabou… faltou pouco!'); setTimeout(() => api.end(api.score, (noAmmo ? 'Acabaram as rolhas! ' : 'O tempo acabou! ') + 'Rodadas vencidas: ' + round + '. Meta da última rodada: ' + mt + ' alvos (você fez ' + hits + ').'), 2200); }
       }
     };
     function drawTarget(c, g, x, t) {
@@ -165,11 +166,11 @@
       c.strokeStyle = col; c.lineWidth = 1.5; c.beginPath(); c.arc(aim.x, aim.y, 8, 0, Math.PI * 2); c.moveTo(aim.x - 12, aim.y); c.lineTo(aim.x - 4, aim.y); c.moveTo(aim.x + 4, aim.y); c.lineTo(aim.x + 12, aim.y); c.moveTo(aim.x, aim.y - 12); c.lineTo(aim.x, aim.y - 4); c.moveTo(aim.x, aim.y + 4); c.lineTo(aim.x, aim.y + 12); c.stroke();
       if (flash > 0 && x) x.glow(c, aim.x, aim.y, 14, '#ffffff', 0.9);
       // rolhas
-      for (let i = 0; i < 8; i++) { c.fillStyle = i < ammo ? '#c98b45' : 'rgba(255,255,255,.15)'; c.fillRect(8 + i * 8, 204, 5, 9); }
-      if (reload > 0) g.text('RECARREGANDO…', 80, 206, { size: 5, color: '#ffd23f' }); else if (ammo === 0) g.text('SEM ROLHAS! (E)', 80, 206, { size: 5, color: '#ff8f8f' });
+      const tot = meta() * 2; for (let i = 0; i < tot; i++) { c.fillStyle = i < ammo ? '#c98b45' : 'rgba(255,255,255,.15)'; c.fillRect(8 + i * 5, 204, 3, 9); }
+      g.text(ammo + ' rolhas', 12 + tot * 5, 206, { size: 5, color: ammo <= 3 ? '#ff8f8f' : '#ffd23f' });
       if (laugh > 0) { g.img(P.geobot(Math.floor(sc.t * 8) % 3), E.W / 2 - 18, 120 - Math.abs(Math.sin(sc.t * 10)) * 10, { scale: 2 }); g.text('HA HA!', E.W / 2, 104, { size: 10, color: '#fff', align: 'center' }); }
     };
-    sc.dbg = { end() { roundT = 0; hits = -99; } };
+    sc.dbg = { end() { roundT = 0; hits = -99; }, shootGood() { const t = targets.find((o) => !o.hit && !BAD.includes(o.k) && o.x > 10 && o.x < E.W - 10); if (t) { aim.x = t.x; aim.y = t.y; shoot(); } return !!t; }, get round() { return round; }, get ammo() { return ammo; } };
     return sc;
   });
 
