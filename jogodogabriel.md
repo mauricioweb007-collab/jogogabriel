@@ -48,7 +48,10 @@ Marcações: **[não confirmado]** indica algo não verificado; **[pendente]** i
     - Faça antes `read` e `list` com `scope: "files"`.
     - Depois publique com `url` do artifact, `file_path` = `inicio.html` e `files` só com os arquivos alterados. O limite é de 255 arquivos por envio; se passar disso, mande em lotes.
     - Registre a nova versão aqui.
-  - **Versão publicada:** **7** (24/09/2026): Geografia com os gráficos novos e o Parque do Atlas (commit `b0f3e3e`, 72 arquivos). Nexus continua oculto.
+  - **Versão publicada:** **8** (24/09/2026): correções das fases 3-2 e 3-4 de Geografia (seção 8.1).
+  - **Histórico de versões:**
+    - v7: gráficos novos e Parque do Atlas (commit `b0f3e3e`, 72 arquivos).
+    - v6: Nexus oculto.
   - **Permissão:** o usuário liberou a ferramenta Artifact nas configurações da sessão. Se um envio for bloqueado de novo, peça ao usuário para liberar a permissão; não contorne o bloqueio.
 
 ---
@@ -157,7 +160,7 @@ node src/tests/gen-tabela-geografia.cjs                        # tabela das 45 q
 - Plataforma v2 (lançador, registro, core, motor de questões).
 - Geografia (45 questões, 16 fases).
 - **Gabriel Nexus** (seção 7): entrada pelo nome, perfil global, ponte de pontuação, 21 Nexóticos, hub e 8 áreas, 4 jogos recreativos, Fliperama com replays das matérias e torneios, Área dos Pais com sandbox. Depois, **ocultado para a criança** a pedido do usuário.
-- Link único publicado (**versão 7**: Geografia gráfica e Parque do Atlas).
+- Link único publicado (**versão 8**: Geografia gráfica, Parque do Atlas e correções das fases 3-2 e 3-4).
 - Documentos atualizados: `COMECE-AQUI.md`, `COMO-ADICIONAR-MATERIA.md`, `CREDITOS.md`.
 
 - **Geografia — melhoria gráfica e Parque do Atlas** (seção 8), a pedido do usuário.
@@ -520,3 +523,43 @@ node src/tests/gen-tabela-geografia.cjs                        # tabela das 45 q
 - Recompensas cosméticas por medalhas do Parque.
 - Mais tabuleiros e temas na Memória.
 - Modo "estados" no Quebra-cabeça.
+
+### 8.1 Correções pedidas pelo usuário (24/09/2026)
+**3-2 Cidade em Transformação travava**
+- **Causa:** a entrega de recurso rodava a **cada quadro** enquanto o Gabriel estava dentro de um bairro.
+  - Entrar no **Centro** carregando um recurso reabria a fala da Gaia sem parar, e a fase ficava presa.
+  - Num bairro errado, os avisos se acumulavam.
+- **Correção** (`scenes/city.js`): a reação acontece **só ao entrar** num bairro, guardada em `p.zone`.
+- **Verificação:** reproduzido no navegador antes e depois; a fase segue até as questões.
+
+**3-4 Torre da População: dinâmica refeita** (`scenes/tower.js`)
+- **Problemas:**
+  - Os degraus tinham vãos de 5 blocos, mas o pulo alcança uns 3.
+  - O altímetro cobria o lado direito da torre.
+  - Os painéis dos anos cobriam os degraus.
+  - Os 9 andares eram iguais.
+- **Torre nova:**
+  - Tem 19 colunas e foi deslocada (`CAMX`); a torre inteira aparece ao lado de um altímetro mais estreito, que mostra onde o Gabriel está.
+  - A câmera fica mais baixa, para mostrar o que vem por cima.
+- **9 andares, cada um com um desafio próprio** (tabela `DESIGN`), com degraus a cada 3 blocos e vãos de no máximo 2:
+
+  | Andar | Desafio |
+  |---|---|
+  | 1 | Escadinha |
+  | 2 | Zigue-zague |
+  | 3 | Plataforma que anda |
+  | 4 | Mola |
+  | 5 | Degraus estreitos |
+  | 6 | Elevador |
+  | 7 | Ponte partida |
+  | 8 | Plataforma rápida + mola |
+  | 9 | Reta final |
+
+- **Também:**
+  - Moedas-guia mostram o caminho.
+  - Fragmentos opcionais ficam em pulos mais difíceis.
+  - As Névoas ficam mais rápidas conforme a torre sobe.
+  - Os painéis dos anos ficam no vão livre, atrás das plataformas.
+  - O totem do andar 8 foi para x=14.
+- **Não mudou:** questões, textos e dados da tabela.
+- **Verificação:** um robô subiu os andares 1 e 2 pelo teclado, pulando degrau por degrau. Testes `features`, `e2e` nos 3 perfis, `layouts` e `parque` OK.

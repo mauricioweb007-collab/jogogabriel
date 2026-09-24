@@ -91,8 +91,11 @@
       cars.forEach((c) => { if (Math.abs(c.x + 10 - (p.x + 5)) < 14 && Math.abs(c.y + 5 - (p.y + 4)) < 10 && p.stun <= 0) { p.stun = 0.6; GG.audio.sfx('hit'); p.y += c.vert ? 0 : (p.y < c.y ? -14 : 14); p.x += c.vert ? (p.x < c.x ? -14 : 14) : 0; } });
       if (ctx.trail && p.moving) C.trail(p.x + 5, p.y + 6);
       // Central de recursos: pega o próximo recurso necessário
-      if (!carry && Math.hypot(p.x - HUB.x, p.y - HUB.y) < 18) { const n = need(); if (n) { carry = n.n; GG.audio.sfx('coin'); goal(); } }
-      if (carry) { [CENTRO].concat(DIST).forEach((d) => { if (p.x > d.x && p.x < d.x + d.w && p.y > d.y && p.y < d.y + d.h) deliver(d); }); }
+      if (!carry && Math.hypot(p.x - HUB.x, p.y - HUB.y) < 18) { const n = need(); if (n) { carry = n.n; GG.audio.sfx('coin'); goal(); if (p.zone) p.zone = null; } }
+      // Entrega só no momento em que ENTRA num bairro (antes repetia a cada quadro: no Centro a fala
+      // da Gaia reabria sem parar e a fase travava; em bairro errado, avisos se acumulavam).
+      const zone = [CENTRO].concat(DIST).find((d) => p.x > d.x && p.x < d.x + d.w && p.y > d.y && p.y < d.y + d.h) || null;
+      if (zone !== p.zone) { p.zone = zone; if (zone && carry) deliver(zone); }
       if (IN.pressed('pause')) GEO.stage.pauseMenu(ctx);
     };
     function drawCity(x, after) {
