@@ -38,6 +38,7 @@ Marcações: **[não confirmado]** indica algo não verificado; **[pendente]** i
 - O repositório `diario` foi a "pasta errada": nada vai para ele.
 - Não abrir PR sem pedido. Não citar identificador de modelo em commits nem arquivos.
 - **Nunca** gravar a senha dos pais em texto puro no repositório.
+- **Link para jogar:** sempre atualizar o MESMO artifact (https://claude.ai/artifact/5G4dYdvU9XW6oNCWXvPV7i), aberto a quem tem o link — decisão do usuário. Publicar com `inicio.html` como página, todos os arquivos de jogo (sem testes/ferramentas) e `ciencias.html` = cópia de `index.html` (o artifact não aceita o caminho `index.html`).
 
 ---
 
@@ -89,7 +90,7 @@ src/tests/                  regressão de Ciências, testes do Nexus, tabela de 
 
 **Motor:** canvas lógico 400x225 pixel-perfect, 60 Hz, pausa com `GG.ui.blocking()`. O Nexus usa um desenho próprio em alta resolução (DOM e canvas), não o motor pixel. `GG.store` recusa gravar a chave de Ciências.
 
-**Rodar:** abrir `inicio.html`. Online, o lançador usa `ciencias.html` se existir (cópia só no artifact publicado). O artifact publicado (v4, https://claude.ai/artifact/5G4dYdvU9XW6oNCWXvPV7i) é **anterior ao Nexus** **[pendente republicar, se pedido]**.
+**Rodar:** abrir `inicio.html`. Online, o lançador usa `ciencias.html` se existir (cópia só no artifact publicado). Artifact publicado: **v5 (24/09/2026), já com o Nexus**, em https://claude.ai/artifact/5G4dYdvU9XW6oNCWXvPV7i.
 
 **Testes** (Node 18+ e Playwright; aqui: `/opt/node22/lib/node_modules/playwright`, Chromium em `/opt/pw-browsers`; use `NODE_PATH=/opt/node22/lib/node_modules`). A senha vem da variável de ambiente, nunca do repositório:
 
@@ -163,7 +164,7 @@ node src/tests/gen-tabela-geografia.cjs                        # tabela das 45 q
 **Próximos passos (só quando o usuário pedir)**
 1. Jogo de **Matemática** com o material da prova. Depois, preencher o manifesto (7.4) e criar o pacote `matematica-v2` com os outros Nexóticos.
 2. Outras matérias pelo mesmo contrato.
-3. Republicar o artifact com o Nexus; PR para `main`; GitHub Pages.
+3. PR para `main`; GitHub Pages (só com pedido).
 
 ---
 
@@ -420,4 +421,3 @@ node src/tests/gen-tabela-geografia.cjs                        # tabela das 45 q
 ### 7.10 Pendências reais do Nexus
 - **[pendente]** Jogo de Matemática e os outros 9 Nexóticos de Matemática (pacote futuro).
 - **[não confirmado]** Balanceamento de preços, níveis e desempenho em aparelhos reais: falta uma sessão de jogo com o Gabriel.
-- **[pendente, se pedido]** Republicar o artifact, que ainda é a v4, sem o Nexus.
