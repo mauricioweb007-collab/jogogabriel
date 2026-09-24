@@ -39,7 +39,16 @@ Marcações: **[não confirmado]** indica algo não verificado; **[pendente]** i
 - O repositório `diario` foi a "pasta errada": nada vai para ele.
 - Não abrir PR sem pedido. Não citar identificador de modelo em commits nem arquivos.
 - **Nunca** gravar a senha dos pais em texto puro no repositório.
-- **Link para jogar (decisão do usuário):** sempre atualizar o MESMO artifact, https://claude.ai/artifact/5G4dYdvU9XW6oNCWXvPV7i (aberto a quem tem o link; hoje na **versão 6**). Página = `inicio.html`; arquivos = `css/`, `js/`, `src/` sem testes/ferramentas/licenças `.md`, mais `inicio.html` e `ciencias.html` (cópia de `index.html`, pois o artifact não aceita o caminho `index.html`). Em atualização, basta enviar os arquivos alterados.
+- **Link para jogar (decisão e autorização permanente do usuário, 24/09/2026):** o usuário **autorizou de forma permanente** a atualização do link. Ao fim de **toda** alteração no jogo (código, imagens, fases, minijogos, textos), republicar no **MESMO** artifact, sem perguntar de novo: https://claude.ai/artifact/5G4dYdvU9XW6oNCWXvPV7i (aberto a quem tem o link). Nunca criar um link novo.
+  - **Arquivos publicados:**
+    - A página é `inicio.html`.
+    - Vão também `css/`, `js/` e `src/`, sem testes, ferramentas nem licenças `.md`.
+    - Vão ainda `ciencias.html` (cópia de `index.html`, porque o artifact não aceita o caminho `index.html`) e `src/modules/geografia/assets/`.
+  - **Como atualizar:**
+    - Faça antes `read` e `list` com `scope: "files"`.
+    - Depois publique com `url` do artifact, `file_path` = `inicio.html` e `files` só com os arquivos alterados. O limite é de 255 arquivos por envio; se passar disso, mande em lotes.
+    - Registre a nova versão aqui.
+  - **Versão publicada:** 6 (Nexus oculto). **[pendente]** A versão 7, com os gráficos novos e o Parque de Geografia (commit `b0f3e3e`, 72 arquivos), foi bloqueada pelo classificador de permissões da sessão, mesmo com o usuário autorizando. Publicar assim que a permissão da ferramenta Artifact estiver liberada.
 
 ---
 
@@ -147,7 +156,7 @@ node src/tests/gen-tabela-geografia.cjs                        # tabela das 45 q
 - Plataforma v2 (lançador, registro, core, motor de questões).
 - Geografia (45 questões, 16 fases).
 - **Gabriel Nexus** (seção 7): entrada pelo nome, perfil global, ponte de pontuação, 21 Nexóticos, hub e 8 áreas, 4 jogos recreativos, Fliperama com replays das matérias e torneios, Área dos Pais com sandbox. Depois, **ocultado para a criança** a pedido do usuário.
-- Link único publicado (versão 6).
+- Link único publicado (versão 6). **[pendente]** versão 7 (Geografia gráfica e Parque), bloqueada pela permissão da sessão; ver seção 1.
 - Documentos atualizados: `COMECE-AQUI.md`, `COMO-ADICIONAR-MATERIA.md`, `CREDITOS.md`.
 
 - **Geografia — melhoria gráfica e Parque do Atlas** (seção 8), a pedido do usuário.
