@@ -72,9 +72,9 @@
       intro: ['Bem-vindo à **feira do cordel**! Tudo aqui parece **xilogravura**.', 'Suba nas cordas, pule nas molas e colete as **páginas** do folheto.'],
       cards: { folclore: ['O cordel pode retratar **mitos e folclore**, como o **Caipora**.'] },
       goal: 'Atravesse a feira e imprima sua xilogravura.', par: 260 },
-    { id: 'c2s3', ch: 2, n: 3, title: 'Ritmos do Brasil', engine: 'rhythm', theme: 'ritmos', music: null, style: 'Jogo de ritmo',
+    { id: 'c2s3', ch: 2, n: 3, title: 'Ritmos do Brasil', engine: 'rhythm', theme: 'ritmos', music: null, style: 'Batalha de ritmo',
       questions: ['GEO-C2-Q04'], node: { x: 380, y: 420 },
-      intro: ['Três ritmos, três influências! Toque no tempo certo com **←**, **↓** e **→** (ou tocando as pistas).', 'Antes de cada música, conheça a festa.'],
+      intro: ['Três ritmos, três influências — numa **batalha de ritmo** contra o GeoBot! Use **← ↓ ↑ →** (ou tocando as pistas).', 'Antes de cada música, conheça a festa.'],
       cards: {
         divino: ['**Festa do Divino**: origem **portuguesa**. Celebração religiosa com grupos, **dança, tambores, bandeiras** e **roupas especiais**.'],
         samba: ['**Samba de roda**: surgiu na **Bahia**, com forte influência **africana**. Dança, canto, **palmas, chocalho, pandeiro, tambor, viola e berimbau**.'],

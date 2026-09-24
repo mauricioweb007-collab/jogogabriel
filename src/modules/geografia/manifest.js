@@ -12,7 +12,7 @@
   /** Fases reais (content/capitulos.js). boss = chefe; bonus = sala opcional sem questões. */
   const STAGES = [
     ['c1s1', 'Festival da Diversidade', 'Plataforma lateral', 1], ['c1s2', 'Mapa dos Povos Originários', 'Exploração e mapa', 1], ['c1s3', 'Rotas pelo Atlântico', 'Nave-cartográfica', 1], ['c1s4', 'Caminhos da Imigração', 'Corrida contra o GeoBot', 1], ['c1s5', 'Chefe: Generalizador', 'Batalha de chefe', 1, 'boss'],
-    ['c2s1', 'Labirinto das Culturas', 'Labirinto de coleta', 2], ['c2s2', 'Cordel em Movimento', 'Plataforma em xilogravura', 2], ['c2s3', 'Ritmos do Brasil', 'Jogo de ritmo', 2], ['c2s4', 'Cozinha dos Povos', 'Quebra-cabeça de sílabas', 2], ['c2s5', 'Chefe: Sombra do Preconceito', 'Batalha de chefe', 2, 'boss'],
+    ['c2s1', 'Labirinto das Culturas', 'Labirinto de coleta', 2], ['c2s2', 'Cordel em Movimento', 'Plataforma em xilogravura', 2], ['c2s3', 'Ritmos do Brasil', 'Batalha de ritmo', 2], ['c2s4', 'Cozinha dos Povos', 'Quebra-cabeça de sílabas', 2], ['c2s5', 'Chefe: Sombra do Preconceito', 'Batalha de chefe', 2, 'boss'],
     ['c3s1', 'Do Litoral ao Interior', 'Corrida com mapa animado', 3], ['c3s2', 'Cidade em Transformação', 'Ação e construção', 3], ['c3s3', 'Energia para Todos', 'Labirinto de rede elétrica', 3], ['c3s4', 'Torre da População', 'Plataforma vertical', 3], ['c3s5', 'Territórios e Direitos', 'Mapa e demarcação', 3], ['c3s6', 'Chefe Final: Vírus da Desigualdade', 'Batalha final', 3, 'boss'],
     ['b1', 'Corrida Relâmpago', 'Desafio opcional contra o GeoBot', 1, 'bonus'], ['b2', 'Ritmo Livre', 'Batalha de ritmo contra o GeoBot', 2, 'bonus'], ['b3', 'Labirinto Relâmpago', 'Desafio opcional de labirinto', 3, 'bonus']
   ];

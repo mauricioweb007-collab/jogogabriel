@@ -1,143 +1,229 @@
 /* =====================================================================
-   scenes/rhythm.js — JOGO DE RITMO (Fase 2-3 Ritmos do Brasil e Sala
-   bônus 2). Três músicas curtas e ORIGINAIS com instrumentos citados no
-   material: Festa do Divino (tambores e sinos; origem portuguesa),
-   Samba de roda (palmas, pandeiro/chocalho, berimbau; influência
-   africana) e Toré (chocalhos e tambor; comunidades indígenas).
-   Antes de cada música, cartão curto da Gaia; depois, checagem de
-   origem. Ao final, a atividade do livro (GEO-C2-Q04).
-   Pistas: ← ↓ → (ou tocar na pista).
+   scenes/rhythm.js — FASE 2-3 "RITMOS DO BRASIL": BATALHA DE RITMO.
+   Refeita a pedido do usuário (24/09/2026) no mesmo estilo do Ritmo
+   Livre (scenes/ritmolivre.js): setas que sobem até os alvos, "vez do
+   GeoBot / sua vez", barra de disputa, combos, notas longas, notas
+   douradas e o MODO FESTA (combo 20).
+   O conteúdo do material continua igual: três ritmos, três influências
+   — Festa do Divino (portuguesa: tambores e sinos), Samba de roda
+   (africana: palmas, chocalho, pandeiro, berimbau) e Toré (indígena:
+   chocalhos e tambor). Antes de cada música, o cartão da Gaia; depois,
+   a checagem de origem; no fim, a atividade do livro (GEO-C2-Q04).
+   Controles: ← ↓ ↑ → (ou A S W D, ou tocar na pista). Não dá para
+   "perder" a fase: perder a disputa só dá menos pontos.
    ===================================================================== */
 (function () {
   'use strict';
   const U = GG.util, E = GG.engine, P = GG.pixel, C = GEO.common;
+  const X = () => (GEO.gfx && GEO.gfx.ready ? GEO.gfx : null);
   const ok = (t, fb) => ({ t, ok: true, fb }), no = (t, fb) => ({ t, ok: false, fb });
-  const LX = [262, 300, 338], HIT = 188, SPEED = 120;
+  const DIRN = ['left', 'down', 'up', 'right'];
+  const COL = ['#c24bff', '#3ec1ff', '#35e07a', '#ff4d6d'];
+  const PX = [262, 294, 326, 358], BX = [28, 52, 76, 100]; // pistas do jogador / do GeoBot
+  const RY = 40; // linha dos alvos
   const SONGS = [
-    { id: 'divino', card: 'divino', name: 'Festa do Divino', bpm: 96, beats: 44, pat: [[0, 'drum'], [2, 'bell'], [4, 'drum'], [5, 'drum'], [6, 'bell']], len: 8, color: '#e5484d', deco: 'bandeiras',
+    { id: 'divino', card: 'divino', name: 'Festa do Divino', origin: 'origem portuguesa', bpm: 100, speed: 95, bars: 4, dens: 0.38, holds: 0.1, color: '#e5484d', song: 'rt_divino',
+      ins: [['tambor', 'drum'], ['sino', 'bell'], ['atabaque', 'drum'], ['sino', 'bell']], deco: 'bandeiras',
       check: { prompt: 'A **Festa do Divino** tem origem…', options: [ok('portuguesa'), no('africana', 'O samba de roda é que tem forte influência africana.'), no('indígena', 'O toré é que é das comunidades indígenas.')] } },
-    { id: 'samba', card: 'samba', name: 'Samba de roda', bpm: 112, beats: 52, pat: [[0, 'drum'], [1, 'clap'], [2, 'shaker'], [3, 'clap'], [4, 'drum'], [5, 'string'], [6, 'clap'], [7, 'shaker']], len: 8, color: '#f39c12', deco: 'roda',
+    { id: 'samba', card: 'samba', name: 'Samba de roda', origin: 'influência africana', bpm: 112, speed: 110, bars: 4, dens: 0.5, holds: 0.1, color: '#f39c12', song: 'rt_samba',
+      ins: [['palmas', 'clap'], ['maracas', 'shaker'], ['tambor', 'drum'], ['violao', 'string']], deco: 'roda',
       check: { prompt: 'O **samba de roda** surgiu na Bahia com forte influência…', options: [ok('africana'), no('portuguesa', 'A Festa do Divino é que tem origem portuguesa.'), no('japonesa', 'O livro fala em forte influência africana.')] } },
-    { id: 'tore', card: 'tore', name: 'Toré', bpm: 88, beats: 40, pat: [[0, 'drum'], [1, 'shaker'], [2, 'shaker'], [3, 'shaker'], [4, 'drum'], [6, 'shaker']], len: 8, color: '#2ecc71', deco: 'chocalhos',
+    { id: 'tore', card: 'tore', name: 'Toré', origin: 'comunidades indígenas', bpm: 120, speed: 122, bars: 4, dens: 0.58, holds: 0.12, chords: 0.08, color: '#2ecc71', song: 'rt_tore',
+      ins: [['maracas', 'shaker'], ['tambor', 'drum'], ['maracas', 'shaker'], ['pena', 'drum']], deco: 'chocalhos',
       check: { prompt: 'O **toré** é uma manifestação cultural de…', options: [ok('comunidades indígenas'), no('origem portuguesa', 'A Festa do Divino é portuguesa.'), no('imigrantes europeus', 'O toré é das comunidades indígenas.')] } }
   ];
-  const LANE_OF = { drum: 1, bell: 0, clap: 0, shaker: 2, string: 1 };
+  // músicas originais (sintetizadas) no clima de cada festa
+  GG.audio.addSong('rt_divino', { bpm: 100, wave: 'triangle', lead: 'D5 - F#5 A5 - F#5 E5 D5 - E5 F#5 G5 F#5 - E5 - D5 - F#5 A5 - B5 A5 F#5 - E5 D5 E5 D5 - - -', bass: 'D3 - A2 - D3 - A2 - G2 - D3 - A2 - D3 -', drums: 'k - h - k k h -' });
+  GG.audio.addSong('rt_samba', { bpm: 112, wave: 'square', lead: 'A4 - C5 E5 - D5 C5 A4 - C5 - E5 D5 - - - A4 - C5 E5 - G5 E5 D5 - C5 - D5 A4 - - -', bass: 'A2 A2 - A2 E2 - E2 E2 D2 D2 - D2 E2 - E2 -', drums: 'k s h s k h s s' });
+  GG.audio.addSong('rt_tore', { bpm: 120, wave: 'triangle', lead: 'E5 E5 G5 E5 D5 - E5 - E5 E5 G5 A5 G5 - E5 - D5 D5 E5 D5 B4 - D5 - E5 G5 E5 D5 E5 - - -', bass: 'E2 - E2 - B2 - E2 - E2 - E2 - B2 - E2 -', drums: 'k h h h k h h h' });
 
   GEO.scenes.rhythm = function (ctx) {
     const def = ctx.def, bonus = !!def.bonus;
     const sc = { cam: { x: 0, y: 0 }, t: 0 };
-    let si = 0, notes = [], songT = 0, playing = false, busy = false, finished = false, hits = { p: 0, g: 0, m: 0 }, combo = 0, press = [0, 0, 0], lastJudge = null;
+    let si = 0, notes = [], songT = 0, busy = false, finished = false, playing = false;
+    let bar = 0.5, combo = 0, best = 0, mult = 1, fever = 0, score = 0, hits = { p: 0, g: 0, b: 0, m: 0 }, total = 0, wins = 0, songHits = null, songTotal = 0;
+    let press = [0, 0, 0, 0], botPress = [0, 0, 0, 0], judge = null, pose = { me: -1, bot: -1, meT: 0, botT: 0 }, holding = [null, null, null, null];
     ctx.actionMax = 150;
     if (ctx.resume && ctx.resume.data && ctx.resume.data.si != null) si = ctx.resume.data.si;
-    function buildChart(S) {
-      const spb = 60 / S.bpm / 2, out = [];
-      for (let b = 0; b < S.beats; b++) S.pat.forEach(([o, ins]) => { const step = b * S.len + o; if (step % 2 === 0 || S.id === 'samba') { const t = 2 + (b * S.len + o) * spb; if (t < 2 + S.beats * spb * 2) out.push({ t, lane: LANE_OF[ins], ins, hit: false, judged: false }); } });
-      return out.filter((n, i) => i % (S.id === 'samba' ? 3 : 2) === 0).slice(0, 40);
+
+    /* ------------------------------------------------ partitura: vez do GeoBot + sua vez (resposta parecida) */
+    function chart(S) {
+      const beat = 60 / S.bpm, out = [];
+      let t = 2.2, last = null;
+      for (let turn = 0; turn < 6; turn++) { // 3 trocas: GeoBot canta, você responde
+        const who = turn % 2 === 0 ? 'bot' : 'me';
+        if (who === 'bot') {
+          last = [];
+          for (let s = 0; s < S.bars * 4; s++) {
+            if (Math.random() < S.dens || s % 4 === 0) {
+              const lane = Math.floor(Math.random() * 4), hold = Math.random() < S.holds && s % 2 === 0 ? beat * (1 + Math.floor(Math.random() * 2)) : 0;
+              last.push({ s, lane, hold, gold: Math.random() < 0.08, chord: S.chords && Math.random() < S.chords ? (lane + 2) % 4 : -1 });
+            }
+          }
+        }
+        const src = who === 'bot' ? last : last.map((n) => Object.assign({}, n, { lane: Math.random() < 0.2 ? (n.lane + 1) % 4 : n.lane }));
+        src.forEach((n) => {
+          const nt = t + n.s * beat / 2;
+          out.push({ who, t: nt, lane: n.lane, hold: n.hold, gold: n.gold, judged: false, held: 0 });
+          if (n.chord >= 0 && who === 'me') out.push({ who, t: nt, lane: n.chord, hold: 0, gold: false, judged: false, held: 0 });
+        });
+        t += S.bars * 2 * beat + beat * 2;
+      }
+      return out.sort((a, b) => a.t - b.t);
     }
+
     sc.begin = async function () { if (!ctx.resume) ctx.checkpoint({ si: 0 }); await next(); };
     async function run(fn) { busy = true; try { await fn(); } catch (e) { console.error(e); } busy = false; GG.input.clear(); }
     async function next() {
       if (si >= SONGS.length) {
         finished = true;
         await run(async () => {
+          const grade = (() => { const acc = (hits.p + hits.g * 0.75 + hits.b * 0.4) / Math.max(1, total); return acc > 0.92 ? 'S' : acc > 0.8 ? 'A' : acc > 0.6 ? 'B' : 'C'; })();
+          await ctx.say('gaia', ['Fim do show! Você venceu **' + wins + ' de 3** disputas contra o GeoBot. Nota do ritmo: **' + grade + '**. Pontos: **' + score + '**.']);
           if (!bonus) await ctx.q('GEO-C2-Q04');
           if (!ctx.damage) ctx.addAction(20);
-          await ctx.finish();
+          await ctx.finish(); // sem {geobot}: isto não é corrida contra o GeoBot (não entra no placar de corridas)
         });
         return;
       }
       const S = SONGS[si];
-      await run(async () => { if (!bonus) await ctx.cards(S.card); await ctx.say('gaia', ['Música: **' + S.name + '**. Aperte **←**, **↓** ou **→** quando a nota chegar na linha. Toque na pista também vale!']); });
-      notes = buildChart(S); songT = 0; playing = true; hits = { p: 0, g: 0, m: 0 }; combo = 0;
-      ctx.setGoal('Tocando: ' + S.name + ' (' + notes.length + ' notas)');
+      await run(async () => {
+        if (!bonus) await ctx.cards(S.card);
+        await ctx.say('gaia', ['Batalha de ritmo: **' + S.name + '** (' + S.origin + ')! O **GeoBot** toca primeiro (setas da esquerda); depois é a **sua vez** (direita).', 'Aperte **← ↓ ↑ →** (ou **A S W D**) quando a seta encostar no alvo. **Segure** nas notas longas. **Combo 20** liga o **Modo Festa**!']);
+      });
+      notes = chart(S); songTotal = notes.filter((n) => n.who === 'me').length; total += songTotal;
+      songHits = { p: 0, g: 0, b: 0, m: 0 };
+      songT = -0.2; playing = true; bar = 0.5; combo = 0; mult = 1;
+      GG.audio.music(S.song);
+      ctx.setGoal('Música ' + (si + 1) + '/3 — ' + S.name + ': vença a disputa com o GeoBot!');
+      if (X()) X().banner({ id: 'rt' + si, icon: S.ins[0][0], title: S.name, style: S.origin + ' • ' + S.bpm + ' batidas por minuto' }, 'RITMOS DO BRASIL');
     }
     async function songEnd() {
-      playing = false;
-      const S = SONGS[si];
-      const acc = (hits.p + hits.g * 0.6) / Math.max(1, notes.length);
-      ctx.addAction(Math.round(acc * 40));
-      GG.audio.sfx('win');
+      playing = false; GG.audio.stopMusic();
+      const S = SONGS[si], won = bar >= 0.5; if (won) wins++;
+      const acc = (songHits.p + songHits.g * 0.75 + songHits.b * 0.4) / Math.max(1, songTotal);
+      ctx.addAction(Math.round(acc * 36 + (won ? 4 : 0)));
+      GG.audio.sfx(won ? 'win' : 'bad');
+      if (won) { E.fx.confetti(E.W / 2, 60, 50); if (X()) X().flash('#fff6c0', 0.35); }
       await run(async () => {
-        await ctx.say('gaia', ['Fim de **' + S.name + '**! Perfeitas: ' + hits.p + ', boas: ' + hits.g + ', perdidas: ' + hits.m + '.']);
+        await ctx.say(won ? 'gaia' : 'geobot', [(won ? 'Você venceu a disputa do **' + S.name + '**!' : 'O GeoBot levou a disputa do **' + S.name + '**… na próxima é você!') + ' Perfeitas: ' + songHits.p + ', boas: ' + (songHits.g + songHits.b) + ', perdidas: ' + songHits.m + '. Combo máximo: ' + best + '.']);
         if (!bonus) {
-          const r = await GG.quiz.quick({ prompt: S.check.prompt, type: 'mc', options: S.check.options }, { title: 'Origem do ritmo', subject: 'Geografia', chips: [S.name], doneLabel: 'Próximo ritmo ▶' });
+          const r = await GG.quiz.quick({ prompt: S.check.prompt, type: 'mc', options: S.check.options }, { title: 'Origem do ritmo', subject: 'Geografia', chips: [S.name], doneLabel: si < SONGS.length - 1 ? 'Próximo ritmo ▶' : 'Continuar ▶' });
           const okk = r.attempts === 1; GEO.campaign.recordCheck(okk, 'Festas e ritmos'); ctx.learnPts += okk ? 25 : 10; ctx.learnMax += 25; ctx.hud();
         }
       });
       si++; ctx.checkpoint({ si });
       await next();
     }
-    function judge(lane) {
-      press[lane] = 0.12;
-      const n = notes.filter((x) => !x.judged && x.lane === lane).sort((a, b) => Math.abs(a.t - songT) - Math.abs(b.t - songT))[0];
-      if (!n) return;
-      const d = Math.abs(n.t - songT);
-      if (d < 0.1) { n.judged = n.hit = true; hits.p++; combo++; lastJudge = { t: 'PERFEITO!', c: '#7bff8f', at: sc.t, lane }; GG.audio.sfx(n.ins); E.fx.burst(LX[lane], HIT, SONGS[si].color, 8, 80); }
-      else if (d < 0.2) { n.judged = n.hit = true; hits.g++; combo++; lastJudge = { t: 'BOM', c: '#ffd23f', at: sc.t, lane }; GG.audio.sfx(n.ins); }
+
+    /* ------------------------------------------------ julgamento */
+    function hit(lane) {
+      press[lane] = 0.12; pose.me = lane; pose.meT = 0.25;
+      const cand = notes.filter((n) => n.who === 'me' && !n.judged && n.lane === lane && Math.abs(n.t - songT) < 0.24).sort((a, b) => Math.abs(a.t - songT) - Math.abs(b.t - songT))[0];
+      if (!cand) return;
+      const d = Math.abs(cand.t - songT), S = SONGS[si];
+      const r = d < 0.06 ? ['PERFEITO!', '#7bff8f', 1, 'p', 0.045] : d < 0.12 ? ['ÓTIMO!', '#3ec1ff', 0.8, 'g', 0.03] : ['BOM', '#ffd23f', 0.5, 'b', 0.015];
+      cand.judged = true; cand.hit = true; hits[r[3]]++; songHits[r[3]]++; combo++; best = Math.max(best, combo);
+      mult = Math.min(4, 1 + Math.floor(combo / 10));
+      if (combo === 20 && !fever) { fever = 8; if (X()) X().flash('#ffd23f', 0.4); GG.audio.sfx('power'); }
+      const pts = Math.round(100 * r[2] * mult * (cand.gold ? 2 : 1) * (fever > 0 ? 2 : 1)); score += pts;
+      bar = Math.min(1, bar + r[4] * (cand.gold ? 1.5 : 1));
+      judge = { t: r[0], c: r[1], at: sc.t, lane };
+      GG.audio.sfx(S.ins[lane][1]);
+      if (X()) { X().sparkle(PX[lane], RY, COL[lane], cand.gold ? 8 : 4); X().ring(PX[lane], RY, cand.gold ? '#ffd23f' : COL[lane], 22); if (mult > 1 || cand.gold) X().pop(PX[lane], RY + 18, '+' + pts, cand.gold ? '#ffd23f' : '#fff', 7); }
+      if (cand.hold) holding[lane] = cand;
     }
-    sc.click = function (x) { if (!playing || busy) return; const lane = LX.findIndex((lx) => Math.abs(x - lx) < 20); if (lane >= 0) judge(lane); };
+    function miss(n) { n.judged = true; hits.m++; songHits.m++; combo = 0; mult = 1; bar = Math.max(0, bar - 0.05); judge = { t: 'ERROU', c: '#ff6b6b', at: sc.t, lane: n.lane }; pose.me = -2; pose.meT = 0.3; }
+    sc.click = function (x) { if (!playing || busy) return; const lane = PX.findIndex((lx) => Math.abs(x - lx) < 16); if (lane >= 0) hit(lane); };
+
     sc.update = function (dt) {
-      sc.t += dt; press = press.map((v) => Math.max(0, v - dt));
+      sc.t += dt; press = press.map((v) => Math.max(0, v - dt)); botPress = botPress.map((v) => Math.max(0, v - dt));
+      pose.meT -= dt; pose.botT -= dt; if (fever > 0) fever -= dt;
       if (busy || finished || !playing) return;
-      ctx.tick(dt);
-      songT += dt;
+      ctx.tick(dt); songT += dt;
       const IN = GG.input;
-      if (IN.pressed('left')) judge(0); if (IN.pressed('down') || IN.pressed('up') || IN.pressed('jump')) judge(1); if (IN.pressed('right')) judge(2);
-      // batida guia suave
-      const S = SONGS[si], spb = 60 / S.bpm;
-      if (Math.floor(songT / spb) !== Math.floor((songT - dt) / spb) && songT < 2) GG.audio.sfx('click');
-      notes.forEach((n) => { if (!n.judged && songT - n.t > 0.25) { n.judged = true; hits.m++; combo = 0; lastJudge = { t: 'ERROU', c: '#ff8f8f', at: sc.t }; } });
-      if (notes.every((n) => n.judged) && songT > notes[notes.length - 1].t + 0.6) songEnd();
+      if (IN.pressed('left')) hit(0); if (IN.pressed('down')) hit(1); if (IN.pressed('up') || IN.pressed('jump')) hit(2); if (IN.pressed('right')) hit(3);
+      holding.forEach((n, lane) => {
+        if (!n) return;
+        const down = IN.down(DIRN[lane]) || (lane === 2 && IN.down('jump'));
+        if (down && songT < n.t + n.hold) { n.held += dt; score += Math.round(60 * dt * mult); bar = Math.min(1, bar + dt * 0.02); if (X() && Math.random() < 0.3) X().sparkle(PX[lane], RY, COL[lane], 1); }
+        else holding[lane] = null;
+      });
+      const S = SONGS[si];
+      notes.forEach((n) => {
+        if (n.judged) return;
+        if (n.who === 'bot' && songT >= n.t) { n.judged = true; botPress[n.lane] = 0.15 + n.hold; pose.bot = n.lane; pose.botT = 0.25 + n.hold; GG.audio.sfx(S.ins[n.lane][1]); bar = Math.max(0, bar - 0.006); }
+        else if (n.who === 'me' && songT - n.t > 0.24) miss(n);
+      });
+      const last = notes[notes.length - 1];
+      if (!last || songT > last.t + last.hold + 1) songEnd();
       if (IN.pressed('pause')) GEO.stage.pauseMenu(ctx);
     };
-    const hashX = (i) => { const v = Math.sin(i * 91.7 + 3.3) * 43758.5; return v - Math.floor(v); };
-    sc.draw = function (g) {
-      const S = SONGS[Math.min(si, SONGS.length - 1)], c = g.ctx();
-      const gr = c.createLinearGradient(0, 0, 0, E.H); gr.addColorStop(0, '#2a1640'); gr.addColorStop(1, '#5a2a3a'); c.fillStyle = gr; c.fillRect(0, 0, E.W, E.H);
-      const X = GEO.gfx && GEO.gfx.ready ? GEO.gfx : null;
-      const beat0 = playing ? Math.abs(Math.sin(songT * Math.PI * S.bpm / 60)) : 0;
-      if (X) {
-        // holofotes que varrem o palco no ritmo e cortina
-        for (let i = 0; i < 12; i++) { const x = hashX(i) * 240, y = hashX(i + 5) * 80; c.fillStyle = 'rgba(255,255,255,' + (0.2 + 0.3 * Math.abs(Math.sin(sc.t * 2 + i))).toFixed(2) + ')'; c.fillRect(x, y, 1, 1); }
-        c.save(); c.globalCompositeOperation = 'lighter';
-        [['#ff5d8f', 30], ['#3ec1ff', 120], ['#ffd23f', 210]].forEach(([col, bx], i) => {
-          const a = Math.sin(sc.t * 0.9 + i * 2) * 0.35, len = 190;
-          const gr2 = c.createLinearGradient(bx, 0, bx + Math.sin(a) * len, len); gr2.addColorStop(0, col + '66'); gr2.addColorStop(1, col + '00');
-          c.fillStyle = gr2; c.globalAlpha = 0.55 + beat0 * 0.35; c.beginPath(); c.moveTo(bx - 3, 0); c.lineTo(bx + 3, 0); c.lineTo(bx + Math.sin(a) * len + 28, len); c.lineTo(bx + Math.sin(a) * len - 28, len); c.closePath(); c.fill();
-        });
-        c.restore();
-        c.fillStyle = '#7a1030'; for (let x = 0; x < 240; x += 12) { c.fillStyle = x % 24 ? '#8e1a3c' : '#6e0c2a'; c.fillRect(x, 0, 12, 10 + Math.sin(x * 0.3) * 2); }
-        c.fillStyle = '#5a0a22'; c.fillRect(0, 0, 14, 170); c.fillRect(226, 0, 14, 170);
-      }
-      // palco
-      c.fillStyle = '#6b3f22'; c.fillRect(0, 170, 240, 55); c.fillStyle = '#8b5a2b'; c.fillRect(0, 166, 240, 6);
-      if (X) { const fl = c.createLinearGradient(0, 166, 0, 225); fl.addColorStop(0, 'rgba(255,220,150,' + (0.15 + beat0 * 0.2).toFixed(2) + ')'); fl.addColorStop(1, 'rgba(0,0,0,0)'); c.fillStyle = fl; c.fillRect(0, 166, 240, 59); ['atabaque', 'maracas', 'sanfona', 'violao'].forEach((n, i) => X.ilus(c, n, 30 + i * 60, 196 + (i % 2 ? beat0 * -2 : 0), 22, { shadow: true })); }
-      if (S.deco === 'bandeiras') for (let i = 0; i < 6; i++) { g.rect(20 + i * 36, 60, 2, 50, '#6b4f2a'); g.rect(22 + i * 36, 60, 18, 12, i % 2 ? '#e5484d' : '#fff'); }
-      if (S.deco === 'roda') { c.strokeStyle = 'rgba(255,255,255,.3)'; c.beginPath(); c.ellipse(120, 150, 90, 18, 0, 0, Math.PI * 2); c.stroke(); g.line(30, 160, 44, 110, '#3b220b', 2); g.circle(33, 152, 5, '#c98b45'); }
-      if (S.deco === 'chocalhos') for (let i = 0; i < 5; i++) { g.circle(40 + i * 40, 100 + Math.sin(sc.t * 6 + i) * 3, 6, '#c98b45'); g.rect(39 + i * 40, 106, 2, 12, '#6b4f2a'); }
-      const beat = playing ? Math.abs(Math.sin(songT * Math.PI * S.bpm / 60)) : 0;
-      P.crowd().slice(0, 8).forEach((pp, i) => g.img(P.front(Object.assign({}, pp, { frame: Math.floor(sc.t * 4 + i) % 2 })), 12 + i * 27, 140 - beat * (i % 2 ? 6 : 3)));
-      g.img(C.gabrielSide(ctx.look, playing && beat > 0.6 ? 'jump' : 'idle', sc.t), 200, 138 - beat * 4);
-      g.text(S.name.toUpperCase(), 120, 20, { size: 9, color: S.color, align: 'center' });
-      g.text('Música ' + (Math.min(si, 2) + 1) + '/3', 120, 34, { size: 6, color: '#fff', align: 'center' });
-      // pistas
-      g.rect(240, 0, 120, E.H, 'rgba(0,0,0,.35)');
-      LX.forEach((lx, i) => { g.rect(lx - 16, 0, 32, E.H, i % 2 ? 'rgba(255,255,255,.04)' : 'rgba(255,255,255,.08)'); });
-      g.rect(240, HIT - 2, 120, 4, '#ffffff');
-      LX.forEach((lx, i) => { if (X && press[i] > 0) X.glow(c, lx, HIT, 26, S.color, 0.9); g.circle(lx, HIT, 14, press[i] > 0 ? S.color : 'rgba(255,255,255,.25)', press[i] > 0 ? 0 : 2); g.text(['←', '↓', '→'][i], lx, HIT + 18, { size: 8, color: '#fff', align: 'center' }); });
-      const NI = { drum: 'atabaque', bell: 'sino', clap: 'palmas', shaker: 'maracas' };
-      notes.forEach((n) => {
-        if (n.judged) return; const y = HIT - (n.t - songT) * SPEED; if (y < -20 || y > E.H) return;
-        if (X) X.glow(c, LX[n.lane], y, 16, S.color, 0.5);
-        g.circle(LX[n.lane], y, 11, S.color); g.circle(LX[n.lane], y, 8.5, '#fff');
-        if (!(X && NI[n.ins] && X.has(NI[n.ins]) && X.ilus(c, NI[n.ins], LX[n.lane], y, 15))) g.text({ drum: 'T', bell: 'S', clap: 'P', shaker: 'C', string: 'B' }[n.ins], LX[n.lane], y - 4, { size: 6, color: '#2a2233', align: 'center', shadow: false });
+
+    /* ------------------------------------------------ desenho */
+    function arrowShape(c, x, y, lane, s, fill, stroke) {
+      c.save(); c.translate(x, y); c.rotate([Math.PI, Math.PI / 2, -Math.PI / 2, 0][lane] || 0); const k = s / 12;
+      c.beginPath(); c.moveTo(12 * k, 0); c.lineTo(0, -10 * k); c.lineTo(0, -5 * k); c.lineTo(-11 * k, -5 * k); c.lineTo(-11 * k, 5 * k); c.lineTo(0, 5 * k); c.lineTo(0, 10 * k); c.closePath();
+      if (fill) { c.fillStyle = fill; c.fill(); } if (stroke) { c.strokeStyle = stroke; c.lineWidth = 1.6; c.stroke(); } c.restore();
+    }
+    function drawLanes(c, g, xs, who) {
+      const x = X(), S = SONGS[Math.min(si, 2)];
+      xs.forEach((lx, lane) => {
+        const pr = who === 'me' ? press[lane] : botPress[lane];
+        if (pr > 0 && x) x.glow(c, lx, RY, 20, COL[lane], 0.8);
+        arrowShape(c, lx, RY, lane, who === 'me' ? 12 : 9, pr > 0 ? COL[lane] : 'rgba(20,24,50,.75)', pr > 0 ? '#fff' : 'rgba(255,255,255,.5)');
+        if (who === 'me' && x) x.ilus(c, S.ins[lane][0], lx, 212, 13, { alpha: 0.85 }); // instrumento de cada seta
       });
-      if (X && lastJudge && lastJudge.at !== sc._fxAt) { sc._fxAt = lastJudge.at; if (lastJudge.lane != null) { const ln = LX[lastJudge.lane]; X.ring(ln, HIT, S.color, 26); X.sparkle(ln, HIT, S.color, lastJudge.t === 'BOM' ? 2 : 5); } }
-      if (lastJudge && sc.t - lastJudge.at < 0.6) { const k = (sc.t - lastJudge.at) / 0.6; c.save(); c.translate(300, 114); const sc2 = k < 0.15 ? 0.6 + k * 4 : 1.2 - Math.min(0.2, (k - 0.15)); c.scale(sc2, sc2); g.text(lastJudge.t, 0, -4, { size: 9, color: lastJudge.c, align: 'center' }); c.restore(); }
-      if (combo > 2) g.text('combo ' + combo, 300, 126, { size: 6, color: '#fff', align: 'center' });
-      g.text('T tambor  S sino  P palmas', 300, 4, { size: 4, color: '#ccc', align: 'center' }); g.text('C chocalho  B berimbau', 300, 12, { size: 4, color: '#ccc', align: 'center' });
+      notes.forEach((n) => {
+        if (n.who !== who) return;
+        if (n.judged && !(n.hit && n.hold && holding[n.lane] === n)) return;
+        const y = RY + (n.t - songT) * S.speed; if (y > E.H + 20 || (y < RY - 30 && !n.hold)) return;
+        const lx = xs[n.lane], s = who === 'me' ? 12 : 9;
+        if (n.hold) { const y2 = RY + (n.t + n.hold - songT) * S.speed; c.fillStyle = COL[n.lane] + 'aa'; c.fillRect(lx - s * 0.3, Math.max(RY, y), s * 0.6, Math.max(0, y2 - Math.max(RY, y))); }
+        if (n.judged) return;
+        if (x) x.glow(c, lx, y, s * 1.4, n.gold || fever > 0 ? '#ffd23f' : COL[n.lane], 0.5);
+        arrowShape(c, lx, y, n.lane, s, n.gold ? '#ffd23f' : fever > 0 ? 'hsl(' + ((sc.t * 400 + n.lane * 90) % 360) + ',90%,60%)' : COL[n.lane], '#fff');
+      });
+    }
+    sc.draw = function (g) {
+      const c = g.ctx(), x = X(), S = SONGS[Math.min(si, 2)];
+      const beat = playing ? Math.abs(Math.sin(songT * Math.PI * S.bpm / 60)) : 0;
+      const bg = c.createLinearGradient(0, 0, 0, E.H); bg.addColorStop(0, fever > 0 ? '#3a0a4a' : '#1a0c33'); bg.addColorStop(1, fever > 0 ? '#7a1a3a' : GG.pixel.shade(S.color, -120)); c.fillStyle = bg; c.fillRect(0, 0, E.W, E.H);
+      if (x) {
+        c.save(); c.globalCompositeOperation = 'lighter';
+        for (let i = 0; i < 4; i++) { const bx = 130 + i * 45, a = Math.sin(sc.t * (1 + i * 0.3) + i) * 0.5; const gr = c.createLinearGradient(bx, 0, bx + Math.sin(a) * 160, 190); gr.addColorStop(0, COL[i] + '55'); gr.addColorStop(1, COL[i] + '00'); c.fillStyle = gr; c.globalAlpha = 0.5 + beat * 0.4; c.beginPath(); c.moveTo(bx - 2, 0); c.lineTo(bx + 2, 0); c.lineTo(bx + Math.sin(a) * 160 + 26, 190); c.lineTo(bx + Math.sin(a) * 160 - 26, 190); c.closePath(); c.fill(); }
+        c.restore();
+        if (fever > 0 && !E.reduced) { c.save(); c.globalAlpha = 0.22 + 0.15 * beat; c.fillStyle = 'hsl(' + (sc.t * 200 % 360) + ',80%,55%)'; c.fillRect(0, 0, E.W, E.H); c.restore(); if (Math.random() < 0.3) E.fx.confetti(U.rand(40, 360), -5, 3); }
+      }
+      // enfeites de cada festa
+      if (S.deco === 'bandeiras') { c.strokeStyle = 'rgba(255,255,255,.4)'; c.beginPath(); c.moveTo(126, 34); c.quadraticCurveTo(200, 54, 240, 34); c.stroke(); for (let i = 0; i < 7; i++) { const fx = 132 + i * 15, fy = 36 + Math.sin((i + 0.5) / 7 * Math.PI) * 9; g.rect(fx, fy, 8, 9, i % 2 ? '#e5484d' : '#fff'); } }
+      if (S.deco === 'roda') { c.strokeStyle = 'rgba(255,255,255,.25)'; c.beginPath(); c.ellipse(200, 176, 64, 10, 0, 0, Math.PI * 2); c.stroke(); }
+      if (S.deco === 'chocalhos' && x) for (let i = 0; i < 4; i++) x.ilus(c, 'maracas', 140 + i * 40, 42 + Math.sin(sc.t * 6 + i) * 3, 14);
+      c.fillStyle = '#2a1a10'; c.fillRect(0, 186, E.W, 39); c.fillStyle = '#5a3a20'; c.fillRect(0, 182, E.W, 5);
+      if (x) { [[118, 162], [282, 162]].forEach(([sx, sy]) => x.ilus(c, S.ins[0][0], sx, sy + beat * -2, 26 + beat * 4, { shadow: true })); }
+      P.crowd().slice(0, 10).forEach((pp, i) => g.img(P.front(Object.assign({}, pp, { frame: Math.floor(sc.t * 4 + i) % 2 })), 118 + i * 17, 196 - beat * (i % 2 ? 5 : 2)));
+      const bp = pose.botT > 0 ? pose.bot : -1, mp = pose.meT > 0 ? pose.me : -1;
+      const off = (l) => (l === 0 ? [-3, 0] : l === 1 ? [0, 3] : l === 2 ? [0, -5] : l === 3 ? [3, 0] : [0, 0]);
+      const ob = off(bp), om = off(mp);
+      g.img(P.geobot(bp >= 0 ? 3 : Math.floor(sc.t * 4) % 3), 150 + ob[0], 150 - beat * 3 + ob[1], { scale: 1.6 });
+      g.img(C.gabrielSide(ctx.look, mp === -2 ? 'idle' : mp >= 0 ? 'jump' : 'run', sc.t), 222 + om[0], 150 - beat * 3 + om[1], { scale: 1.6, flip: true });
+      if (mp === -2) g.text('?', 236, 136, { size: 8, color: '#ff6b6b' });
+      g.rect(10, 26, 112, 150, 'rgba(0,0,0,.25)'); g.rect(242, 26, 136, 196, 'rgba(0,0,0,.3)');
+      drawLanes(c, g, BX, 'bot'); drawLanes(c, g, PX, 'me');
+      g.text('GEOBOT', 64, 14, { size: 6, color: '#9aa7c7', align: 'center' }); g.text('VOCÊ', 310, 14, { size: 6, color: '#ffd23f', align: 'center' });
+      g.panel(130, 6, 140, 10, '#15152a', '#15152a'); g.rect(132, 8, 136, 6, '#9aa7c7'); g.rect(132 + 136 * (1 - bar), 8, 136 * bar, 6, '#ffd23f');
+      if (x) { x.ilus(c, 'robo', 132 + 136 * (1 - bar) - 7, 11, 14); x.ilus(c, 'estrela', 132 + 136 * (1 - bar) + 7, 11, 12); }
+      g.text(S.name.toUpperCase(), 64, 184, { size: 6, color: S.color, align: 'center' }); g.text('Música ' + (Math.min(si, 2) + 1) + '/3 • ' + S.origin, 64, 194, { size: 4, color: '#fff', align: 'center' });
+      g.text(String(score), 238, 186, { size: 8, color: '#fff', align: 'right' });
+      if (combo > 2) g.text('COMBO ' + combo + (mult > 1 ? '  x' + mult : ''), 238, 198, { size: 6, color: fever > 0 ? '#ffd23f' : '#9ff2ff', align: 'right' });
+      if (fever > 0) g.text('MODO FESTA!', 200, 64, { size: 9, color: 'hsl(' + (sc.t * 300 % 360) + ',90%,65%)', align: 'center' });
+      const nxtMe = notes.find((n) => n.who === 'me' && !n.judged), nxtBot = notes.find((n) => n.who === 'bot' && !n.judged);
+      if (playing && nxtBot && (!nxtMe || nxtBot.t < nxtMe.t) && nxtBot.t - songT < 1.2) g.text('VEZ DO GEOBOT', 200, 28, { size: 6, color: '#9aa7c7', align: 'center' });
+      else if (playing && nxtMe && nxtMe.t - songT < 1.4 && (!nxtBot || nxtMe.t < nxtBot.t)) g.text('SUA VEZ!', 200, 26, { size: 8, color: '#ffd23f', align: 'center' });
+      if (judge && sc.t - judge.at < 0.5) { const k = (sc.t - judge.at) / 0.5; c.save(); c.globalAlpha = 1 - k; g.text(judge.t, 310, 64 - k * 8, { size: 8, color: judge.c, align: 'center' }); c.restore(); }
+      if (playing && songT < 1.6) g.text(songT < 0.5 ? '3' : songT < 1 ? '2' : '1', 310, 110, { size: 16, color: '#ffd23f', align: 'center' });
     };
-    sc.dbg = { busy: () => busy, playing: () => playing, autoplay() { notes.forEach((n) => { n.judged = n.hit = true; hits.p++; }); songT = 999; } };
+    sc.dbg = { busy: () => busy, playing: () => playing, autoplay() { notes.forEach((n) => { if (!n.judged) { n.judged = true; if (n.who === 'me') { n.hit = true; hits.p++; songHits.p++; score += 100; } } }); bar = 1; songT = 999; }, state: () => ({ si, bar, combo, score, fever, total, hits, wins }), peek: () => ({ songT, notes }) };
     return sc;
   };
 })();

@@ -1,7 +1,7 @@
 {
   "ok": true,
   "profile": "erros",
-  "minutos": "1.3",
+  "minutos": "1.2",
   "errs": [],
   "coverage": {
     "done": 45,
@@ -14,24 +14,24 @@
   "trophies": [
     "guardiao_diversidade"
   ],
-  "coins": 683,
-  "earned": 683,
-  "xp": 5485,
+  "coins": 688,
+  "earned": 688,
+  "xp": 5525,
   "level": {
     "lvl": 9,
     "title": "Lenda do Atlas",
     "cur": 5200,
     "next": 6300,
-    "pct": 0.2590909090909091
+    "pct": 0.29545454545454547
   },
   "medals": {
     "bronze": 6,
     "prata": 9,
     "ouro": 1
   },
-  "firstTry": 2,
-  "helped": 38,
-  "attempts": 121,
+  "firstTry": 3,
+  "helped": 37,
+  "attempts": 119,
   "geobot": {
     "vitorias": 2,
     "corridas": 2,
@@ -44,15 +44,15 @@
     "atlasDourado"
   ],
   "tiers": {
-    "1": 7,
-    "3": 38
+    "1": 8,
+    "3": 37
   },
   "doneIn": {
     "aventura": 45
   },
   "cie": "{\"v\":1,\"name\":\"Gabriel\",\"map\":\"r3\",\"q\":{\"L1-Q1\":{\"done\":true}},\"crystals\":[\"r1\",\"r2\"],\"medals\":[],\"storyDone\":false,\"coins\":321,\"marker\":\"ciencias-intocado\"}",
   "geoKey": true,
-  "txt": 6704,
+  "txt": 6654,
   "apLog": [],
   "hard": [
     "GEO-C1-Q01 nível 3 tentativas 3",
@@ -71,7 +71,6 @@
     "GEO-C2-Q01 nível 3 tentativas 3",
     "GEO-C2-Q02 nível 3 tentativas 3",
     "GEO-C2-Q03 nível 3 tentativas 3",
-    "GEO-C2-Q16 nível 3 tentativas 3",
     "GEO-C2-Q04 nível 3 tentativas 3",
     "GEO-C2-Q12 nível 3 tentativas 3",
     "GEO-C2-Q13 nível 3 tentativas 3",
