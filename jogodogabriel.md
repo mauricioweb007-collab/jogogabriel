@@ -48,8 +48,13 @@ Marcações: **[não confirmado]** indica algo não verificado; **[pendente]** i
     - Faça antes `read` e `list` com `scope: "files"`.
     - Depois publique com `url` do artifact, `file_path` = `inicio.html` e `files` só com os arquivos alterados. O limite é de 255 arquivos por envio; se passar disso, mande em lotes.
     - Registre a nova versão aqui.
-  - **Versão publicada:** **8** (24/09/2026): correções das fases 3-2 e 3-4 de Geografia (seção 8.1).
+  - **Versão publicada:** **9** (24/09/2026): Geografia arcade (seção 8.2).
+    - Labirintos no estilo Pac-Man.
+    - Chefes novos.
+    - Ritmo Livre refeito.
+    - Cidade 3-2 com mais desafio.
   - **Histórico de versões:**
+    - v8: correções das fases 3-2 e 3-4 (seção 8.1).
     - v7: gráficos novos e Parque do Atlas (commit `b0f3e3e`, 72 arquivos).
     - v6: Nexus oculto.
   - **Permissão:** o usuário liberou a ferramenta Artifact nas configurações da sessão. Se um envio for bloqueado de novo, peça ao usuário para liberar a permissão; não contorne o bloqueio.
@@ -160,7 +165,7 @@ node src/tests/gen-tabela-geografia.cjs                        # tabela das 45 q
 - Plataforma v2 (lançador, registro, core, motor de questões).
 - Geografia (45 questões, 16 fases).
 - **Gabriel Nexus** (seção 7): entrada pelo nome, perfil global, ponte de pontuação, 21 Nexóticos, hub e 8 áreas, 4 jogos recreativos, Fliperama com replays das matérias e torneios, Área dos Pais com sandbox. Depois, **ocultado para a criança** a pedido do usuário.
-- Link único publicado (**versão 8**: Geografia gráfica, Parque do Atlas e correções das fases 3-2 e 3-4).
+- Link único publicado (**versão 9**: Geografia gráfica, Parque do Atlas, correções e modo arcade da seção 8.2).
 - Documentos atualizados: `COMECE-AQUI.md`, `COMO-ADICIONAR-MATERIA.md`, `CREDITOS.md`.
 
 - **Geografia — melhoria gráfica e Parque do Atlas** (seção 8), a pedido do usuário.
@@ -563,3 +568,96 @@ node src/tests/gen-tabela-geografia.cjs                        # tabela das 45 q
   - O totem do andar 8 foi para x=14.
 - **Não mudou:** questões, textos e dados da tabela.
 - **Verificação:** um robô subiu os andares 1 e 2 pelo teclado, pulando degrau por degrau. Testes `features`, `e2e` nos 3 perfis, `layouts` e `parque` OK.
+
+### 8.2 Geografia no modo arcade (24/09/2026, pedido do usuário)
+**Cartão de leitura** (`GEO.gfx.readCard`, em `gfx/gfx.js` + `gfx.css`)
+- Janela que **pausa o jogo** com desenho grande, nome e texto.
+- Continua com **qualquer tecla**, com um toque fora da janela ou com o botão "Continuar ▶". Tem também o botão "Ouvir".
+- Usada nos labirintos (item coletado) e nos chefes (placas).
+
+**Labirintos estilo Pac-Man** (`scenes/maze.js`: fases 2-1 e 3-3 e sala bônus b3)
+- **Monstro encosta no Gabriel:**
+  - aparece "PEGO!" e o Gabriel gira;
+  - Gabriel e monstros **voltam ao início**, sem perder item, carga nem pontos;
+  - depois vem "PRONTO? / VAI!".
+- **4 poderes por conjunto** (Empatia ou Escudo, 7 s):
+  - a música troca para `labirinto_poder` (bem mais rápida);
+  - os monstros ficam **azuis**, fogem e piscam no fim do poder;
+  - comido, o monstro vira **olhos**, que voltam à **base** (casa 12,5) pelo menor caminho e renascem depois de 2,5 s;
+  - os pontos dobram a cada monstro comido.
+- **Monstros com jeito próprio:** um persegue direto, outro corta o caminho à frente e o terceiro é tímido.
+- **Itens e altares com desenho + nome:**
+  - itens: rede (desenho próprio), balangandãs (joia), refeição, pomba do Divino, samba (dançarina), toré (maracá), pena, atabaque e bandeira da Alemanha;
+  - altares: pena (indígena), globo com a África, bandeira de Portugal e **mini mapas** destacando Norte, Nordeste e Sul;
+  - na fase 3-3: raio e casas.
+- **Pegar item** abre o cartão "ITEM COLETADO!" com o nome e os altares possíveis.
+- **Extras:** "chomp" ao comer pontinhos e bônus "LIMPOU TUDO!".
+
+**Chefes** (`scenes/boss.js`)
+- **Leitura:** as placas surgem e o jogo **pausa no cartão** com as 3 frases. O botão "📜 Reler placas" reabre o cartão.
+- **Posição das placas:**
+  - ficam **na frente do chefe**, uma em cada altura (chão, meio e alto), alinhadas com os níveis das plataformas;
+  - ao **mirar**, a frase aparece numa faixa embaixo da tela.
+- **Ataques com aviso vermelho:** tiro triplo mirado, chuva, onda no chão ("PULE!") e investida.
+- **Fase final:** vida do chefe com "FÚRIA" abaixo de 50%.
+- **Surpresas:** cada placa **verdadeira** atingida por engano causa uma surpresa em rodízio, sem fazer perder a fase:
+  - chuva de rótulos;
+  - chefe furioso (disparos em círculo);
+  - terremoto (ondas);
+  - apagão (só a luz do Gabriel);
+  - placas embaralhadas.
+- **Faixas de anúncio:** SOBREVIVA, ESCUDO QUEBRADO, ATAQUE FINAL e as surpresas.
+
+**Ritmo Livre** (sala bônus b2; `scenes/ritmolivre.js`, motor `ritmolivre`)
+- **Batalha de ritmo contra o GeoBot**, inspirada nos jogos de ritmo de sucesso:
+  - 4 setas (← ↓ ↑ → ou A S W D);
+  - "vez do GeoBot / sua vez";
+  - barra de disputa;
+  - notas longas e notas douradas;
+  - combo com multiplicador até x4;
+  - **Modo Carnaval** no combo 25.
+- **3 rodadas:** Frevo (118 bpm), Samba (132) e Carnaval (146), com músicas originais.
+- **Resultado:** nota S/A/B/C e medalha pelo aproveitamento.
+- **A fase 2-3 (Ritmos do Brasil) não mudou.**
+
+**Cidade 3-2** (`scenes/city.js`)
+- **Trânsito:**
+  - carros, ônibus e caminhão nas duas mãos;
+  - **semáforo** (os carros param no vermelho);
+  - o trânsito acelera 12% a cada entrega, até +60%.
+- **Obstáculos:**
+  - **cones de obra** que bloqueiam a rua;
+  - **batida derruba o recurso** (é preciso pegá-lo de novo).
+- **Bônus:**
+  - **entrega expressa** (14 s, barra sobre o Gabriel);
+  - moedas;
+  - **bicicleta turbo**.
+- **Animações:**
+  - pedestres e faixas de pedestre;
+  - **obra animada** em cada entrega: andaime subindo, poeira e corações dos moradores.
+- **O Gabriel começa na calçada.**
+
+**Arquivos:**
+- **Novos:**
+  - `scenes/ritmolivre.js`.
+  - Ilustrações adicionadas ao atlas (`fluent3d.png`/`.js`, 236): pomba, refeição, pena, África, escudo, caixa de som, globo de discoteca, cone, caminhão, bandeiras (Kenney), rede e outras.
+- **Alterados:**
+  - `scenes/maze.js`, `boss.js`, `city.js`.
+  - `gfx/gfx.js`, `gfx.css`.
+  - `content/capitulos.js` (b2 usa `ritmolivre`).
+  - `manifest.js` (texto de b2) e `jogar.html`.
+- **Questões e textos pedagógicos não mudaram.**
+
+**Testes:**
+- `features` ✓.
+- `e2e` otimo, erros e rapido: 45/45 questões e 16/16 fases.
+- `layouts` OK.
+- `parque` ✓.
+- Regressão de Ciências idêntica.
+- Scripts no navegador confirmaram:
+  - cartão do item + qualquer tecla;
+  - morte e volta ao início mantendo o item;
+  - poder, música rápida e "olhos" voltando à base;
+  - cartão das placas e as surpresas;
+  - robô tocando as 3 rodadas do Ritmo Livre;
+  - b2 e b3 chegando ao resultado.

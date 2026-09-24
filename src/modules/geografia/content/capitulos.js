@@ -130,7 +130,7 @@
   /** Salas bônus (opcionais) liberadas por medalhas de ouro no capítulo. */
   D.bonus = [
     { id: 'b1', ch: 1, title: 'Corrida Relâmpago', engine: 'race', theme: 'estrada', music: 'corrida', style: 'Desafio opcional contra o GeoBot', need: 3, bonus: true, questions: [] },
-    { id: 'b2', ch: 2, title: 'Ritmo Livre', engine: 'rhythm', theme: 'ritmos', music: null, style: 'Desafio opcional de ritmo', need: 3, bonus: true, questions: [] },
+    { id: 'b2', ch: 2, title: 'Ritmo Livre', engine: 'ritmolivre', theme: 'ritmos', music: null, style: 'Batalha de ritmo contra o GeoBot', need: 3, bonus: true, questions: [] },
     { id: 'b3', ch: 3, title: 'Labirinto Relâmpago', engine: 'maze', theme: 'energia', music: 'labirinto', style: 'Desafio opcional de labirinto', need: 3, bonus: true, questions: [] }
   ];
   D.bonus.forEach((b) => { D.stageById[b.id] = b; });

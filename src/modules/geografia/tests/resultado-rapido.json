@@ -1,7 +1,7 @@
 {
   "ok": true,
   "profile": "rapido",
-  "minutos": "0.5",
+  "minutos": "0.6",
   "errs": [],
   "coverage": {
     "done": 45,

@@ -114,6 +114,32 @@
     void k; return sp;
   };
 
+  /**
+   * CARTÃO DE LEITURA (pausa o jogo): desenho grande + nome + texto. Fecha com QUALQUER tecla,
+   * clique/toque fora ou no botão. o: {icon, canvas, kicker, title, lines[], hint, color, cls}
+   * Retorna Promise. Enquanto aberto, UI.blocking() é true e o motor fica pausado.
+   */
+  X.readCard = function (o) {
+    return new Promise((res) => {
+      const U = GG.util, t0 = Date.now();
+      let closed = false;
+      const done = () => { if (closed) return; closed = true; m.close(); };
+      const m = GG.ui.modal({ title: o.kicker || '', cls: 'small readcard ' + (o.cls || ''), noClose: true, onClose: () => { closed = true; GG.input.clear(); res(); },
+        onKey: (ev) => { if (Date.now() - t0 < 350) return true; if (['Tab', 'Shift', 'Alt', 'Control', 'Meta'].includes(ev.key)) return false; ev.preventDefault(); ev.stopPropagation(); done(); return true; } });
+      m.el.style.setProperty('--rc', o.color || '#ffd23f');
+      const art = U.el('div', { class: 'rc-art' });
+      if (o.canvas) art.appendChild(o.canvas); else if (o.icon && X.has(o.icon)) art.appendChild(X.el(o.icon, 96));
+      m.body.appendChild(art);
+      if (o.title) m.body.appendChild(U.el('div', { class: 'rc-title' }, o.title));
+      (o.lines || []).forEach((l) => { const pEl = U.el('p', { class: 'rc-line' }); pEl.innerHTML = String(l).replace(/[<>&]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c])).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>'); m.body.appendChild(pEl); });
+      m.body.appendChild(U.el('p', { class: 'rc-hint' }, o.hint || 'Aperte qualquer tecla ou toque para continuar'));
+      const speak = [o.title].concat(o.lines || []).filter(Boolean).join('. ');
+      m.setActions([GG.tts && GG.tts.supported() ? GG.ui.btn('🔊 Ouvir', 'ghost small', () => GG.tts.speak(speak)) : null, GG.ui.btn('Continuar ▶', 'pri', done)]);
+      m.wrap.addEventListener('pointerdown', (ev) => { if (ev.target === m.wrap && Date.now() - t0 > 350) done(); });
+      GG.audio.sfx('check');
+    });
+  };
+
   /* ================================================================ luz */
   /** Brilho radial aditivo. */
   X.glow = function (c, x, y, r, color, a) {

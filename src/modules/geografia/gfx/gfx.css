@@ -53,3 +53,22 @@
 .pq-card::after { content: ''; position: absolute; top: -40%; left: -60%; width: 40%; height: 180%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent); transform: rotate(20deg); animation: gSweep 4s ease-in-out infinite; pointer-events: none; }
 @keyframes gSweep { 0%, 60% { left: -60%; } 100% { left: 140%; } }
 body.rm .ilus, body.rm .pq-card, body.rm .pq-card::after, body.rm .res-shine, body.rm .res-3d, body.rm .res-stars .st, body.rm .np-hero .ilus { animation: none !important; }
+
+/* cartão de leitura (pausa com qualquer tecla) */
+.modal.readcard { text-align: center; background: radial-gradient(circle at 50% 0%, #2e3680, #161a3c 70%); box-shadow: 0 0 0 3px #0a0c1c, 0 0 0 6px var(--rc, #ffd23f), 0 0 40px color-mix(in srgb, var(--rc, #ffd23f) 55%, transparent), 0 18px 40px rgba(0,0,0,.6); animation: rcPop .35s cubic-bezier(.2,1.6,.4,1); }
+.readcard .m-head { justify-content: center; } .readcard .m-title { text-align: center; color: var(--rc, #ffd23f); flex: 0 1 auto; }
+.readcard .rc-art { display: grid; place-items: center; min-height: 100px; margin: 2px 0 6px; }
+.readcard .rc-art .ilus { animation: gFloat 2.4s ease-in-out infinite; filter: drop-shadow(0 6px 10px rgba(0,0,0,.5)); }
+.readcard .rc-art canvas { width: 150px; height: auto; image-rendering: auto; border-radius: 10px; }
+.readcard .rc-title { font-family: var(--pix); font-size: calc(15px * var(--fs)); line-height: 1.5; color: #fff; text-shadow: 0 2px 0 #000; margin: 4px 0 8px; }
+.readcard .rc-line { font-size: calc(18px * var(--fs)); font-weight: 800; margin: 6px 0; }
+.readcard .rc-line b { color: var(--rc, #ffd23f); }
+.readcard .rc-hint { font-size: .8em; color: var(--ink2); margin-top: 10px; animation: rcBlink 1.2s steps(2) infinite; }
+.readcard .m-actions { justify-content: center; }
+.readcard.plates .rc-line { text-align: left; background: rgba(255,255,255,.06); border-radius: 8px; padding: 6px 10px; }
+@keyframes rcPop { 0% { transform: scale(.6); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes rcBlink { 50% { opacity: .35; } }
+body.rm .modal.readcard, body.rm .readcard .rc-hint, body.rm .readcard .rc-art .ilus { animation: none !important; }
+/* botão para reler as placas do chefe */
+.boss-read { position: fixed; right: 12px; top: 84px; z-index: 30; box-shadow: 0 0 0 2px #0a0c1c, 0 0 14px rgba(159,242,255,.6); }
+body.in-stage.has-touch .boss-read { top: 70px; }
