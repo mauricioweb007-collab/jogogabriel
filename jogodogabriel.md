@@ -48,7 +48,8 @@ Marcações: **[não confirmado]** indica algo não verificado; **[pendente]** i
     - Faça antes `read` e `list` com `scope: "files"`.
     - Depois publique com `url` do artifact, `file_path` = `inicio.html` e `files` só com os arquivos alterados. O limite é de 255 arquivos por envio; se passar disso, mande em lotes.
     - Registre a nova versão aqui.
-  - **Versão publicada:** 6 (Nexus oculto). **[pendente]** A versão 7, com os gráficos novos e o Parque de Geografia (commit `b0f3e3e`, 72 arquivos), foi bloqueada pelo classificador de permissões da sessão, mesmo com o usuário autorizando. Publicar assim que a permissão da ferramenta Artifact estiver liberada.
+  - **Versão publicada:** **7** (24/09/2026): Geografia com os gráficos novos e o Parque do Atlas (commit `b0f3e3e`, 72 arquivos). Nexus continua oculto.
+  - **Permissão:** o usuário liberou a ferramenta Artifact nas configurações da sessão. Se um envio for bloqueado de novo, peça ao usuário para liberar a permissão; não contorne o bloqueio.
 
 ---
 
@@ -156,7 +157,7 @@ node src/tests/gen-tabela-geografia.cjs                        # tabela das 45 q
 - Plataforma v2 (lançador, registro, core, motor de questões).
 - Geografia (45 questões, 16 fases).
 - **Gabriel Nexus** (seção 7): entrada pelo nome, perfil global, ponte de pontuação, 21 Nexóticos, hub e 8 áreas, 4 jogos recreativos, Fliperama com replays das matérias e torneios, Área dos Pais com sandbox. Depois, **ocultado para a criança** a pedido do usuário.
-- Link único publicado (versão 6). **[pendente]** versão 7 (Geografia gráfica e Parque), bloqueada pela permissão da sessão; ver seção 1.
+- Link único publicado (**versão 7**: Geografia gráfica e Parque do Atlas).
 - Documentos atualizados: `COMECE-AQUI.md`, `COMO-ADICIONAR-MATERIA.md`, `CREDITOS.md`.
 
 - **Geografia — melhoria gráfica e Parque do Atlas** (seção 8), a pedido do usuário.
