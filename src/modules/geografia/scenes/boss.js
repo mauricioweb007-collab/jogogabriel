@@ -65,7 +65,7 @@
     let btn = null, shuffleN = 0;
     const pet = ctx.pet ? C.pet() : null;
     if (ctx.resume && ctx.resume.data && ctx.resume.data.si) { si = ctx.resume.data.si; shieldLeft = layers - steps.slice(0, si).filter((s) => s.k === 'q' || s.k === 'check').length; }
-    sc.exit = () => { if (btn) btn.remove(); };
+    sc.exit = () => { if (btn) btn.remove(); sheetOff(); };
     sc.begin = async function () {
       if (!ctx.resume) { ctx.checkpoint({ si: 0 }); await ctx.say('gaia', [def.bossName + ': “' + def.bossLine + '”', 'Pulsos: tecla **B / E / J** (ou botão B). Pule com **Espaço / A**. Fique de olho nos **avisos vermelhos**: eles mostram de onde vem o ataque!']); }
       startStep();
@@ -113,6 +113,34 @@
       btn = U.el('button', { type: 'button', class: 'btn small info boss-read', onclick: () => { if (!busy && plates.length) run(readPlates); } }, '📜 Reler placas');
       document.body.appendChild(btn);
     }
+    /* ---------------------------------------------------------------- painel fixo das placas (pedido do usuário, 24/09/2026)
+       A instrução e as frases A/B/C ficam SEMPRE visíveis num canto, pequenas, enquanto houver placas:
+       a criança não precisa decorar nem reabrir o cartão. Mostra a altura de cada placa, a mirada (🎯)
+       e as já destruídas (riscadas). Pode ser minimizado. HTML (texto nítido), atualizado só quando muda. */
+    let sheet = null, sheetSig = '', sheetMin = false;
+    function sheetOff() { if (sheet) { sheet.remove(); sheet = null; sheetSig = ''; } window.removeEventListener('resize', sheetPlace); }
+    function sheetPlace() {
+      if (!sheet) return;
+      const r = document.getElementById('game').getBoundingClientRect();
+      sheet.style.left = Math.round(r.left + 8) + 'px'; sheet.style.top = Math.round(r.top + r.height * 0.13) + 'px';
+      sheet.style.maxWidth = Math.round(Math.max(220, Math.min(400, r.width * 0.34))) + 'px';
+    }
+    function sheetSync(aim) {
+      if (!plates.length) { sheetOff(); return; }
+      const sig = plates.map((pl) => pl.letter + pl.alive + pl.lv).join() + '|' + (aim ? aim.letter : '') + '|' + sheetMin;
+      if (sig === sheetSig && sheet) return;
+      if (!sheet) { sheet = U.el('aside', { class: 'boss-sheet', 'aria-live': 'polite', 'aria-label': 'Placas do escudo' }); document.body.appendChild(sheet); window.addEventListener('resize', sheetPlace); }
+      sheetSig = sig; sheet.innerHTML = '';
+      const tog = U.el('button', { type: 'button', class: 'bs-min', 'aria-label': sheetMin ? 'Mostrar as placas' : 'Minimizar', title: sheetMin ? 'Mostrar' : 'Minimizar', onclick: () => { sheetMin = !sheetMin; sheetSync(aimed()); } }, sheetMin ? '＋' : '－');
+      sheet.appendChild(U.el('div', { class: 'bs-head' }, [U.el('b', null, '🛡️ Destrua só as FALSAS!'), tog]));
+      if (!sheetMin) {
+        sheet.appendChild(U.el('ul', null, plates.map((pl) => U.el('li', { class: (pl.alive ? '' : 'gone') + (aim === pl ? ' aim' : '') }, [
+          U.el('span', { class: 'bs-l' }, pl.letter), U.el('span', { class: 'bs-t' }, [U.el('i', null, LEVELS[pl.lv].name + ' • '), pl.alive ? pl.s.t : '✖ FALSA — destruída']), aim === pl ? U.el('span', { class: 'bs-aim', 'aria-label': 'mirando' }, '🎯') : null
+        ]))));
+        sheet.appendChild(U.el('p', { class: 'bs-tip' }, 'Placa verdadeira atingida = surpresa do chefe.'));
+      }
+      sheetPlace();
+    }
     function platesDone() { return plates.every((pl) => !pl.alive || pl.s.v); }
     function hitPlate(pl) {
       if (pl.s.v) {
@@ -126,7 +154,7 @@
       boss.hurt = 0.3; ctx.learnPts += 25; GEO.campaign.recordCheck(true, 'Placas de chefe — ' + def.title); GEO.eco.award(20, 2, 'Placa falsa', GEO.eco.replayFactor(def.id));
       if (pl.s.fb) GG.ui.toast('✔ Corrigido: ' + pl.s.fb, 'ok', 3200);
       ctx.hud();
-      if (platesDone()) { plates.length = 0; if (btn) { btn.remove(); btn = null; } run(async () => { await ctx.say('gaia', ['Placas falsas destruídas! O escudo trincou.']); next(); }); }
+      if (platesDone()) { plates.length = 0; sheetOff(); if (btn) { btn.remove(); btn = null; } run(async () => { await ctx.say('gaia', ['Placas falsas destruídas! O escudo trincou.']); next(); }); }
     }
     /** Surpresa diferente a cada erro: muda o jogo por alguns segundos, sem fazer perder a fase. */
     function surprise() {
@@ -232,6 +260,7 @@
       });
       // placas (na frente do chefe, uma por altura)
       const aim = aimed();
+      sheetSync(aim);
       plates.forEach((pl) => {
         if (!pl.alive) return;
         const bob = Math.sin(sc.t * 2 + pl.lv) * 2, yy = pl.y + bob;

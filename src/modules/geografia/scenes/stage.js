@@ -258,8 +258,10 @@
         b.appendChild(U.el('ul', { class: 'res-q' }, ctx.results.map((x) => { const q = GEO.campaign.qById(x.id); return U.el('li', null, (x.personal ? '💬 ' : x.tier === 1 ? '⭐⭐⭐ ' : x.tier === 2 ? '⭐⭐ ' : '⭐ ') + q.id + ' — ' + q.title); })));
       }
       if (r.rewards.bonusUnlocked) b.appendChild(U.el('p', { class: 'res-rec' }, '🎁 Sala bônus liberada: ' + r.rewards.bonusUnlocked.title + '!'));
-      // 100% de acerto: parabéns + 1 giro grátis na Roleta da Sorte (scenes/roleta.js)
-      const perfect = GEO.parque && GEO.parque.isPerfect && GEO.parque.isPerfect(ctx);
+      // 100% de acerto: parabéns + 1 giro grátis na Roleta da Sorte (scenes/roleta.js).
+      // Nas fases de CHEFE não há roleta (pedido do usuário, 24/09/2026): vencer o chefe já dá o bilhete do Arcade,
+      // em que a criança ESCOLHE o jogo; roleta + bilhete faziam o minijogo aparecer 2 vezes.
+      const perfect = def.engine !== 'boss' && GEO.parque && GEO.parque.isPerfect && GEO.parque.isPerfect(ctx);
       const spin = perfect && GEO.parque.awardPerfect(def.id);
       if (perfect) {
         b.insertBefore(U.el('div', { class: 'res-perfect' }, [U.el('b', { class: 'pix' }, '🎉 PARABÉNS! 100% DE ACERTO NESTA FASE!'),

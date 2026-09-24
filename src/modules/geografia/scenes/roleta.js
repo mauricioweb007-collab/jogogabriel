@@ -30,6 +30,8 @@
   /** Dá o giro (1 por fase por dia). Retorna true se deu. */
   PQ.awardPerfect = function (stageId) {
     if (GEO.mode && GEO.mode.isReplay && GEO.mode.isReplay()) return false;
+    // fases de chefe nunca dão giro: o prêmio delas é o bilhete do Arcade (escolhido pela criança)
+    const st = (GEO.data.stages || []).find((x) => x.id === stageId); if (st && st.engine === 'boss') return false;
     const f = flags(); f.spinDays = f.spinDays || {};
     const day = U.today();
     if (f.spinDays[stageId] === day) return false;

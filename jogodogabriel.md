@@ -207,6 +207,10 @@ node src/modules/ingles/tests/ingles.cjs otimo|erros           # Inglês: conte�
 **Em andamento:** nada.
 
 **Problemas conhecidos e limitações**
+- **[pendente, a pedido do usuário: “deixe para depois”] Congelamento às vezes no Chrome (Geografia)**: a tela congela e só volta com F5; é aleatório, mais em questões de alternativas, ao escolher, selecionar texto ou pedir dica. **Não reproduzido** nos testes (Chromium sem GPU): seleção, clique fora e resposta funcionaram. Suspeitas para investigar, com as correções testadas e **desfeitas** por pedido do usuário:
+  - o jogo continua redesenhando o cenário 60 vezes por segundo por trás da janela da questão (`src/core/engine.js`); a correção seria redesenhar ~5×/s com janela aberta e nada com a aba escondida;
+  - o agendador de música (`src/core/audio.js`) “recupera” de uma vez todas as notas perdidas quando a aba volta do segundo plano; a correção seria pular para agora (`if (nextT < ctx.currentTime) nextT = ctx.currentTime + 0.05`) e limitar o laço.
+  - Para confirmar, pedir ao usuário: navegador e computador, se havia outra aba aberta antes, e o que aparece no Console (F12) quando congela.
 - **Sem teste com uma pessoa real.** Só testes automáticos. **[não confirmado]** ritmo, dificuldade, preços e textos na prática.
 - **Senha dos pais no navegador = barreira familiar**, não segurança forte (o projeto é estático, sem servidor).
 - O modo de teste vive no `sessionStorage` **da aba**: abrir outra aba não carrega o modo de teste.
@@ -923,6 +927,15 @@ A sessão dos pais é simulada no `sessionStorage`; a senha não é usada nem gu
   - foi recomendado ao usuário trocar a chave no painel da ElevenLabs, porque ela ficou escrita no chat.
 - **Se ele pedir de novo:** só com os arquivos de áudio gerados fora do jogo, nunca com a chave no jogo.
 
+
+
+### 8.10 Chefes: painel fixo das placas e sem roleta (24/09/2026, pedido do usuário)
+- **Problema 1:** na tela do chefe, depois que o cartão “Placas do escudo” fechava, as frases A/B/C sumiam; a criança não sabia mais em quais placas atirar.
+  - **Correção (`scenes/boss.js` + `gfx/gfx.css`):** painel pequeno `.boss-sheet` no **canto superior esquerdo** da tela do jogo, **sempre visível** enquanto há placas: “🛡️ Destrua só as FALSAS!”, cada placa com letra, altura (chão/meio/alto) e frase; a placa mirada fica destacada com 🎯; as destruídas ficam riscadas (“✖ FALSA — destruída”); acompanha a surpresa “placas embaralhadas”; botão **－/＋** para minimizar; some quando as placas falsas acabam. Texto em HTML (nítido), atualizado só quando algo muda. O botão “📜 Reler placas” continua.
+- **Problema 2:** vencer um chefe com 100% dava **giro na Roleta** e também o **bilhete do Arcade**: o minijogo aparecia duas vezes.
+  - **Correção:** fases de chefe (`engine: 'boss'`) **não dão giro** (`scenes/stage.js` e `PQ.awardPerfect` em `scenes/roleta.js`). Fica só o bilhete, em que a criança **escolhe** o jogo. As outras fases continuam dando giro no 100%.
+- **Teste novo:** `node src/modules/geografia/tests/chefe.cjs` (painel com as 3 placas e a instrução, no canto, riscando a destruída, minimizar, some no fim; chefe sem giro; fase comum com giro; sem erros).
+- **Não mudou:** questões, placas, dificuldade e economia.
 
 ---
 
