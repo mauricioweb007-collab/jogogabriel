@@ -41,6 +41,8 @@ Marcações: **[não confirmado]** indica algo não verificado; **[pendente]** i
 
 - **Biblioteca de minijogos (regra permanente, pedido do usuário em 24/09/2026):** o código de todos os minijogos fica em `docs/MINIGAMES-CODIGO.md`, para reaproveitar em outras matérias com outro tema. Ao criar ou mudar um minijogo, rode `node src/tools/gen-minigames-md.cjs` na mesma entrega. O guia de reaproveitamento está na seção 8.8.
 
+- **Chaves de API e segredos (regra permanente):** **nunca** gravar chave de API (ElevenLabs, OpenAI etc.) no repositório, no código do jogo ou no link publicado. O link é aberto a quem tem o endereço, e qualquer pessoa conseguiria copiar a chave. Se um dia houver voz gerada por serviço externo, gerar os arquivos de áudio fora do jogo, com a chave numa variável de ambiente da sessão, e publicar só os arquivos.
+
 **Regras de git (permanentes)**
 - Só fazer push em `claude/adoring-galileo-w55t2f` do repositório `jogogabriel`.
 - O repositório `diario` foi a "pasta errada": nada vai para ele.
@@ -178,10 +180,22 @@ node src/tests/gen-tabela-geografia.cjs                        # tabela das 45 q
 - Plataforma v2 (lançador, registro, core, motor de questões).
 - Geografia (45 questões, 16 fases).
 - **Gabriel Nexus** (seção 7): entrada pelo nome, perfil global, ponte de pontuação, 21 Nexóticos, hub e 8 áreas, 4 jogos recreativos, Fliperama com replays das matérias e torneios, Área dos Pais com sandbox. Depois, **ocultado para a criança** a pedido do usuário.
-- Link único publicado (**versão 10**: Geografia gráfica, Parque, modo arcade e Arcade dos Mundos com entrada por moedas ou perguntas).
+- Link único publicado, **versão 14**: Geografia gráfica, Parque, modo arcade, Arcade dos Mundos (17 minijogos no total), Roleta da Sorte do 100%, fase 2-3 como batalha de ritmo e Área dos Pais com todo o conteúdo novo. O histórico de versões está na seção 1.
 - Documentos atualizados: `COMECE-AQUI.md`, `COMO-ADICIONAR-MATERIA.md`, `CREDITOS.md`.
 
-- **Geografia — melhoria gráfica e Parque do Atlas** (seção 8), a pedido do usuário.
+- **Geografia: melhoria gráfica, Parque, modo arcade e minijogos** (seção 8, de 8.1 a 8.9), a pedido do usuário.
+  - **Minijogos (17):**
+    - **Parque**: Memória, Voo da Arara, Cesta da Feira e Quebra-cabeça do Brasil;
+    - **Mundo 1**: Jangada Radical, Colunas do Mosaico, Quebra-Mosaico e Travessia do Rio;
+    - **Mundo 2**: Feira Ninja, Quermesse e Pega-Névoa;
+    - **Mundo 3**: Estrada Brasil, Invasores da Poluição, Empilha-Prédios e Pinball da Floresta;
+    - **Bônus**: Ritmo Livre (b2), Corrida Relâmpago (b1) e Labirinto Relâmpago (b3).
+  - **Regras dos minijogos:**
+    - liberação pelo chefe de cada mundo;
+    - entrada por 70 EcoMoedas ou 2 perguntas, com bilhete grátis depois do chefe;
+    - tudo livre depois do estudo concluído;
+    - Roleta da Sorte no 100% de acerto.
+  - **Código reaproveitável:** `docs/MINIGAMES-CODIGO.md` (gerador em `src/tools/gen-minigames-md.cjs`).
 
 **Em andamento:** nada.
 
@@ -199,9 +213,14 @@ node src/tests/gen-tabela-geografia.cjs                        # tabela das 45 q
 - Geografia gráfica: mede de 38 a 58 quadros/s no Chromium sem GPU dos testes (antes, 61). Há **modo leve automático** (abaixo de 34 quadros/s). **[não confirmado]** em tablet e celular reais.
 - Ainda não há **fotos reais** de comidas, festas e lugares (Wikimedia e bancos de imagens estão bloqueados na rede desta sessão). **[pendente]** pedir ao usuário as fotos que ele quiser, ou baixar numa sessão com acesso.
 - Os minijogos do Parque **não** estão no Fliperama do Nexus (o manifesto não os lista), porque o Nexus está oculto.
+- **Minijogos testados só por robôs e scripts:**
+  - **[não confirmado]** com a criança a dificuldade de Estrada, Quermesse, Colunas, Travessia e Pinball;
+  - a física do Pinball é simples: a bola pode, raramente, atravessar um rebatedor muito rápido.
+- **Roleta:** o limite de **1 giro por fase por dia** foi decisão minha, não do usuário. Mudar só se ele pedir.
+- **Personagem:** os sprites do Gabriel ainda são **desenhados por código**. O usuário recebeu os PNGs para redesenhar (seção 8.9). **[pendente]** trocar pelas imagens dele quando ele mandar.
 
 **Próximo passo concreto**
-- Aguardar o usuário. O mais provável é o **jogo de Matemática**: pedir o material da prova, criar um jogo próprio (novo enredo, ambientes e fases) em `src/modules/matematica/`, preencher o bloco `franchise` do manifesto (7.4) e manter o Nexus oculto até o usuário decidir.
+- Aguardar o usuário. Pendências dele: os **novos desenhos do Gabriel** (seção 8.9) e o retorno sobre a dificuldade dos minijogos. Depois, o mais provável é o **jogo de Matemática**: pedir o material da prova, criar um jogo próprio (novo enredo, ambientes e fases) em `src/modules/matematica/`, preencher o bloco `franchise` do manifesto (7.4) e manter o Nexus oculto até o usuário decidir.
 
 **Depois (só com pedido)**
 - Redesenhar e liberar o Nexus (`nexusVisible: true`); pacote `matematica-v2` com os outros Nexóticos; outras matérias; PR para `main`; GitHub Pages.
@@ -867,4 +886,33 @@ A sessão dos pais é simulada no `sessionStorage`; a senha não é usada nem gu
   4. a mecânica (física, colisões, pontuação e dificuldade) não depende do tema e pode ficar igual;
   5. registrar cada jogo em `franchise.testExtras` do manifesto da matéria (regra da Área dos Pais, seção 1).
 - **Ciências continua congelada:** nada disso vai para ela sem pedido expresso.
+
+### 8.9 Sprites do personagem e decisão sobre áudio (24/09/2026)
+
+**Sprites do Gabriel (pedido do usuário: "todas as imagens do personagem para eu editar")**
+- **Como o Gabriel é feito:** ele **não é um arquivo de imagem**. É desenhado por código em `src/core/pixel.js`, e as cenas de Geografia o chamam por `GEO.common.gabrielSide` e `gabrielTop` (`scenes/common.js`). A aparência vem de `GEO.eco.look()` (`systems/economy.js`), que muda com os itens da loja.
+  - **`P.side(o)`:** lateral de **18x24 px**, olhando para a direita (o jogo espelha para a esquerda). São 5 poses: 0 parado, 1 e 2 correndo, 3 pulando, 4 atirando.
+  - **`P.front(o)`:** visão de cima de **14x20 px**. Direções `down` (frente), `up` (costas) e `side` (perfil), com 2 passos cada. O retrato dos diálogos é o `front` ampliado 5x.
+  - **Poses derivadas** (não são desenhos novos): abaixado na Jangada (o parado achatado), piscando, esticar/amassar no pulo.
+- **O que foi enviado ao usuário:** o zip `sprites-gabriel.zip`, com 133 PNGs de fundo transparente, no tamanho real e ampliados 8x, mais o `LEIA-ME.txt`.
+  - Tem 6 visuais: padrão, boné azul, mochila, mochila dourada, capa do coração e xilogravura.
+  - O zip foi gerado na sessão com um script que chama `P.side`/`P.front` no navegador; o script não está no repositório.
+  - Refazer é fácil: abrir `jogar.html` e, para cada visual e pose, exportar com `canvas.toDataURL()`.
+- **Quando o usuário mandar os desenhos:**
+  - carregar os PNGs (por exemplo, em `src/modules/geografia/assets/personagem/<visual>/<pose>.png`);
+  - em `GEO.common.gabrielSide` e `gabrielTop`, devolver a imagem dele quando existir, e cair no desenho por código quando faltar;
+  - manter o ponto de apoio nos **pés, centralizados**, porque o jogo desenha o lateral em (x−9, pés−24);
+  - se ele desenhar maior, escalar para 18x24 e 14x20, ou ajustar os deslocamentos;
+  - **Ciências não muda.**
+
+**Áudio com ElevenLabs: CANCELADO pelo usuário**
+- **O pedido:** voz da ElevenLabs (modelo Flash v2.5, voz "Ana Alice") no lugar da leitura em voz alta do navegador. O usuário mandou a chave no chat.
+- **O que foi decidido:**
+  - a chave **não** entra no código nem no link publicado (regra de segredos da seção 1);
+  - a proposta foi pré-gerar MP3s na sessão, e o usuário **cancelou**: "não é para gerar MP3 dos áudios, pode deixar para lá o áudio".
+- **Estado:**
+  - **nenhuma** chamada foi feita à API e a chave **não** foi gravada em lugar nenhum;
+  - a voz continua sendo a **leitura em voz alta do navegador**, com a limitação de sempre (a voz depende do aparelho);
+  - foi recomendado ao usuário trocar a chave no painel da ElevenLabs, porque ela ficou escrita no chat.
+- **Se ele pedir de novo:** só com os arquivos de áudio gerados fora do jogo, nunca com a chave no jogo.
 
