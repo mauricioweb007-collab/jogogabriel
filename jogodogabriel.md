@@ -34,6 +34,11 @@ Marcações: **[não confirmado]** indica algo não verificado; **[pendente]** i
 - Arte e música são originais, fornecidas pelo responsável ou de licença livre, registradas em `CREDITOS.md`.
 - **Um único save infantil por navegador.** O nome é só personalização: não existe conta, senha ou seleção de perfis para a criança.
 
+- **Área dos Pais sempre em dia (regra permanente, pedido do usuário em 24/09/2026):** **todo conteúdo novo** (fase, minijogo, menu, tela de recompensa, loja, item, modo de jogo) precisa entrar **na mesma entrega** no **modo de teste da Área dos Pais**, com acesso direto e tudo liberado, para o responsável poder testar. Uma entrega **só está pronta** quando:
+  - o conteúdo aparece em "🧪 Modo de teste → 🎮 Abrir jogos (sandbox)" (em Geografia: `franchise.testTargets` para fases e `franchise.testExtras` para minijogos, menus e telas, no `manifest.js`);
+  - o link abre o conteúdo no sandbox (o save real não muda);
+  - o teste automático da Área dos Pais do módulo passa (Geografia: `src/modules/geografia/tests/pais-teste.cjs`, que falha se um minijogo registrado não estiver na lista).
+
 **Regras de git (permanentes)**
 - Só fazer push em `claude/adoring-galileo-w55t2f` do repositório `jogogabriel`.
 - O repositório `diario` foi a "pasta errada": nada vai para ele.
@@ -48,7 +53,8 @@ Marcações: **[não confirmado]** indica algo não verificado; **[pendente]** i
     - Faça antes `read` e `list` com `scope: "files"`.
     - Depois publique com `url` do artifact, `file_path` = `inicio.html` e `files` só com os arquivos alterados. O limite é de 255 arquivos por envio; se passar disso, mande em lotes.
     - Registre a nova versão aqui.
-  - **Versão publicada:** **10** (24/09/2026): Arcade dos Mundos e regras de entrada dos minijogos (seção 8.3).
+  - **Versão publicada:** **11** (24/09/2026): Área dos Pais com Parque, Arcade e telas de recompensa no modo de teste (seção 8.4).
+    - v10: Arcade dos Mundos e regras de entrada dos minijogos (seção 8.3).
     - v9: Geografia arcade (seção 8.2).
     - Labirintos no estilo Pac-Man.
     - Chefes novos.
@@ -122,6 +128,7 @@ node src/modules/geografia/tests/features.cjs                  # Geografia: 45 q
 node src/modules/geografia/tests/e2e.cjs otimo|erros|rapido    # campanha inteira
 node src/modules/geografia/tests/layouts.cjs <pasta>           # 1366x768, 1920x1080, 390x844
 node src/modules/geografia/tests/parque.cjs                    # camada gráfica + Parque do Atlas (19 checagens)
+node src/modules/geografia/tests/pais-teste.cjs                # Área dos Pais: todo minijogo/menu/tela de Geografia abre no modo de teste (sandbox)
 node src/tests/gen-tabela-geografia.cjs                        # tabela das 45 questões
 ```
 
@@ -322,7 +329,7 @@ node src/tests/gen-tabela-geografia.cjs                        # tabela das 45 q
   - `minigames`: lista com `minigameId, title, description, genre, controls, icon, entry{type:'page', url, params}, unlockText, freePlay, parentTest, records, assets, deps`.
   - `collectiblePacks`: caminhos dos pacotes.
 - **Área dos Pais:** `questionBank: {scripts, prepare(), build() → [{id, module, group, title, prompt, type, concept, where, answer, model, why, err, hint1, hint2, spec, guided, raw}], statsFor(save,id), concepts(save)}`.
-- **Modo de teste:** `testEntry(opts)` → URL do jogo em sandbox; `testTargets` → fases para ir direto.
+- **Modo de teste:** `testEntry(opts)` → URL do jogo em sandbox; `testTargets` → fases para ir direto; `testExtras` (opcional) → `[{group, items:[{t, p}]}]`, em que `p` são os parâmetros passados para `testEntry`. A Área dos Pais mostra `testExtras` numa lista agrupada com o botão "Abrir" (minijogos, menus e telas especiais). **Todo conteúdo novo entra aqui** (seção 1).
 - O Nexus, a Galeria, os portais, o Fliperama e a Área dos Pais leem tudo pelo registro. **Não há `if` por matéria no núcleo.**
 - Um módulo sem jogo (como Matemática) pode registrar só `comingSoon` e o pacote.
 
@@ -428,7 +435,7 @@ node src/tests/gen-tabela-geografia.cjs                        # tabela das 45 q
   - Erros técnicos (`ecoNexus.erros.v1`) e Configurações.
 - **Modo de teste:** faixa permanente "MODO DE TESTE DOS PAIS".
   - O sandbox usa as chaves `ecoNexus.teste.<chave real>` e tem tudo liberado.
-  - Atalhos para o Nexus (hub, Fliperama, Loja, Parque, Casa, Oficina, Galeria), Ciências (jogo novo, tudo concluído, região direta), Geografia (atlas, fase direta, questão direta) e todos os minigames.
+  - Atalhos para o Nexus (hub, Fliperama, Loja, Parque, Casa, Oficina, Galeria), Ciências (jogo novo, tudo concluído, região direta), Geografia (atlas, fase direta, questão direta, **Parque, Arcade dos Mundos, os 13 minijogos e as telas de recompensa dos chefes**, seção 8.4) e todos os minigames.
   - Inspetor de questões com anterior/próxima, gabarito, critérios, metadados, simulação de acerto, erro, pista e conclusão, e estados bloqueado/liberado/concluído/dominado.
   - Pontos e saldo simulados só com `testMode:true`; alternar "tudo liberado" e "como aluno"; rever as boas-vindas.
   - Teste de teclado, toque, áudio e acessibilidade.
@@ -716,3 +723,32 @@ node src/tests/gen-tabela-geografia.cjs                        # tabela das 45 q
 - Missões diárias do Arcade.
 - Um jogo de pinball (estilo Sonic Spinball).
 - Um jogo estilo Frogger ("Travessia do Rio").
+
+### 8.4 Área dos Pais com todo o Parque e o Arcade (24/09/2026, pedido do usuário)
+**Problema:** o Arcade dos Mundos (8.3) entrou no jogo, mas não aparecia no modo de teste da Área dos Pais. Daí nasceu a regra permanente da seção 1: todo conteúdo novo entra na Área dos Pais na mesma entrega.
+
+**O que o responsável tem agora** em "🧪 Modo de teste → 🎮 Abrir jogos (sandbox) → Geografia":
+- lista "Minijogos, Parque e Arcade", agrupada, com botão **Abrir**:
+  - **Menus e telas:** Parque + Arcade (menu completo), Arcade de cada mundo e a tela "Arcade liberado" de cada chefe (com o bilhete grátis);
+  - **Parque do Atlas:** Memória das Culturas, Voo da Arara, Cesta da Feira e Quebra-cabeça do Brasil;
+  - **Arcade do Mundo 1, 2 e 3:** os 9 jogos da seção 8.3.
+- Cada item abre direto no **sandbox**, com tudo liberado.
+- **Entrada testável:** no teste, a tela de entrada aparece como para a criança (pagar 70 EcoMoedas ou responder 2 perguntas), com o botão extra **"🧪 Entrar grátis (teste)"**. Moedas e respostas ficam só no sandbox.
+- **Ferramentas de teste no menu do Parque** (só no modo de teste): +100 🪙, zerar 🪙, +1 🎟️ em cada mundo, tirar 🎟️ e abrir a tela de recompensa do chefe.
+
+**Como funciona:**
+- `manifest.js`: `franchise.testExtras` (lista) e `testEntry` aceita `minijogo`, `parque` (`todos`, `1`, `2` ou `3`) e `recompensa` (`1`, `2` ou `3`).
+- `systems/mode.js`: valida esses parâmetros só com o modo de teste ativo; `main.js` (`A.testStart`) confere o id do jogo em `GEO.parque.GAMES` antes de abrir.
+- `src/pais/pais.js`: mostra `testExtras` de **qualquer** matéria que declarar a lista (sem `if` por matéria).
+- `scenes/parque.js`: entrada com "Entrar grátis (teste)" e ferramentas de teste; `gfx/gfx.css`: `.pq-test`.
+
+**Teste novo:** `node src/modules/geografia/tests/pais-teste.cjs`, que confere:
+- que todo jogo de `GEO.parque.GAMES` está em `testExtras` (e o contrário);
+- que o painel lista os 20 itens, agrupados;
+- que o botão "Abrir" leva ao jogo e que os 20 atalhos abrem o conteúdo certo;
+- as ferramentas de teste e a entrada paga no sandbox;
+- que o save real fica intacto byte a byte;
+- que não há erros no console.
+
+A sessão dos pais é simulada no `sessionStorage`; a senha não é usada nem guardada.
+

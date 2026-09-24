@@ -290,6 +290,13 @@
       const box = U.el('div', { class: 'kpi' }, [U.el('b', null, F.icon + ' ' + F.title), s]);
       if (m.franchise.moduleId === 'ciencias') box.appendChild(U.el('div', { class: 'row' }, [btn('Jogo novo', 'small', () => { location.href = ROOT + F.testEntry({ preset: 'novo' }); }), btn('Tudo concluído', 'small', () => { location.href = ROOT + F.testEntry({ preset: 'completo' }) + '&reset=1'; }), btn('Ir para a região', 'small pri', () => { location.href = ROOT + F.testEntry({ preset: 'completo', mapa: s.value }); })]));
       else box.appendChild(U.el('div', { class: 'row' }, [btn('Atlas', 'small', () => { location.href = ROOT + F.testEntry({}); }), btn('Ir para a fase', 'small pri', () => { location.href = ROOT + F.testEntry({ fase: s.value }); })]));
+      // conteúdo extra do módulo (minijogos, menus, telas de recompensa): lista vinda do manifesto
+      if ((F.testExtras || []).length) {
+        const ex = [];
+        const sx = U.el('select', { 'aria-label': 'Minijogos e telas de ' + F.title }, F.testExtras.map((gr) => U.el('optgroup', { label: gr.group }, gr.items.map((it) => { ex.push(it); return U.el('option', { value: String(ex.length - 1) }, it.t); }))));
+        box.appendChild(U.el('span', { class: 'tip' }, 'Minijogos, Parque e Arcade (tudo liberado no teste):'));
+        box.appendChild(U.el('div', { class: 'row' }, [sx, btn('Abrir', 'small pri', () => { location.href = ROOT + F.testEntry(ex[+sx.value].p); })]));
+      }
       return box;
     })))]));
     // minigames

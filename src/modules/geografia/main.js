@@ -195,6 +195,9 @@
     UI.toast('🧪 Modo de teste: todas as fases liberadas. Nada altera o save real.', 'gold', 3600);
     if (GEO.mode.stage) GEO.stage.run(GEO.mode.stage, 'aventura');
     else if (GEO.mode.question) A.testQuestion(GEO.mode.question);
+    else if (GEO.parque && GEO.mode.minigame && GEO.parque.GAMES.some((g) => g.id === GEO.mode.minigame)) setTimeout(() => GEO.parque.play(GEO.mode.minigame), 300);
+    else if (GEO.parque && GEO.mode.parque) setTimeout(() => GEO.parque.open(GEO.mode.parque === 'todos' ? null : +GEO.mode.parque), 300);
+    else if (GEO.parque && GEO.mode.reward) setTimeout(() => A.arcadeUnlocked(GEO.mode.reward), 300);
   };
   A.testQuestion = function (id) {
     const q = GEO.campaign.qById(id); if (!q) return;

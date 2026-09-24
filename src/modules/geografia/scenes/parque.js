@@ -46,7 +46,8 @@
   /* ---------------------------------------------------------------- ENTRADA (pedido do usuário, set/2026)
      Cada partida custa PQ.COST EcoMoedas de Geografia (≈ o que se ganha em ~2 fases novas: uma fase
      rende de ~40 a ~60) OU 2 perguntas rápidas do tema do mundo. Vencer um chefe dá 1 BILHETE GRÁTIS
-     para um jogo do Arcade daquele mundo. No modo de teste dos pais, tudo é grátis. */
+     para um jogo do Arcade daquele mundo. No modo de teste dos pais, a tela de entrada aparece igual
+     (para testar moedas e perguntas no sandbox) com um botão extra "🧪 Entrar grátis (teste)". */
   PQ.COST = 70;
   const tickets = () => { const f = (S().flags = S().flags || {}); f.arcadeTickets = f.arcadeTickets || {}; return f.arcadeTickets; };
   PQ.tickets = (w) => tickets()[w] || 0;
@@ -66,7 +67,6 @@
   /** Entrada: bilhete grátis → joga; senão, escolher entre moedas e 2 perguntas. */
   PQ.enter = function (id) {
     const g = GAMES.find((x) => x.id === id); if (!g) return;
-    if (isTest()) { PQ.play(id); return; }
     if (g.world && PQ.tickets(g.world) > 0) { tickets()[g.world]--; GEO.save.persist(); UI.toast('🎟️ Bilhete grátis usado! Boa diversão.', 'gold', 2200); PQ.play(id); return; }
     const coins = S().coins, can = coins >= PQ.COST;
     const m = UI.modal({ title: '🎟️ Entrar em ' + g.title, cls: 'small pq-entry' });
@@ -80,7 +80,9 @@
     });
     if (!can) pay.setAttribute('aria-disabled', 'true');
     const ask = UI.btn('📝 Responder 2 perguntas' + (g.world ? ' do Mundo ' + g.world : ''), can ? '' : 'pri', async () => { m.close(); await twoQuestions(g); PQ.play(id); });
-    m.setActions([UI.btn('Cancelar', 'ghost', () => m.close()), ask, pay]);
+    const acts = [UI.btn('Cancelar', 'ghost', () => m.close()), ask, pay];
+    if (isTest()) { m.body.appendChild(U.el('p', { class: 'tip' }, '🧪 Modo de teste: moedas e respostas usadas aqui ficam só no sandbox.')); acts.push(UI.btn('🧪 Entrar grátis (teste)', 'go', () => { m.close(); PQ.play(id); })); }
+    m.setActions(acts);
   };
   let lastView = null;
   /** Abre o Parque. only = número do mundo para mostrar só o Arcade daquele mundo. */
@@ -100,6 +102,15 @@
     };
     const tk = [1, 2, 3].filter((w) => PQ.tickets(w) > 0).map((w) => 'Mundo ' + w + ': ' + PQ.tickets(w));
     m.body.appendChild(U.el('p', { class: 'pq-wallet' }, '🪙 ' + S().coins + ' EcoMoedas • entrada: ' + PQ.COST + ' 🪙 ou 2 perguntas' + (tk.length ? ' • 🎟️ bilhetes grátis — ' + tk.join(', ') : '')));
+    if (isTest()) {
+      const re = () => { m.close(); setTimeout(() => PQ.open(only), 40); };
+      const coinsTo = (n) => { const sv = S(); sv.coins = Math.max(0, n); GEO.save.persist(); GEO.hud && GEO.hud.update(); re(); };
+      m.body.appendChild(U.el('div', { class: 'pq-test' }, [U.el('b', null, '🧪 Ferramentas de teste (só sandbox): '),
+        UI.btn('+100 🪙', 'small', () => coinsTo(S().coins + 100)), UI.btn('Zerar 🪙', 'small', () => coinsTo(0)),
+        UI.btn('+1 🎟️ em cada mundo', 'small', () => { [1, 2, 3].forEach((w) => { tickets()[w] = (tickets()[w] || 0) + 1; }); GEO.save.persist(); re(); }),
+        UI.btn('Tirar 🎟️', 'small', () => { const f = S().flags; f.arcadeTickets = {}; GEO.save.persist(); re(); }),
+        UI.btn('Tela de recompensa do chefe', 'small', () => { m.close(); setTimeout(() => GEO.app.arcadeUnlocked(only || 1), 60); })]));
+    }
     const section = (title, list) => { if (!list.length) return; m.body.appendChild(U.el('h3', { class: 'pq-sec' }, title)); m.body.appendChild(U.el('div', { class: 'pq-grid' }, list.map(card))); };
     if (!only) section('🎡 Parque do Atlas', GAMES.filter((g) => !g.world));
     [1, 2, 3].filter((w) => !only || w === only).forEach((w) => section('🕹️ Arcade do Mundo ' + w + ' — ' + D.chapters[w - 1].title, PQ.worldGames(w)));
