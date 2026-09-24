@@ -2,9 +2,9 @@
    scenes/arcade3.js — ARCADE DO MUNDO 3 (O Brasil que Muda)
    Recompensa depois do chefe Vírus da Desigualdade. Jogos curtos, sem
    perguntas, com tempo/vidas e recorde:
-   • Estrada Brasil — corrida em pseudo-3D pela estrada (litoral,
-     cerrado e cidade), ultrapassando carros e pegando checkpoints
-     (estilo Top Gear do Super Nintendo / OutRun)
+   • Estrada Brasil — corrida vista de cima pelo litoral, cerrado e
+     cidade, com combustível, trânsito que muda de faixa e óleo
+     (estilo Road Fighter do NES)
    • Invasores da Poluição — nave solar limpa nuvens de fumaça que
      descem em formação e mergulham (estilo Galaga / Space Invaders);
      a cada fumaça limpa o céu da cidade fica mais azul
@@ -17,119 +17,160 @@
   const X = () => (GEO.gfx && GEO.gfx.ready ? GEO.gfx : null);
   const IN = () => GG.input;
 
-  /* ================================================================ ESTRADA BRASIL */
+  /* ================================================================ ESTRADA BRASIL
+     Estilo Road Fighter (NES), pedido do usuário (24/09/2026): visão de cima, a estrada
+     serpenteia e estreita; o recurso é o COMBUSTÍVEL (não há tempo extra por checkpoint).
+     Bater num carro ou na beira da pista = rodar e explodir (perde combustível e recomeça
+     parado). Carros amarelos mudam de faixa na sua frente; manchas de óleo fazem rodar;
+     galões na pista devolvem combustível. Dificuldade média: sobe a cada zona e volta. */
   const ZONES = [
-    { name: 'Litoral', sky: 'estrada', grass: ['#3fae52', '#37a049'], rumble: ['#e5484d', '#fff'], road: ['#6b6f7a', '#666a75'], prop: ['treePalm', 'treePalm', 'house1'] },
-    { name: 'Cerrado', sky: 'interior', grass: ['#c98f4d', '#bd8444'], rumble: ['#ffd23f', '#fff'], road: ['#7a6b5a', '#746553'], prop: ['treeOrange', 'cactus2', 'tree'] },
-    { name: 'Cidade', sky: 'cidadeDia', grass: ['#7f8a96', '#77828e'], rumble: ['#3ec1ff', '#fff'], road: ['#4a4f5c', '#454a57'], prop: ['house2', 'tower', 'houseAlt1'] }
+    { name: 'Litoral', side: ['#e8d49a', '#dcc486'], edge: '#2f9be0', rumble: ['#e5484d', '#fff'], road: '#5d626e', hw: 74, props: ['treePalm', 'treePalm', 'house1'], traffic: 1 },
+    { name: 'Cerrado', side: ['#c98f4d', '#bd8444'], edge: '#8a5a2e', rumble: ['#ffd23f', '#fff'], road: '#6d6152', hw: 64, props: ['treeOrange', 'cactus2', 'tree'], traffic: 1.3 },
+    { name: 'Cidade', side: ['#8a95a3', '#7f8a98'], edge: '#4a4f5c', rumble: ['#3ec1ff', '#fff'], road: '#45495a', hw: 58, props: ['house2', 'tower', 'houseAlt1'], traffic: 1.6 }
   ];
-  PQ.register({ id: 'w3_estrada', world: 3, boss: 'c3s6', ref: 'Top Gear (SNES) / OutRun', title: 'Estrada Brasil', icon: 'carro_corrida', c1: '#ff4d6d', c2: '#4a0a1a', music: 'corrida', medals: [1500, 3000, 5000], unit: 'pts',
-    desc: 'Corrida pela estrada do litoral ao interior e à cidade! Ultrapasse carros e alcance os checkpoints antes do tempo acabar.',
-    how: 'O carro acelera sozinho. **← →** fazem a curva, **↓** freia e **Espaço** usa o **turbo** (3 cargas). Fora da pista o carro fica lento! Cada **checkpoint** dá mais tempo.' }, function (api) {
+  PQ.register({ id: 'w3_estrada', world: 3, boss: 'c3s6', ref: 'Road Fighter (NES)', title: 'Estrada Brasil', icon: 'carro_corrida', c1: '#ff4d6d', c2: '#4a0a1a', music: 'corrida', medals: [900, 1900, 3200], unit: 'pts',
+    desc: 'Corrida de estrada vista de cima, do litoral à cidade! Desvie do trânsito e cuide do combustível — cada batida custa caro.',
+    how: '**← →** desviam. O carro acelera sozinho; segure **↑ / Espaço** para a **marcha rápida** (mais pontos, mais risco) e **↓** para frear. **Não encoste** nos carros nem na **beira da pista**! Carros **amarelos** mudam de faixa; **óleo** faz rodar. Pegue os **galões** ⛽: quando o combustível acaba, o jogo termina.' }, function (api) {
     const sc = { cam: { x: 0, y: 0 }, t: 0 };
-    const SEG = 200, RW = 2000, CAMH = 1000, DRAW = 110, N = 1500;
-    const segs = [];
-    for (let i = 0; i < N; i++) {
-      const zi = Math.floor(i / (N / 3));
-      const curve = Math.sin(i / 37) * 3.2 * (Math.sin(i / 173) > -0.2 ? 1 : 0) + (i % 300 > 240 ? 4 * Math.sign(Math.sin(i / 60)) : 0);
-      const hill = Math.sin(i / 55) * 1600 + Math.sin(i / 19) * 300;
-      segs.push({ i, curve, y: hill, zone: zi, prop: i % 9 === 0 ? { side: (i / 9) % 2 ? -1 : 1, off: 1.4 + (i % 4) * 0.25, k: ZONES[zi].prop[i % 3] } : null, cp: i % 250 === 0 && i > 0 });
+    const PY = 176, ZL = 7200, CRUISE = 215, FAST = 300;
+    const car = { x: 200, v: 0, crash: 0, spin: 0, inv: 0, spinDir: 1 };
+    let dist = 0, fuel = 100, playing = false, traffic = [], items = [], spawnT = 1.2, itemT = 5, zone = 0, lap = 0, zoneAnn = 0, over = 0, passed = 0, crashes = 0, mouseX = null, lastZoneIdx = 0;
+    const Z = () => ZONES[zone];
+    const level = () => zone + lap * 3; // 0,1,2,3…
+    const center = (d) => 200 + 52 * Math.sin(d / 900) + 22 * Math.sin(d / 370 + 1);
+    const zmod = (d) => ((Math.floor(d / ZL) % 3) + 3) % 3;
+    const half = (d) => { const zi = zmod(d), zz = ZONES[zi]; let h = zz.hw + 12 * Math.sin(d / 1300); if (Math.sin(d / 2100 + zi) > 0.82) h -= 20 + Math.min(8, lap * 4); return Math.max(36, h - lap * 4); };
+    const zoneAt = zmod;
+    PQ.pointer(sc, { pointerdown: (lx) => { mouseX = lx; }, pointermove: (lx, ly, ev) => { if (mouseX != null || ev.pointerType === 'mouse') mouseX = lx; }, pointerup: (lx, ly, ev) => { if (ev.pointerType !== 'mouse') mouseX = null; } });
+    sc.begin = () => { playing = true; zoneAnn = 2.5; api.goal('Zona: Litoral — desvie e cuide do combustível!'); };
+    const sy = (d) => PY - (d - dist);
+    function spawnCar() {
+      const d = dist + 300, lv = level(), r = Math.random();
+      const kind = r < 0.16 + lv * 0.05 ? 'zig' : r < 0.3 + lv * 0.04 ? 'truck' : r < 0.36 + lv * 0.03 ? 'oil' : 'car';
+      const lane = U.pick([-0.55, 0, 0.55]);
+      if (kind === 'oil') { traffic.push({ k: 'oil', d, off: lane, v: 0, w: 18, h: 12 }); return; }
+      traffic.push({ k: kind, d, off: lane, toOff: lane, v: kind === 'truck' ? 80 + lv * 6 : 110 + Math.random() * 50 + lv * 8, w: kind === 'truck' ? 18 : 14, h: kind === 'truck' ? 38 : 24,
+        col: kind === 'zig' ? '#ffd23f' : kind === 'truck' ? '#e8e8f0' : U.pick(['#3ec1ff', '#35e07a', '#b07bff', '#ff9a3d']), swerved: false });
     }
-    let pos = 0, px = 0, speed = 0, time = 45, playing = false, turbo = 3, boost = 0, dist = 0, over = 0, lastCp = 0, zoneAnn = 0, crash = 0;
-    const MAX = 12000;
-    const cars = [];
-    for (let i = 0; i < 26; i++) cars.push({ z: 3000 + i * 11000 + Math.random() * 4000, x: U.pick([-0.5, 0, 0.5]), speed: 5000 + Math.random() * 3000, col: U.pick(['#3ec1ff', '#ffd23f', '#35e07a', '#b07bff', '#ff9a3d', '#f4f4f4']), passed: false });
-    sc.begin = () => { playing = true; api.goal('Zona: Litoral — chegue aos checkpoints!'); };
+    function crash(why) {
+      if (car.crash > 0 || car.inv > 0) return;
+      car.crash = 1.3; car.spinDir = Math.random() < 0.5 ? -1 : 1; crashes++;
+      fuel = Math.max(0, fuel - 10); api.add(-40);
+      GG.audio.sfx('boom'); E.shake(6, 0.45); E.fx.burst(car.x, PY, '#ff9a3d', 14, 90);
+      if (X()) { X().flash('#ff4d4d', 0.35); X().puff(car.x, PY, 6); X().pop(car.x, PY - 30, why + ' -10 combustível', '#ff8f8f', 8); }
+    }
     sc.update = function (dt) {
       sc.t += dt; const I = IN();
       if (I.pressed('pause')) PQ.pause();
+      if (zoneAnn > 0) zoneAnn -= dt;
       if (!playing) return;
-      time -= dt; api.extra('cronometro', Math.max(0, Math.ceil(time)) + 's');
-      if (crash > 0) crash -= dt; if (boost > 0) boost -= dt; if (zoneAnn > 0) zoneAnn -= dt;
-      if (I.pressed('jump') && turbo > 0 && boost <= 0) { turbo--; boost = 2.5; GG.audio.sfx('boost'); if (X()) X().flash('#9ff2ff', 0.2); }
-      const off = Math.abs(px) > 1.05;
-      const top = (boost > 0 ? MAX * 1.35 : MAX) * (off ? 0.45 : 1);
-      if (crash > 0) speed = Math.max(speed - MAX * 2 * dt, MAX * 0.2);
-      else if (I.down('down')) speed = Math.max(0, speed - MAX * 1.2 * dt);
-      else speed += (top - speed) * Math.min(1, dt * (speed < top ? 0.55 : 2));
-      const seg = segs[Math.floor(pos / SEG) % N];
-      px -= seg.curve * 0.0006 * speed * dt * 0.018; // força centrífuga das curvas
-      px += I.axisX() * dt * 2.4 * (speed / MAX + 0.25);
-      px = U.clamp(px, -2.2, 2.2);
-      pos += speed * dt; dist += speed * dt;
-      if (off && speed > MAX * 0.5 && Math.random() < 0.3 && X()) X().puff(200 + U.rand(-10, 10), 206, 1);
-      const si = Math.floor(pos / SEG);
-      if (segs[si % N].cp && si !== lastCp) { lastCp = si; time += 22; api.add(300); GG.audio.sfx('win'); if (X()) { X().flash('#fff6c0', 0.25); X().pop(200, 70, 'CHECKPOINT! +22 s', '#7bff8f', 11); } }
-      const zi = segs[si % N].zone; if (zi !== sc._zone) { sc._zone = zi; zoneAnn = 2.5; api.goal('Zona: ' + ZONES[zi].name); }
-      cars.forEach((cr) => {
-        cr.z += cr.speed * dt;
-        const dz = ((cr.z - pos) % (N * SEG) + N * SEG) % (N * SEG);
-        if (dz < 300 && dz > 0 && Math.abs(cr.x - px) < 0.45 && crash <= 0) { crash = 1; speed *= 0.4; GG.audio.sfx('hit'); E.shake(5, 0.4); if (X()) X().flash('#ff4d4d', 0.3); api.add(-50); }
-        if (!cr.passed && dz > N * SEG - 400) { cr.passed = true; api.add(60); if (X()) X().pop(200, 130, 'ULTRAPASSOU! +60', '#ffd23f', 8); }
-        if (dz > 2000 && dz < N * SEG - 2000) cr.passed = false;
+      if (car.inv > 0) car.inv -= dt; if (car.spin > 0) car.spin -= dt;
+      // combustível: gasta sempre; mais rápido na marcha rápida
+      const fast = I.down('up') || I.down('jump');
+      fuel -= dt * (fast ? 1.35 : 1.05);
+      api.extra('bateria', Math.max(0, Math.ceil(fuel)) + '% ⛽');
+      if (car.crash > 0) {
+        car.crash -= dt; car.v = Math.max(0, car.v - 400 * dt); dist += car.v * dt;
+        if (car.crash <= 0) { car.x = center(dist); car.v = 0; car.inv = 1.6; car.spin = 0; }
+      } else {
+        const top = I.down('down') ? 0 : fast ? FAST : CRUISE;
+        car.v += (top - car.v) * Math.min(1, dt * (car.v < top ? 0.9 : 3));
+        let steer = I.axisX();
+        if (!steer && mouseX != null) steer = U.clamp((mouseX - car.x) / 18, -1, 1);
+        if (car.spin > 0) steer = car.spinDir * 0.9;
+        car.x += steer * dt * (95 + car.v * 0.35);
+        dist += car.v * dt;
+        const c0 = center(dist), h0 = half(dist);
+        if (Math.abs(car.x - c0) > h0 - 7) crash('Saiu da pista!');
+      }
+      if (Math.floor(dist / 25) !== Math.floor((dist - car.v * dt) / 25)) api.add(1);
+      // zonas (sem tempo extra: só um pouco de combustível e bônus)
+      const zi = Math.floor(dist / ZL);
+      if (zi !== lastZoneIdx) {
+        lastZoneIdx = zi; zone = zi % 3; lap = Math.floor(zi / 3); zoneAnn = 2.5;
+        api.add(250); fuel = Math.min(100, fuel + 12); GG.audio.sfx('win');
+        if (X()) { X().flash('#fff6c0', 0.25); X().pop(200, 70, 'ZONA CONCLUÍDA! +250 e +12 de combustível', '#7bff8f', 9); }
+        api.goal('Zona: ' + Z().name + (lap ? ' (volta ' + (lap + 1) + ', mais rápida!)' : ''));
+      }
+      // trânsito
+      spawnT -= dt;
+      if (spawnT <= 0 && car.v > 40) { spawnCar(); spawnT = Math.max(0.42, (1.25 - level() * 0.12) / Z().traffic) * (0.7 + Math.random() * 0.6) * (CRUISE / Math.max(120, car.v)); }
+      itemT -= dt; if (itemT <= 0 && car.v > 40) { itemT = 6.5 + Math.random() * 3 + level() * 0.6; items.push({ d: dist + 300, off: U.pick([-0.5, 0, 0.5]) }); }
+      const cbox = { x: car.x - 7, y: PY - 12, w: 14, h: 24 };
+      traffic.forEach((o) => {
+        o.d += o.v * dt;
+        const cx0 = center(o.d), hh = half(o.d);
+        if (o.k === 'zig' && !o.swerved) { const gap = o.d - dist; if (gap < 130 && gap > 40) { o.swerved = true; const pOff = (car.x - cx0) / hh; o.toOff = U.clamp(pOff + (Math.random() < 0.5 ? -0.15 : 0.15), -0.6, 0.6); } }
+        if (o.toOff != null) o.off += U.clamp(o.toOff - o.off, -dt * 1.3, dt * 1.3);
+        o.x = cx0 + o.off * hh; o.y = sy(o.d);
+        if (car.crash > 0 || car.inv > 0 || o.hitDone) return;
+        if (E.overlap(cbox, { x: o.x - o.w / 2 + 1, y: o.y - o.h / 2 + 1, w: o.w - 2, h: o.h - 2 })) {
+          if (o.k === 'oil') { o.hitDone = true; car.spin = 0.9; car.spinDir = Math.random() < 0.5 ? -1 : 1; GG.audio.sfx('bad'); if (X()) X().pop(car.x, PY - 26, 'ÓLEO!', '#ffd23f', 8); }
+          else { o.hitDone = true; crash('Batida!'); }
+        }
+        if (!o.passed && o.k !== 'oil' && o.y > PY + 20) { o.passed = true; passed++; api.add(o.k === 'zig' ? 25 : 15); }
       });
-      if (Math.floor(dist / 1000) !== Math.floor((dist - speed * dt) / 1000)) api.add(5);
-      if (time <= 0) { playing = false; over = 1; GG.audio.sfx('bad'); setTimeout(() => api.end(api.score, 'Distância: ' + (dist / 20000).toFixed(1) + ' km. Use o turbo nas retas!'), 900); }
+      traffic = traffic.filter((o) => o.y < E.H + 50 && o.d < dist + 400);
+      items.forEach((it) => { const cx0 = center(it.d); it.x = cx0 + it.off * half(it.d); it.y = sy(it.d); if (!it.got && car.crash <= 0 && Math.abs(it.x - car.x) < 13 && Math.abs(it.y - PY) < 16) { it.got = true; fuel = Math.min(100, fuel + 18); api.add(30); GG.audio.sfx('power'); if (X()) { X().sparkle(it.x, it.y, '#7bff8f', 6); X().pop(it.x, it.y - 12, '+18 combustível', '#7bff8f', 8); } } });
+      items = items.filter((it) => !it.got && it.y < E.H + 20);
+      if (fuel <= 0) { fuel = 0; playing = false; over = 1; GG.audio.sfx('bad'); setTimeout(() => api.end(api.score, 'Combustível acabou! Distância: ' + (dist / 1000).toFixed(1) + ' km • zonas: ' + lastZoneIdx + ' • ultrapassagens: ' + passed + ' • batidas: ' + crashes + '.'), 1100); }
     };
-    function quad(c, x1, y1, w1, x2, y2, w2, col) { c.fillStyle = col; c.beginPath(); c.moveTo(x1 - w1, y1); c.lineTo(x2 - w2, y2); c.lineTo(x2 + w2, y2); c.lineTo(x1 + w1, y1); c.closePath(); c.fill(); }
+    function drawCar(c, x, y, w, h, col, rot) {
+      c.save(); c.translate(x, y); if (rot) c.rotate(rot);
+      c.fillStyle = 'rgba(0,0,0,.3)'; c.fillRect(-w / 2 + 2, -h / 2 + 3, w, h);
+      c.fillStyle = '#15152a'; c.fillRect(-w / 2 - 1.5, -h / 2 + 3, 3, 6); c.fillRect(w / 2 - 1.5, -h / 2 + 3, 3, 6); c.fillRect(-w / 2 - 1.5, h / 2 - 9, 3, 6); c.fillRect(w / 2 - 1.5, h / 2 - 9, 3, 6);
+      c.fillStyle = col; c.fillRect(-w / 2, -h / 2, w, h); c.fillStyle = 'rgba(255,255,255,.3)'; c.fillRect(-w / 2, -h / 2, w, 2);
+      c.fillStyle = 'rgba(20,30,60,.85)'; c.fillRect(-w / 2 + 2, -h / 2 + h * 0.22, w - 4, h * 0.18); c.fillRect(-w / 2 + 2, h / 2 - h * 0.28, w - 4, h * 0.12);
+      c.restore();
+    }
     sc.draw = function (g) {
       const c = g.ctx(), x = X();
-      const base = Math.floor(pos / SEG), frac = (pos % SEG) / SEG;
-      const Z = ZONES[segs[base % N].zone];
-      if (!(x && x.sky(g, Z.sky, base * 4 + px * 30, 0, sc.t, { horizon: 112 }))) { c.fillStyle = '#7fd4ff'; c.fillRect(0, 0, E.W, E.H); }
-      const camY = CAMH + segs[base % N].y + (segs[(base + 1) % N].y - segs[base % N].y) * frac;
-      let dx = -segs[base % N].curve * frac, xc = 0, maxY = E.H;
-      const proj = [];
-      for (let n = 0; n < DRAW; n++) {
-        const s = segs[(base + n) % N], z = (n + 1 - frac) * SEG + 1;
-        const scale = 0.9 / z * 180;
-        xc += dx; dx += s.curve;
-        const sx = E.W / 2 + (-px * RW * scale) + xc * scale * 1.5, sy = 112 + (camY - s.y) * scale * 0.9, sw = RW * scale;
-        proj.push({ s, sx, sy, sw, scale });
+      // laterais (areia/terra/calçada) em faixas que rolam
+      for (let yy = 0; yy < E.H; yy += 8) {
+        const d = dist + (PY - yy), zi = zoneAt(d), zz = ZONES[zi], alt = Math.floor(d / 24) % 2;
+        const cx0 = center(d), hh = half(d);
+        c.fillStyle = zz.side[alt]; c.fillRect(0, yy, E.W, 8);
+        if (zi === 0) { c.fillStyle = zz.edge; c.fillRect(0, yy, Math.max(0, cx0 - hh - 60), 8); } // mar à esquerda no litoral
+        c.fillStyle = zz.rumble[alt]; c.fillRect(cx0 - hh - 5, yy, 5, 8); c.fillRect(cx0 + hh, yy, 5, 8);
+        c.fillStyle = zz.road; c.fillRect(cx0 - hh, yy, hh * 2, 8);
+        if (Math.floor(d / 20) % 2) { c.fillStyle = 'rgba(255,255,255,.75)'; c.fillRect(cx0 - hh * 0.28 - 1, yy, 2, 8); c.fillRect(cx0 + hh * 0.28 - 1, yy, 2, 8); }
+        if (Math.floor(d / ZL) !== Math.floor((d - 8) / ZL)) { for (let k = 0; k < hh * 2; k += 8) { c.fillStyle = (k / 8) % 2 ? '#fff' : '#15152a'; c.fillRect(cx0 - hh + k, yy, 8, 6); } }
       }
-      for (let n = DRAW - 1; n > 0; n--) {
-        const a = proj[n - 1], b = proj[n], s = b.s, zc = ZONES[s.zone], alt = Math.floor((base + n) / 3) % 2;
-        if (a.sy <= b.sy) continue;
-        c.fillStyle = zc.grass[alt]; c.fillRect(0, b.sy, E.W, a.sy - b.sy + 1);
-        quad(c, a.sx, a.sy, a.sw * 1.15, b.sx, b.sy, b.sw * 1.15, zc.rumble[alt]);
-        quad(c, a.sx, a.sy, a.sw, b.sx, b.sy, b.sw, zc.road[alt]);
-        if (alt) quad(c, a.sx, a.sy, a.sw * 0.03, b.sx, b.sy, b.sw * 0.03, '#fff');
-        if (s.cp) { quad(c, a.sx, a.sy, a.sw, b.sx, b.sy, b.sw, Math.floor(sc.t * 6) % 2 ? '#fff' : '#15152a'); }
+      // enfeites na beira
+      if (x) {
+        const step = 70, first = Math.floor((dist - 60) / step);
+        for (let k = first; k < first + 6; k++) {
+          const d = k * step, yy = sy(d); if (yy < -40 || yy > E.H + 40) continue;
+          const zz = ZONES[zoneAt(d)], im = x.img[zz.props[((k % 3) + 3) % 3]]; if (!im) continue;
+          const side = k % 2 ? -1 : 1, cx0 = center(d), hh = half(d), xx = cx0 + side * (hh + 30 + (k % 3) * 8), h = 34, w = h * im.width / im.height;
+          if (xx > -20 && xx < E.W + 20) x.hd(c, () => c.drawImage(im, xx - w / 2, yy - h, w, h));
+        }
       }
-      // objetos na beira e carros (de trás para frente)
-      for (let n = DRAW - 1; n > 0; n--) {
-        const b = proj[n], s = b.s;
-        if (s.prop && x) { const im = x.img[s.prop.k]; if (im) { const h = 900 * b.scale * (s.prop.k === 'tower' ? 1.5 : 1), w = h * im.width / im.height, xx = b.sx + s.prop.side * b.sw * s.prop.off; if (h > 1.5) x.hd(c, () => c.drawImage(im, xx - w / 2, b.sy - h, w, h)); } }
-        if (s.cp && n < 60) { const h = 500 * b.scale; c.fillStyle = '#15152a'; c.fillRect(b.sx - b.sw * 1.1, b.sy - h, 3, h); c.fillRect(b.sx + b.sw * 1.1, b.sy - h, 3, h); c.fillStyle = '#ffd23f'; c.fillRect(b.sx - b.sw * 1.1, b.sy - h, b.sw * 2.2, h * 0.25); if (h > 20) g.text('CHECKPOINT', b.sx, b.sy - h + 1, { size: Math.max(4, h * 0.14), color: '#15152a', align: 'center', shadow: false }); }
-        cars.forEach((cr) => {
-          const dz = ((cr.z - pos) % (N * SEG) + N * SEG) % (N * SEG), cn = Math.floor(dz / SEG);
-          if (cn !== n) return;
-          const w = 360 * b.scale, h = w * 0.55, cx = b.sx + cr.x * b.sw;
-          c.fillStyle = 'rgba(0,0,0,.3)'; c.fillRect(cx - w / 2, b.sy - h * 0.1, w, h * 0.15);
-          c.fillStyle = cr.col; c.fillRect(cx - w / 2, b.sy - h, w, h * 0.8); c.fillStyle = 'rgba(20,30,60,.7)'; c.fillRect(cx - w * 0.35, b.sy - h * 1.1, w * 0.7, h * 0.35);
-          c.fillStyle = '#ff3b3b'; c.fillRect(cx - w / 2 + 1, b.sy - h * 0.55, w * 0.15, h * 0.12); c.fillRect(cx + w / 2 - 1 - w * 0.15, b.sy - h * 0.55, w * 0.15, h * 0.12);
-          c.fillStyle = '#15152a'; c.fillRect(cx - w / 2, b.sy - h * 0.2, w * 0.2, h * 0.2); c.fillRect(cx + w * 0.3, b.sy - h * 0.2, w * 0.2, h * 0.2);
-        });
+      items.forEach((it) => { if (x) x.glow(c, it.x, it.y, 12, '#7bff8f', 0.6); c.fillStyle = '#e5484d'; c.fillRect(it.x - 5, it.y - 6, 10, 12); c.fillStyle = '#8a1020'; c.fillRect(it.x - 3, it.y - 9, 6, 3); c.fillStyle = '#ffd23f'; c.fillRect(it.x - 3, it.y - 2, 6, 3); });
+      traffic.forEach((o) => {
+        if (o.k === 'oil') { c.fillStyle = 'rgba(15,15,30,.85)'; c.beginPath(); c.ellipse(o.x, o.y, 9, 6, 0.3, 0, Math.PI * 2); c.fill(); c.fillStyle = 'rgba(140,90,255,.35)'; c.beginPath(); c.ellipse(o.x - 2, o.y - 1, 4, 2, 0.3, 0, Math.PI * 2); c.fill(); return; }
+        drawCar(c, o.x, o.y, o.w, o.h, o.col, 0);
+        if (o.k === 'zig' && !o.swerved && o.y > -10 && Math.floor(sc.t * 6) % 2) g.text('!', o.x, o.y - o.h / 2 - 9, { size: 7, color: '#ffd23f', align: 'center' });
+      });
+      // jogador
+      if (!(car.inv > 0 && Math.floor(sc.t * 14) % 2)) {
+        const rot = car.crash > 0 ? car.spinDir * (1.3 - car.crash) * 9 : car.spin > 0 ? car.spinDir * (0.9 - car.spin) * 7 : IN().axisX() * 0.12;
+        drawCar(c, car.x, PY, 14, 24, '#e5484d', rot);
+        if (car.crash <= 0) g.text('BR', car.x, PY - 3, { size: 3, color: '#fff', align: 'center', shadow: false });
+        if (car.crash > 0 && x) x.glow(c, car.x, PY, 22 * car.crash, '#ff9a3d', 0.7);
       }
-      // carro do jogador (visto de trás)
-      const bump = Math.sin(sc.t * 30) * (speed / MAX) * 0.8 + (crash > 0 ? Math.sin(sc.t * 40) * 3 : 0), steer = IN().axisX(), cx = 200, cy = 200 + bump;
-      if (boost > 0 && x) { x.glow(c, cx - 14, cy + 4, 12, '#6fe8ff', 0.9); x.glow(c, cx + 14, cy + 4, 12, '#6fe8ff', 0.9); }
-      c.save(); c.translate(cx, cy); c.rotate(steer * 0.06);
-      c.fillStyle = 'rgba(0,0,0,.35)'; c.fillRect(-30, 4, 60, 6);
-      c.fillStyle = '#c0182a'; c.fillRect(-28, -14, 56, 18); c.fillStyle = '#e5484d'; c.fillRect(-24, -26, 48, 13);
-      c.fillStyle = '#1a2a4a'; c.fillRect(-19, -24, 38, 9); c.fillStyle = '#ffd23f'; c.fillRect(-26, -9, 10, 4); c.fillRect(16, -9, 10, 4);
-      c.fillStyle = '#15152a'; c.fillRect(-30, -4, 10, 10); c.fillRect(20, -4, 10, 10); c.fillStyle = '#fff'; c.fillRect(-6, -8, 12, 5); g.text('BR', 0, -8, { size: 4, color: '#15152a', align: 'center', shadow: false });
-      c.fillStyle = '#8a1020'; c.fillRect(-30, -30, 60, 4);
-      c.restore();
-      // painel
-      g.panel(8, 186, 70, 30, 'rgba(15,18,38,.85)', '#3a4290');
-      g.text(Math.round(speed / MAX * 180) + ' km/h', 43, 190, { size: 6, color: '#fff', align: 'center' });
-      for (let i = 0; i < 3; i++) g.rect(18 + i * 16, 204, 12, 6, i < turbo ? '#6fe8ff' : '#333a66'); g.text('TURBO', 43, 210, { size: 3, color: '#9ff2ff', align: 'center' });
-      g.text(Math.max(0, Math.ceil(time)) + '', E.W / 2, 8, { size: 14, color: time < 10 && Math.floor(sc.t * 4) % 2 ? '#ff5d6c' : '#ffd23f', align: 'center' });
-      if (zoneAnn > 0) g.text('ZONA: ' + ZONES[segs[base % N].zone].name.toUpperCase(), E.W / 2, 34, { size: 9, color: '#fff', align: 'center' });
-      if (over) g.text('TEMPO ESGOTADO!', E.W / 2, 90, { size: 12, color: '#ff5d6c', align: 'center' });
+      // painel: combustível, velocidade e zona
+      g.panel(6, 30, 20, 120, 'rgba(15,18,38,.85)', '#3a4290');
+      const fh = 108 * fuel / 100, fc = fuel < 25 ? (Math.floor(sc.t * 4) % 2 ? '#ff5d6c' : '#8a1020') : fuel < 50 ? '#ffd23f' : '#35e07a';
+      g.rect(10, 34 + 108 - fh, 12, fh, fc); g.text('COMB.', 16, 152, { size: 4, color: '#fff', align: 'center' });
+      g.panel(E.W - 64, 196, 58, 22, 'rgba(15,18,38,.85)', '#3a4290'); g.text(Math.round(car.v * 0.6) + ' km/h', E.W - 35, 200, { size: 6, color: '#fff', align: 'center' });
+      g.text(IN().down('up') || IN().down('jump') ? 'MARCHA RÁPIDA' : 'marcha normal', E.W - 35, 209, { size: 3.5, color: '#9ff2ff', align: 'center' });
+      const zp = (dist % ZL) / ZL; g.rect(120, 6, 160, 4, 'rgba(0,0,0,.4)'); g.rect(120, 6, 160 * zp, 4, '#ffd23f'); g.text(Z().name + (lap ? ' • volta ' + (lap + 1) : ''), 200, 12, { size: 5, color: '#fff', align: 'center' });
+      if (zoneAnn > 0) g.text('ZONA: ' + Z().name.toUpperCase(), E.W / 2, 40, { size: 10, color: '#fff', align: 'center' });
+      if (fuel < 20 && playing && Math.floor(sc.t * 3) % 2) g.text('POUCO COMBUSTÍVEL!', E.W / 2, 58, { size: 7, color: '#ff8f8f', align: 'center' });
+      if (over) g.text('ACABOU O COMBUSTÍVEL!', E.W / 2, 90, { size: 11, color: '#ff5d6c', align: 'center' });
     };
-    sc.dbg = { end() { time = -999; } };
+    sc.dbg = { end() { fuel = 0; }, car, center, half, get traffic() { return traffic; }, get items() { return items; }, get dist() { return dist; }, get fuel() { return fuel; }, set fuel(v) { fuel = v; }, get crashes() { return crashes; } };
     return sc;
   });
 

@@ -1,7 +1,7 @@
 {
   "ok": true,
   "profile": "erros",
-  "minutos": "1.2",
+  "minutos": "1.3",
   "errs": [],
   "coverage": {
     "done": 45,

@@ -21,12 +21,12 @@
   const PQ = (GEO.parque = {});
 
   const GAMES = [
-    { id: 'memoria', title: 'Memória das Culturas', icon: 'cartas', c1: '#9b4dca', c2: '#3a1f5a', boss: 'c1s5', unlockWorld: 1, music: 'atlas', medals: [45, 70, 88], unit: '%',
-      desc: 'Vire as cartas e encontre os pares de instrumentos, comidas, bichos e festas do Brasil.', how: 'Toque em duas cartas (ou use as setas e Espaço) para achar os **pares iguais**. São 3 tabuleiros!' },
+    { id: 'memoria', title: 'Memória das Culturas', icon: 'cartas', c1: '#9b4dca', c2: '#3a1f5a', boss: 'c1s5', unlockWorld: 1, music: 'atlas', medals: [200, 420, 620], unit: 'pts',
+      desc: 'Vire as cartas e encontre os pares de instrumentos, comidas, bichos e festas do Brasil. 4 erros e acabou!', how: 'Toque em duas cartas (ou use as setas e Espaço) para achar os **pares iguais**. São 3 tabuleiros. Você tem **4 corações**: errar uma carta que **você já tinha visto** é um **erro**. Com **4 erros**, o jogo acaba!' },
     { id: 'arara', title: 'Voo da Arara', icon: 'arara', c1: '#e8456b', c2: '#5a1030', boss: 'c1s5', unlockWorld: 1, music: 'oceano', medals: [150, 300, 480], unit: 'pts',
       desc: 'Voe pelas 5 regiões do Brasil, pegue frutas e desvie das tempestades e das árvores altas.', how: 'Toque na tela ou aperte **Espaço** para a arara bater as asas. Voe pelas **5 regiões** do Brasil!' },
     { id: 'cesta', title: 'Cesta da Feira', icon: 'cesta', c1: '#ff9a3d', c2: '#7a3a10', boss: 'c2s5', unlockWorld: 2, music: 'festa', medals: [220, 420, 650], unit: 'pts',
-      desc: 'As comidas estão caindo das barracas! Pegue tudo com a cesta e faça combos.', how: 'Mova a cesta com **← →** ou arrastando o dedo. Pegue as comidas e as estrelas; fuja das **nuvens de chuva**!' },
+      desc: 'Encha a banca da feira! Pegue só as comidas do PEDIDO e fuja das frutas estragadas e dos raios.', how: 'Mova a cesta com **← →** ou arrastando o dedo. Pegue as comidas do **PEDIDO** (lá em cima) para encher a banca. **Fruta estragada** e **raio** tiram uma **vida** (são 3); a **chuva** deixa a cesta lenta. Cada pedido entregue deixa a feira mais rápida!' },
     { id: 'quebra', title: 'Quebra-cabeça do Brasil', icon: 'quebra', c1: '#2e9e6a', c2: '#123f2c', boss: 'c3s6', unlockWorld: 3, music: 'atlas', medals: [250, 400, 520], unit: 'pts',
       desc: 'As regiões do mapa se soltaram! Arraste cada uma para o lugar certo.', how: 'Arraste cada **região** para o contorno do mapa. No teclado: **E** troca a peça, as setas movem e **Espaço** solta.' }
   ];
@@ -53,6 +53,8 @@
   PQ.tickets = (w) => tickets()[w] || 0;
   PQ.giveTicket = (w) => { tickets()[w] = (tickets()[w] || 0) + 1; GEO.save.persist(); };
   const isTest = () => !!(GEO.mode && GEO.mode.isTest && GEO.mode.isTest());
+  /** Estudo concluído (os 3 mundos e o final): todos os minijogos ficam livres, sem moedas nem perguntas. */
+  PQ.allFree = () => !!S().finalDone;
   /** Duas perguntas rápidas (afirmações do capítulo) para entrar sem gastar moedas. */
   async function twoQuestions(g) {
     const done = [1, 2, 3].filter((n) => D.stages.some((st) => st.ch === n && stageDone(st.id)));
@@ -67,6 +69,7 @@
   /** Entrada: bilhete grátis → joga; senão, escolher entre moedas e 2 perguntas. */
   PQ.enter = function (id) {
     const g = GAMES.find((x) => x.id === id); if (!g) return;
+    if (PQ.allFree()) { PQ.play(id); return; }
     if (g.world && PQ.tickets(g.world) > 0) { tickets()[g.world]--; GEO.save.persist(); UI.toast('🎟️ Bilhete grátis usado! Boa diversão.', 'gold', 2200); PQ.play(id); return; }
     const coins = S().coins, can = coins >= PQ.COST;
     const m = UI.modal({ title: '🎟️ Entrar em ' + g.title, cls: 'small pq-entry' });
@@ -101,7 +104,8 @@
       ]);
     };
     const tk = [1, 2, 3].filter((w) => PQ.tickets(w) > 0).map((w) => 'Mundo ' + w + ': ' + PQ.tickets(w));
-    m.body.appendChild(U.el('p', { class: 'pq-wallet' }, '🪙 ' + S().coins + ' EcoMoedas • entrada: ' + PQ.COST + ' 🪙 ou 2 perguntas' + (tk.length ? ' • 🎟️ bilhetes grátis — ' + tk.join(', ') : '')));
+    if (PQ.allFree()) m.body.appendChild(U.el('p', { class: 'pq-wallet' }, '🏆 Estudo concluído! Todos os minijogos estão liberados: jogue à vontade, sem moedas e sem perguntas.'));
+    else m.body.appendChild(U.el('p', { class: 'pq-wallet' }, '🪙 ' + S().coins + ' EcoMoedas • entrada: ' + PQ.COST + ' 🪙 ou 2 perguntas' + (tk.length ? ' • 🎟️ bilhetes grátis — ' + tk.join(', ') : '')));
     if (isTest()) {
       const re = () => { m.close(); setTimeout(() => PQ.open(only), 40); };
       const coinsTo = (n) => { const sv = S(); sv.coins = Math.max(0, n); GEO.save.persist(); GEO.hud && GEO.hud.update(); re(); };
@@ -109,6 +113,7 @@
         UI.btn('+100 🪙', 'small', () => coinsTo(S().coins + 100)), UI.btn('Zerar 🪙', 'small', () => coinsTo(0)),
         UI.btn('+1 🎟️ em cada mundo', 'small', () => { [1, 2, 3].forEach((w) => { tickets()[w] = (tickets()[w] || 0) + 1; }); GEO.save.persist(); re(); }),
         UI.btn('Tirar 🎟️', 'small', () => { const f = S().flags; f.arcadeTickets = {}; GEO.save.persist(); re(); }),
+        UI.btn(S().finalDone ? 'Desfazer “estudo concluído”' : 'Simular “estudo concluído”', 'small', () => { S().finalDone = !S().finalDone; GEO.save.persist(); re(); }),
         UI.btn('Tela de recompensa do chefe', 'small', () => { m.close(); setTimeout(() => GEO.app.arcadeUnlocked(only || 1), 60); })]));
     }
     const section = (title, list) => { if (!list.length) return; m.body.appendChild(U.el('h3', { class: 'pq-sec' }, title)); m.body.appendChild(U.el('div', { class: 'pq-grid' }, list.map(card))); };
@@ -218,7 +223,10 @@
     const sc = { cam: { x: 0, y: 0 }, t: 0 };
     const BOARDS = [[4, 3], [4, 4], [5, 4]];
     const CW = 40, CH = 44, GAP = 6;
-    let bi = 0, cards = [], open = [], lock = 0, pairs = 0, misses = 0, totalPairs = 0, cursor = 0, started = false, labels = [];
+    // pedido do usuário: 4 erros encerram o jogo. Erro = errar quando uma das cartas já tinha sido vista
+    // (a criança deveria lembrar); virar duas cartas novas e errar é só tentativa.
+    let bi = 0, cards = [], open = [], lock = 0, pairs = 0, misses = 0, totalPairs = 0, cursor = 0, started = false, labels = [], over = false;
+    api.lives = 4; api.maxLives = 4; api.refresh();
     function layout() {
       const [cols, rows] = BOARDS[bi], n = cols * rows / 2;
       const pick = U.shuffle(CARDS.filter((c) => !X() || X().has(c[0]))).slice(0, n);
@@ -231,7 +239,7 @@
     sc.begin = () => { started = true; };
     function flip(i) {
       const c = cards[i]; if (!started || lock > 0 || !c || c.up || c.done || open.length >= 2) return;
-      c.up = true; open.push(c); GG.audio.sfx('click');
+      c.wasSeen = !!c.seen; c.up = true; open.push(c); GG.audio.sfx('click');
       if (open.length < 2) return;
       const [a, b] = open;
       if (a.id === b.id) {
@@ -243,15 +251,22 @@
           if (pairs === cards.length / 2) boardDone();
         }, 350);
       } else {
-        misses++; lock = 0.95; GG.audio.sfx('bad');
+        const partnerSeen = cards.some((o) => o !== a && o.id === a.id && o.seen);
+        const real = b.wasSeen || partnerSeen;
+        a.seen = b.seen = true; lock = 0.95;
+        if (real) {
+          misses++; api.lives--; api.refresh(); GG.audio.sfx('hit'); E.shake(3, 0.2); if (X()) { X().flash('#ff4d4d', 0.2); X().pop(E.W / 2, 30, 'ERRO! Você já tinha visto essa carta', '#ff8f8f', 8); }
+          if (api.lives <= 0) { over = true; lock = 99; setTimeout(() => { a.up = b.up = false; api.end(api.score, '4 erros: fim de jogo! Pares achados: ' + totalPairs + ' • chegou ao tabuleiro ' + (bi + 1) + ' de 3. Dica: lembre onde cada carta estava!'); }, 900); return; }
+        } else { GG.audio.sfx('bad'); if (X()) X().pop(E.W / 2, 30, 'Cartas novas — memorize!', '#9ff2ff', 7); }
         setTimeout(() => { a.shake = b.shake = 0.35; }, 350);
         setTimeout(() => { a.up = b.up = false; open = []; }, 900);
       }
     }
     function boardDone() {
       GG.audio.sfx('win'); if (X()) X().flash('#ffffff', 0.25); E.fx.confetti(E.W / 2, 40, 40);
+      api.add(50);
       if (bi < BOARDS.length - 1) { bi++; lock = 1.3; setTimeout(layout, 1100); }
-      else { const pct = Math.round(100 * totalPairs / (totalPairs + misses * 0.6)); setTimeout(() => api.end(pct, 'Pares: ' + totalPairs + ' • Tentativas sem par: ' + misses + '. A pontuação é o seu aproveitamento.'), 900); }
+      else { const bonus = api.lives * 40; api.add(bonus); setTimeout(() => api.end(api.score, 'Os 3 tabuleiros completos! Erros: ' + misses + ' • bônus dos corações: +' + bonus + '.'), 900); }
     }
     layout();
     sc.click = (lx, ly) => { const i = cards.findIndex((c) => lx >= c.x && lx <= c.x + CW && ly >= c.y && ly <= c.y + CH); if (i >= 0) { cursor = i; flip(i); } };
@@ -294,7 +309,7 @@
       });
       labels.forEach((l) => { const k = (sc.t - l.at) / 1.6; c.save(); c.globalAlpha = k > 0.7 ? (1 - k) / 0.3 : 1; g.panel(l.x - 34, l.y - 14 - k * 10, 68, 12, '#ffd23f', '#15152a'); g.text(l.t, l.x, l.y - 11 - k * 10, { size: 5, color: '#2a2233', align: 'center', shadow: false, maxW: 64 }); c.restore(); });
     };
-    sc.dbg = { solve() { if (lock > 0 && pairs) return; cards.forEach((c) => { c.done = c.up = true; }); totalPairs += cards.length / 2 - pairs; pairs = cards.length / 2; boardDone(); } };
+    sc.dbg = { miss() { const u = cards.filter((c) => !c.done); const a = u[0], b = u.find((c) => c.id !== a.id); a.seen = b.seen = true; lock = 0; open = []; flip(cards.indexOf(a)); flip(cards.indexOf(b)); }, get over() { return over; }, solve() { if (lock > 0 && pairs) return; cards.forEach((c) => { c.done = c.up = true; }); totalPairs += cards.length / 2 - pairs; pairs = cards.length / 2; boardDone(); } };
     return sc;
   };
 
@@ -384,44 +399,75 @@
   /* ================================================================ 3. CESTA DA FEIRA */
   const FOODS = ['abacaxi', 'banana', 'coco', 'manga', 'milho', 'melancia', 'abacate', 'uva', 'morango', 'limao', 'pao', 'queijo', 'peixe', 'cenoura', 'tomate'];
   MAKE.cesta = function (api) {
+    // pedido do usuário (24/09/2026): objetivo claro (encher a banca com os PEDIDOS), 3 vidas e mais coisas
+    // erradas caindo. Fruta estragada (micróbio) e raio tiram vida; chuva deixa a cesta lenta; comida fora do
+    // pedido vale pouco e quebra o combo. Cada pedido completo deixa a feira mais rápida.
     const sc = { cam: { x: 0, y: 0 }, t: 0 };
-    const DUR = 60, bk = { x: 200, w: 40, slow: 0, sq: 0 };
-    let t = DUR, playing = false, drops = [], spawnT = 0, combo = 0, mult = 1, dragX = null, face = 1;
-    api.extra('cronometro', DUR + 's');
-    sc.begin = () => { playing = true; };
-    pointer(sc, { pointerdown: (lx) => { dragX = lx; }, pointermove: (lx, ly, ev) => { if (dragX != null || ev.pointerType === 'mouse') dragX = lx; }, pointerup: (lx, ly, ev) => { if (ev.pointerType !== 'mouse') dragX = null; } });
+    const DUR = 90, bk = { x: 200, w: 40, slow: 0, sq: 0, inv: 0 };
+    let t = DUR, playing = false, drops = [], spawnT = 0, combo = 0, mult = 1, dragX = null, face = 1, order = null, orders = 0, stall = [], over = false;
     const foods = FOODS.filter((f) => !X() || X().has(f));
+    const BADS = ['microbio', 'raio', 'chuva'];
+    api.lives = 3; api.refresh(); api.extra('cronometro', DUR + 's');
+    function newOrder() {
+      const kinds = U.shuffle(foods.slice()).slice(0, orders < 2 ? 2 : 3);
+      order = kinds.map((k, i) => ({ k, need: 2 + ((orders + i) % 2) + Math.floor(orders / 3), got: 0 }));
+      api.goal('Pedido ' + (orders + 1) + ' da banca: ' + order.map((o) => o.need + ' ' + NAMES[o.k]).join(', '));
+    }
+    const NAMES = { abacaxi: 'abacaxi', banana: 'banana', coco: 'coco', manga: 'manga', milho: 'milho', melancia: 'melancia', abacate: 'abacate', uva: 'uva', morango: 'morango', limao: 'limão', pao: 'pão', queijo: 'queijo', peixe: 'peixe', cenoura: 'cenoura', tomate: 'tomate' };
+    sc.begin = () => { playing = true; newOrder(); };
+    pointer(sc, { pointerdown: (lx) => { dragX = lx; }, pointermove: (lx, ly, ev) => { if (dragX != null || ev.pointerType === 'mouse') dragX = lx; }, pointerup: (lx, ly, ev) => { if (ev.pointerType !== 'mouse') dragX = null; } });
+    const heat = () => Math.min(1, (DUR - t) / DUR + orders * 0.06);
     function spawn() {
-      const r = Math.random(), k = r < 0.12 ? 'chuva' : r < 0.2 ? 'estrela_brilho' : U.pick(foods);
-      drops.push({ k, x: 20 + Math.random() * (E.W - 40), y: -14, vy: 45 + Math.random() * 30 + (DUR - t) * 1.1, rot: Math.random() * 6, vr: (Math.random() - 0.5) * 3 });
+      const r = Math.random(), bad = 0.18 + heat() * 0.2;
+      let k;
+      if (r < bad) k = U.pick(BADS);
+      else if (r < bad + 0.05) k = 'estrela_brilho';
+      else if (order && r < bad + 0.5) { const need = order.filter((o) => o.got < o.need); k = need.length ? U.pick(need).k : U.pick(foods); }
+      else k = U.pick(foods);
+      drops.push({ k, x: 20 + Math.random() * (E.W - 40), y: -14, vy: 55 + Math.random() * 35 + heat() * 70, vx: BADS.includes(k) && Math.random() < 0.3 + heat() * 0.3 ? U.rand(-40, 40) : 0, rot: Math.random() * 6, vr: (Math.random() - 0.5) * 3 });
+    }
+    function hurt(d, why) {
+      if (bk.inv > 0) return;
+      combo = 0; mult = 1; bk.inv = 1.2; api.lives--; api.refresh(); GG.audio.sfx('hit'); E.shake(4, 0.3);
+      if (X()) { X().flash('#ff4d4d', 0.3); X().pop(d.x, 168, why, '#ff8f8f', 8); }
+      if (api.lives <= 0) { playing = false; over = true; setTimeout(() => api.end(api.score, 'Acabaram as vidas! Pedidos entregues: ' + orders + '. Fuja das frutas estragadas e dos raios!'), 700); }
     }
     sc.update = function (dt) {
-      sc.t += dt; if (bk.slow > 0) bk.slow -= dt; bk.sq *= Math.max(0, 1 - dt * 10);
+      sc.t += dt; if (bk.slow > 0) bk.slow -= dt; if (bk.inv > 0) bk.inv -= dt; bk.sq *= Math.max(0, 1 - dt * 10);
       const IN = GG.input;
       if (IN.pressed('pause')) PQ.pause();
       if (!playing) return;
       t -= dt; api.extra('cronometro', Math.max(0, Math.ceil(t)) + 's');
-      const sp = bk.slow > 0 ? 90 : 210, ax = IN.axisX(), x0 = bk.x;
+      const sp = bk.slow > 0 ? 90 : 215, ax = IN.axisX(), x0 = bk.x;
       if (ax) { bk.x += ax * sp * dt; dragX = null; } else if (dragX != null) bk.x += Math.max(-sp * dt, Math.min(sp * dt, dragX - bk.x));
       bk.x = Math.max(bk.w / 2 + 4, Math.min(E.W - bk.w / 2 - 4, bk.x));
       if (Math.abs(bk.x - x0) > 0.3) face = bk.x > x0 ? 1 : -1;
       bk.moving = Math.abs(bk.x - x0) > 0.3;
-      spawnT -= dt; if (spawnT <= 0) { spawn(); spawnT = Math.max(0.38, 0.85 - (DUR - t) * 0.008); }
+      spawnT -= dt; if (spawnT <= 0) { spawn(); spawnT = Math.max(0.3, 0.8 - heat() * 0.45); }
       drops.forEach((d) => {
-        d.y += d.vy * dt; d.rot += d.vr * dt;
+        d.y += d.vy * dt; d.x += d.vx * dt; if (d.x < 12 || d.x > E.W - 12) d.vx *= -1; d.rot += d.vr * dt;
         if (!d.got && d.y > 182 && d.y < 202 && Math.abs(d.x - bk.x) < bk.w / 2 + 6) {
           d.got = true; bk.sq = 0.4;
-          if (d.k === 'chuva') { combo = 0; mult = 1; bk.slow = 2; GG.audio.sfx('bad'); if (X()) { X().pop(d.x, 170, 'Molhou!', '#9fd8ff', 8); X().puff(bk.x, 190, 4); } }
-          else {
-            combo++; const nm = Math.min(5, 1 + Math.floor(combo / 5)); if (nm > mult && X()) X().pop(E.W / 2, 90, 'COMBO x' + nm + '!', '#ffd23f', 14); mult = nm;
-            const v = (d.k === 'estrela_brilho' ? 30 : 10) * mult; api.add(v); GG.audio.sfx(d.k === 'estrela_brilho' ? 'frag' : 'coin');
-            if (X()) { X().sparkle(d.x, 186, d.k === 'estrela_brilho' ? '#ffe39a' : '#ffffff', d.k === 'estrela_brilho' ? 8 : 3); X().pop(d.x, 172, '+' + v, '#ffe27a', 8); }
-          }
+          if (d.k === 'chuva') { combo = 0; mult = 1; bk.slow = 2.5; GG.audio.sfx('bad'); if (X()) { X().pop(d.x, 170, 'Molhou! Cesta lenta', '#9fd8ff', 8); X().puff(bk.x, 190, 4); } return; }
+          if (d.k === 'microbio') { hurt(d, 'Fruta estragada! -1 vida'); return; }
+          if (d.k === 'raio') { hurt(d, 'Raio! -1 vida'); return; }
+          if (d.k === 'estrela_brilho') { api.add(40 * mult); GG.audio.sfx('frag'); if (X()) { X().sparkle(d.x, 186, '#ffe39a', 8); X().pop(d.x, 172, '+' + 40 * mult, '#ffe27a', 8); } return; }
+          const o = order && order.find((q) => q.k === d.k && q.got < q.need);
+          if (o) {
+            o.got++; combo++; const nm = Math.min(5, 1 + Math.floor(combo / 4)); if (nm > mult && X()) X().pop(E.W / 2, 90, 'COMBO x' + nm + '!', '#ffd23f', 14); mult = nm;
+            const v = 15 * mult; api.add(v); GG.audio.sfx('coin'); if (X()) { X().sparkle(d.x, 186, '#ffffff', 3); X().pop(d.x, 172, '+' + v, '#ffe27a', 8); }
+            if (order.every((q) => q.got >= q.need)) {
+              orders++; const bonus = 60 + orders * 20; api.add(bonus); GG.audio.sfx('win'); E.fx.confetti(E.W / 2, 60, 30);
+              order.forEach((q) => { for (let i = 0; i < q.need; i++) stall.push(q.k); }); stall = stall.slice(-24);
+              if (X()) { X().flash('#fff6c0', 0.2); X().pop(E.W / 2, 110, 'PEDIDO ENTREGUE! +' + bonus, '#7bff8f', 11); }
+              newOrder();
+            }
+          } else { combo = 0; mult = 1; api.add(2); GG.audio.note('E4', 0.05); if (X()) X().pop(d.x, 172, 'Não está no pedido', '#c9d0ff', 6); }
         }
-        if (!d.got && d.y > E.H + 10 && d.k !== 'chuva') { combo = 0; mult = 1; d.gone = true; }
+        if (!d.got && d.y > E.H + 10) { d.gone = true; if (order && order.some((q) => q.k === d.k && q.got < q.need)) { combo = 0; mult = 1; } }
       });
       drops = drops.filter((d) => !d.got && !d.gone && d.y < E.H + 20);
-      if (t <= 0) { playing = false; setTimeout(() => api.end(api.score, 'Dica: pegue várias comidas seguidas para subir o combo até x5!'), 400); }
+      if (t <= 0 && playing) { playing = false; api.add(api.lives * 50); setTimeout(() => api.end(api.score, 'Fim da feira! Pedidos entregues: ' + orders + ' • bônus das vidas: +' + api.lives * 50 + '.'), 400); }
     };
     sc.draw = function (g) {
       const c = g.ctx(), x = X();
@@ -432,23 +478,35 @@
         g.rect(sx + 4, sy, 3, 60, '#6b4f2a'); g.rect(sx + 81, sy, 3, 60, '#6b4f2a');
         for (let k = 0; k < 8; k++) { c.fillStyle = cols[i][k % 2]; c.beginPath(); c.moveTo(sx + k * 11, sy - 14); c.lineTo(sx + k * 11 + 11, sy - 14); c.lineTo(sx + k * 11 + 11, sy); c.arc(sx + k * 11 + 5.5, sy, 5.5, 0, Math.PI); c.closePath(); c.fill(); }
         g.rect(sx, sy + 34, 88, 12, '#8b5a2b'); g.rect(sx, sy + 34, 88, 3, '#b07a3f');
-        if (x) for (let k = 0; k < 4; k++) x.ilus(c, foods[(i * 4 + k) % foods.length], sx + 14 + k * 20, sy + 30, 16);
+        // a banca vai enchendo com os pedidos entregues
+        if (x) for (let k = 0; k < 6; k++) { const it = stall[i * 6 + k]; if (it) x.ilus(c, it, sx + 10 + k * 14, sy + 30, 14); }
       }
       c.fillStyle = '#c9b89a'; c.fillRect(0, 164, E.W, 61); c.fillStyle = 'rgba(0,0,0,.08)'; for (let yy = 168; yy < E.H; yy += 8) for (let xx = (yy / 8 % 2) * 10; xx < E.W; xx += 20) c.fillRect(xx, yy, 18, 1);
+      // quadro do pedido
+      if (order) {
+        const w = order.length * 40 + 8; g.panel(E.W / 2 - w / 2, 22, w, 30, 'rgba(255,248,230,.95)', '#8b5a2b');
+        g.text('PEDIDO ' + (orders + 1), E.W / 2, 24, { size: 4, color: '#8b5a2b', align: 'center', shadow: false });
+        order.forEach((o, i) => { const ox = E.W / 2 - w / 2 + 8 + i * 40; if (x) x.ilus(c, o.k, ox + 9, 40, 16, o.got >= o.need ? { gray: true } : null); g.text(o.got + '/' + o.need, ox + 26, 36, { size: 6, color: o.got >= o.need ? '#2e9e6a' : '#2a2233', align: 'center', shadow: false }); });
+      }
       drops.forEach((d) => {
-        if (!x) { g.circle(d.x, d.y, 6, d.k === 'chuva' ? '#7fc8ff' : '#ffd23f'); return; }
+        if (!x) { g.circle(d.x, d.y, 6, BADS.includes(d.k) ? '#7fc8ff' : '#ffd23f'); return; }
         c.fillStyle = 'rgba(0,0,0,.12)'; c.beginPath(); c.ellipse(d.x, 206, 6 * Math.max(0.1, Math.min(1, d.y / 200)), 1.5, 0, 0, Math.PI * 2); c.fill();
         if (d.k === 'estrela_brilho') x.glow(c, d.x, d.y, 16, '#ffe39a', 0.8);
-        x.ilus(c, d.k, d.x, d.y, d.k === 'chuva' ? 24 : 18, { rot: d.k === 'chuva' ? 0 : d.rot });
+        if (d.k === 'microbio' || d.k === 'raio') x.glow(c, d.x, d.y, 14, '#ff4d6d', 0.45);
+        const wanted = order && order.some((q) => q.k === d.k && q.got < q.need);
+        if (wanted) { c.strokeStyle = 'rgba(123,255,143,.8)'; c.lineWidth = 1.5; c.beginPath(); c.arc(d.x, d.y, 11, 0, Math.PI * 2); c.stroke(); }
+        x.ilus(c, d.k, d.x, d.y, d.k === 'chuva' ? 24 : 18, { rot: BADS.includes(d.k) ? 0 : d.rot });
         if (d.k === 'chuva' && !E.reduced) for (let r = 0; r < 3; r++) g.rect(d.x - 6 + r * 6, d.y + 10 + ((sc.t * 60 + r * 7) % 10), 1, 3, '#7fc8ff');
       });
       const sq = bk.sq;
-      g.img(GEO.common.gabrielSide(GEO.eco.look(), bk.moving ? 'run' : 'idle', sc.t), bk.x - 9 - face * 22, 184, { flip: face < 0 });
-      if (x) { c.fillStyle = 'rgba(0,0,0,.25)'; c.beginPath(); c.ellipse(bk.x, 208, 20, 3, 0, 0, Math.PI * 2); c.fill(); c.save(); c.translate(bk.x, 206); c.scale(1 + sq * 0.3, 1 - sq * 0.3); x.ilus(c, 'cesta', 0, -14, 40, bk.slow > 0 ? { gray: true } : null); c.restore(); if (bk.slow > 0) x.ilus(c, 'chuva', bk.x, 166, 18); }
-      else g.rect(bk.x - 20, 190, 40, 14, '#8b5a2b');
+      if (!(bk.inv > 0 && Math.floor(sc.t * 14) % 2)) {
+        g.img(GEO.common.gabrielSide(GEO.eco.look(), bk.moving ? 'run' : 'idle', sc.t), bk.x - 9 - face * 22, 184, { flip: face < 0 });
+        if (x) { c.fillStyle = 'rgba(0,0,0,.25)'; c.beginPath(); c.ellipse(bk.x, 208, 20, 3, 0, 0, Math.PI * 2); c.fill(); c.save(); c.translate(bk.x, 206); c.scale(1 + sq * 0.3, 1 - sq * 0.3); x.ilus(c, 'cesta', 0, -14, 40, bk.slow > 0 ? { gray: true } : null); c.restore(); if (bk.slow > 0) x.ilus(c, 'chuva', bk.x, 166, 18); }
+        else g.rect(bk.x - 20, 190, 40, 14, '#8b5a2b');
+      }
       if (mult > 1) g.text('x' + mult, bk.x, 176, { size: 8, color: '#ffd23f', align: 'center' });
     };
-    sc.dbg = { end() { t = 0; } };
+    sc.dbg = { end() { t = 0; }, get order() { return order; }, catchNeeded() { const o = order.find((q) => q.got < q.need); drops.push({ k: o.k, x: bk.x, y: 190, vy: 0, vx: 0, rot: 0, vr: 0 }); }, drop(k) { drops.push({ k, x: bk.x, y: 190, vy: 0, vx: 0, rot: 0, vr: 0 }); }, get orders() { return orders; }, get over() { return over; } };
     return sc;
   };
 

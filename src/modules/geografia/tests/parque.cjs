@@ -124,6 +124,10 @@ async function clearDialogs(p) { for (let i = 0; i < 12; i++) { const b = await 
   await p.waitForTimeout(500); await clearDialogs(p);
   ok(await p.evaluate(() => GEO.parque.current() && GEO.parque.current().g.id === 'w1_colunas'), 'depois das 2 perguntas o Colunas do Mosaico começou');
   await p.evaluate(() => { GG.ui.closeAll(); GEO.parque.exit(false); });
+  // estudo concluído: todos os minijogos grátis (sem moedas nem perguntas)
+  await p.evaluate(() => { GEO.save.S.coins = 0; GEO.save.S.flags.arcadeTickets = {}; GEO.save.S.finalDone = true; GEO.parque.enter('w2_ninja'); }); await p.waitForTimeout(700); await clearDialogs(p);
+  ok(await p.evaluate(() => GEO.parque.current() && GEO.parque.current().g.id === 'w2_ninja' && GEO.save.S.coins === 0), 'estudo concluído: minijogo entra direto, sem moedas nem perguntas');
+  await p.evaluate(() => { GG.ui.closeAll(); GEO.parque.exit(false); GEO.save.S.finalDone = false; });
   // reduzir movimento: tudo continua desenhando
   await p.evaluate(() => { GEO.save.S.settings.reduceMotion = true; GG.ui.applyA11y(GEO.save.S.settings); GEO.app.showAtlas(3); });
   await p.waitForTimeout(500);

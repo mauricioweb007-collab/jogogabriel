@@ -53,7 +53,8 @@ Marcações: **[não confirmado]** indica algo não verificado; **[pendente]** i
     - Faça antes `read` e `list` com `scope: "files"`.
     - Depois publique com `url` do artifact, `file_path` = `inicio.html` e `files` só com os arquivos alterados. O limite é de 255 arquivos por envio; se passar disso, mande em lotes.
     - Registre a nova versão aqui.
-  - **Versão publicada:** **11** (24/09/2026): Área dos Pais com Parque, Arcade e telas de recompensa no modo de teste (seção 8.4).
+  - **Versão publicada:** **12** (24/09/2026): minijogos mais desafiadores e tudo livre depois do estudo concluído (seção 8.5).
+    - v11: Área dos Pais com Parque, Arcade e telas de recompensa no modo de teste (seção 8.4).
     - v10: Arcade dos Mundos e regras de entrada dos minijogos (seção 8.3).
     - v9: Geografia arcade (seção 8.2).
     - Labirintos no estilo Pac-Man.
@@ -685,7 +686,7 @@ node src/tests/gen-tabela-geografia.cjs                        # tabela das 45 q
   | 2 | Feira Ninja | Fruit Ninja | Cortar frutas deslizando o dedo ou com o facão no teclado; pimenta tira vida; combo e frenesi |
   | 2 | Quermesse Tiro ao Alvo | Duck Hunt / Yoshi's Safari | Esteiras de alvos, 8 rolhas por carga, meta por rodada; não acertar a placa da Gaia |
   | 2 | Pega-Névoa no Arraial | acerte a toupeira | Névoas saem das panelas de barro; teclas Q W E / A S D / Z X C; névoa dourada vale mais; não acertar os amigos |
-  | 3 | Estrada Brasil | Top Gear (SNES) / OutRun | Corrida em pseudo-3D pelo litoral, cerrado e cidade; checkpoints dão tempo; turbo; ultrapassagens |
+  | 3 | Estrada Brasil | Road Fighter (NES) | Corrida vista de cima pelo litoral, cerrado e cidade; combustível no lugar do tempo; carros que mudam de faixa, óleo e batida na beira (refeita na seção 8.5) |
   | 3 | Invasores da Poluição | Galaga / Space Invaders | Nave solar contra fumaças em formação que mergulham; o céu fica mais azul a cada fumaça limpa |
   | 3 | Empilha-Prédios | Tower Bloxx / Stack | O guindaste balança; solte na hora certa; PERFEITO faz combo; a parte que fica para fora cai |
 
@@ -693,7 +694,8 @@ node src/tests/gen-tabela-geografia.cjs                        # tabela das 45 q
 - **Mundo 1** (chefe c1s5): Arcade 1 + Memória das Culturas + Voo da Arara.
 - **Mundo 2** (c2s5): Arcade 2 + Cesta da Feira.
 - **Mundo 3** (c3s6): Arcade 3 + Quebra-cabeça do Brasil.
-- **No começo nada está liberado.** No modo de teste dos pais, tudo fica liberado e grátis.
+- **No começo nada está liberado.** No modo de teste dos pais, tudo fica liberado (a tela de entrada aparece, com o botão "Entrar grátis (teste)").
+- **Estudo concluído** (`S().finalDone`, os 3 mundos e o final): todos os minijogos ficam **livres para sempre**, sem moedas nem perguntas (seção 8.5).
 
 **Entrada de cada partida** (`GEO.parque.enter`)
 - **Chefe vencido:** aparece "🕹️ Arcade do Mundo n liberado!", que dá **1 bilhete grátis** (`S().flags.arcadeTickets[n]`) para escolher 1 dos 3 jogos. O bilhete pode ficar guardado para depois.
@@ -751,4 +753,20 @@ node src/tests/gen-tabela-geografia.cjs                        # tabela das 45 q
 - que não há erros no console.
 
 A sessão dos pais é simulada no `sessionStorage`; a senha não é usada nem guardada.
+
+### 8.5 Minijogos mais desafiadores e liberação total no fim do estudo (24/09/2026, pedido do usuário)
+**Liberação total:** quando a criança **termina o estudo** (`S().finalDone`), `GEO.parque.allFree()` fica verdadeiro e **todos** os minijogos (Parque e Arcade) entram direto, sem moedas e sem perguntas. O menu mostra "🏆 Estudo concluído!". Antes disso, continuam valendo as regras da seção 8.3. No modo de teste, o menu do Parque tem o botão "Simular / Desfazer estudo concluído".
+
+**Ajustes por jogo:**
+
+| Jogo | Problema relatado | O que mudou |
+|---|---|---|
+| Memória das Culturas | Nunca perdia | **4 corações.** Erro = errar quando uma das cartas **já tinha sido vista** (a criança deveria lembrar); errar com duas cartas novas é só tentativa e aparece "Cartas novas — memorize!". Com **4 erros**, o jogo acaba. A pontuação virou pontos (par +20, tabuleiro +50, corações que sobraram +40 cada); medalhas 200/420/620. |
+| Cesta da Feira | Sem objetivo, fácil demais | **Pedidos da banca** (ex.: 3 cocos e 2 milhos): as comidas do pedido têm um contorno verde, e cada pedido entregue enche a banca e dá bônus. Comida fora do pedido vale pouco e quebra o combo. **3 vidas:** **fruta estragada** (micróbio) e **raio** tiram vida; chuva deixa a cesta lenta; coisas erradas podem cair em diagonal. Dura 90 s e acelera a cada pedido e com o tempo. |
+| Jangada Radical | Barco sumia com a invencibilidade | O barco fica sempre visível, com **anel arco-íris** e brilhos. **Acelera sem parar**, como o dinossauro do Chrome (140 → 360), com "MAIS RÁPIDO!" a cada 20 s. **Abaixar** (↓ ou toque na parte de baixo): a **rede de pesca** do píer só passa abaixado, e a gaivota em rasante também. Um aviso "↓ ABAIXE!" pisca antes. |
+| Colunas do Mosaico | Ficou bom; faltava subir a dificuldade | Como no Tetris: a cada **400 pontos** sobe o **nível** e a peça cai 12% mais rápido (mínimo de 0,14 s), com o aviso "NÍVEL n! MAIS RÁPIDO". |
+| Quermesse Tiro ao Alvo | Muito fácil | Rodada de **25 s** (antes 30). A meta começa em **7 e sobe 1 por rodada**. Os alvos na esteira sobem **+1 por rodada**, e ficam mais rápidos. Alvos errados (**placa da Gaia, presente, pomba**) ficam cada vez mais comuns (16% + 6% por rodada, até 45%), e **cada erro tira 2 s** (e 30 pontos). As rodadas não têm fim: o jogo acaba quando uma meta não é batida. |
+| Estrada Brasil | Checkpoint toda hora, impossível perder | **Refeita no estilo Road Fighter (NES)**, vista de cima. **Combustível** no lugar do tempo: gasta sempre, e mais na marcha rápida (↑/Espaço). Bater num carro ou **na beira da pista** faz o carro rodar e explodir: −10 de combustível e recomeça parado. **Carros amarelos** mudam de faixa na sua frente ("!"), caminhões são largos e **óleo** faz rodar. **Galões** dão +18. Cada zona (litoral, cerrado, cidade) dá só +12 de combustível e +250 pontos; depois das 3 zonas vem outra volta, mais estreita e com mais trânsito. Um robô de teste simples fez cerca de 21 km e 1800 a 2100 pontos, batendo 15 a 18 vezes; sem controle, o jogo acaba em cerca de 50 s. Medalhas 900/1900/3200. |
+
+**Arquivos:** `scenes/parque.js` (liberação total, Memória, Cesta, ferramenta de teste), `scenes/arcade1.js` (Jangada, Colunas), `scenes/arcade2.js` (Quermesse), `scenes/arcade3.js` (Estrada) e `tests/parque.cjs` (estudo concluído = entrada direta).
 

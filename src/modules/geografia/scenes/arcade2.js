@@ -95,14 +95,16 @@
   /* ================================================================ QUERMESSE TIRO AO ALVO */
   PQ.register({ id: 'w2_quermesse', world: 2, boss: 'c2s5', ref: 'Duck Hunt / Yoshi\'s Safari', title: 'Quermesse Tiro ao Alvo', icon: 'alvo', c1: '#e5484d', c2: '#5a1020', music: 'festa', medals: [300, 700, 1200], unit: 'pts',
     desc: 'Barraca da festa junina: acerte os alvos das esteiras com a espingarda de rolha. Bata a meta de cada rodada!',
-    how: 'Mire com o **mouse/dedo** (toque atira) ou com as **setas** e **Espaço** para atirar. São **8 rolhas** por carga (recarrega sozinho ou com **E**). Não acerte a placa da **Gaia**! Bata a **meta** para passar de rodada.' }, function (api) {
+    how: 'Mire com o **mouse/dedo** (toque atira) ou com as **setas** e **Espaço** para atirar. São **8 rolhas** por carga (recarrega com **E**). **Não acerte** a placa da **Gaia**, os **presentes** nem as **pombas**: cada erro tira **2 segundos**! Cada rodada tem **menos tempo para sobrar**, mais alvos e mais rápidos.' }, function (api) {
     const sc = { cam: { x: 0, y: 0 }, t: 0 };
     const ROWS = [72, 112, 152];
     const aim = { x: 200, y: 112 };
     let targets = [], round = 0, roundT = 0, hits = 0, ammo = 8, reload = 0, playing = false, spawnT = 0, flash = 0, laugh = 0, between = 0;
-    const META = [6, 9, 12, 15, 18];
+    // pedido do usuário: rodada de 25 s; meta e alvos na esteira +1 por rodada; alvos errados cada vez mais comuns (−2 s)
+    const RT = 25, meta = () => 7 + round, BAD = ['bussola', 'presente', 'pomba'];
+    const badChance = () => Math.min(0.45, 0.16 + round * 0.06);
     PQ.pointer(sc, { pointermove: (lx, ly) => { aim.x = lx; aim.y = ly; }, pointerdown: (lx, ly) => { aim.x = lx; aim.y = ly; shoot(); } });
-    function startRound() { roundT = 30; hits = 0; targets = []; between = 0; api.goal('Rodada ' + (round + 1) + ': acerte ' + META[Math.min(round, 4)] + ' alvos em 30 s!'); if (X()) X().banner({ id: 'qm', icon: 'alvo', title: 'Rodada ' + (round + 1), style: 'Meta: ' + META[Math.min(round, 4)] + ' alvos' }, 'QUERMESSE'); }
+    function startRound() { roundT = RT; hits = 0; targets = []; between = 0; api.goal('Rodada ' + (round + 1) + ': acerte ' + meta() + ' alvos em ' + RT + ' s! Errado = −2 s'); if (X()) X().banner({ id: 'qm', icon: 'alvo', title: 'Rodada ' + (round + 1), style: 'Meta: ' + meta() + ' alvos' }, 'QUERMESSE'); }
     sc.begin = () => { playing = true; startRound(); };
     function shoot() {
       if (!playing || between > 0 || reload > 0) return;
@@ -111,7 +113,7 @@
       const t = targets.slice().reverse().find((tg) => !tg.hit && Math.abs(tg.x - aim.x) < tg.r && Math.abs(tg.y - aim.y) < tg.r);
       if (!t) { if (X()) X().puff(aim.x, aim.y, 1); return; }
       t.hit = true; t.fall = 0;
-      if (t.k === 'bussola') { api.add(-30); GG.audio.sfx('bad'); if (X()) X().pop(t.x, t.y - 10, 'NÃO! -30', '#ff6b6b', 9); return; }
+      if (BAD.includes(t.k)) { api.add(-30); roundT -= 2; GG.audio.sfx('bad'); E.shake(3, 0.2); if (X()) { X().pop(t.x, t.y - 10, 'NÃO! -2 s', '#ff6b6b', 9); X().flash('#ff4d4d', 0.15); } return; }
       const v = t.k === 'estrela_brilho' ? 50 : t.k === 'balao' ? 10 : t.k === 'lata' ? 15 : 20; hits++; api.add(v * (1 + round * 0.25) | 0);
       GG.audio.sfx(t.k === 'balao' ? 'boom' : 'coin'); if (X()) { X().sparkle(t.x, t.y, '#fff0a0', 5); X().pop(t.x, t.y - 12, '+' + (v * (1 + round * 0.25) | 0), '#ffe27a', 8); }
     }
@@ -124,26 +126,27 @@
       if (I.pressed('jump')) shoot(); if (I.pressed('act') && ammo < 8) reload = 0.9;
       if (reload > 0) { reload -= dt; if (reload <= 0) { ammo = 8; GG.audio.sfx('check'); } }
       if (between > 0) { between -= dt; if (between <= 0) { if (laugh > 0 || api._over) return; startRound(); } return; }
-      roundT -= dt; api.extra('alvo', hits + '/' + META[Math.min(round, 4)] + ' • ' + Math.max(0, Math.ceil(roundT)) + 's');
+      roundT -= dt; api.extra('alvo', hits + '/' + meta() + ' • ' + Math.max(0, Math.ceil(roundT)) + 's');
       spawnT -= dt;
-      if (spawnT <= 0) {
-        spawnT = Math.max(0.35, 0.9 - round * 0.12);
-        const row = Math.floor(Math.random() * 3), dir = row % 2 ? -1 : 1, r = Math.random();
-        const k = r < 0.08 ? 'estrela_brilho' : r < 0.18 ? 'bussola' : r < 0.5 ? 'balao' : r < 0.75 ? 'lata' : 'pato';
-        targets.push({ k, row, x: dir > 0 ? -16 : E.W + 16, y: ROWS[row], vx: dir * (45 + round * 12 + row * 8) * (k === 'estrela_brilho' ? 2 : 1), r: k === 'balao' ? 11 : 12, bob: Math.random() * 6 });
+      const live = targets.filter((t) => !t.hit && !BAD.includes(t.k)).length;
+      if (spawnT <= 0 && live < 4 + round) {
+        spawnT = Math.max(0.3, 0.85 - round * 0.1);
+        const row = Math.floor(Math.random() * 3), dir = row % 2 ? -1 : 1, r = Math.random(), bc = badChance();
+        const k = r < bc ? U.pick(BAD.slice(0, Math.min(3, 1 + round))) : r < bc + 0.07 ? 'estrela_brilho' : r < bc + 0.35 ? 'balao' : r < bc + 0.6 ? 'lata' : 'pato';
+        targets.push({ k, row, x: dir > 0 ? -16 : E.W + 16, y: ROWS[row], vx: dir * (50 + round * 14 + row * 8) * (k === 'estrela_brilho' ? 2 : 1), r: k === 'balao' ? 11 : 12, bob: Math.random() * 6 });
       }
       targets.forEach((t) => { if (t.hit) { t.fall += dt; t.y += 160 * dt; } else { t.x += t.vx * dt; if (t.k === 'balao') t.y = ROWS[t.row] - 6 + Math.sin(sc.t * 3 + t.bob) * 4; } });
       targets = targets.filter((t) => t.x > -30 && t.x < E.W + 30 && (!t.hit || t.fall < 0.6));
       if (roundT <= 0) {
-        const meta = META[Math.min(round, 4)];
-        if (hits >= meta) { round++; api.add(100); GG.audio.sfx('win'); E.fx.confetti(E.W / 2, 60, 40); between = 2; api.goal('Meta batida! Próxima rodada…'); }
-        else { playing = false; laugh = 3; api._over = true; GG.audio.sfx('bad'); api.goal('O GeoBot ri da barraca… faltou pouco!'); setTimeout(() => api.end(api.score, 'Rodadas vencidas: ' + round + '. Meta da última rodada: ' + meta + ' alvos (você fez ' + hits + ').'), 2200); }
+        const mt = meta();
+        if (hits >= mt) { round++; api.add(100); GG.audio.sfx('win'); E.fx.confetti(E.W / 2, 60, 40); between = 2; api.goal('Meta batida! Próxima rodada…'); }
+        else { playing = false; laugh = 3; api._over = true; GG.audio.sfx('bad'); api.goal('O GeoBot ri da barraca… faltou pouco!'); setTimeout(() => api.end(api.score, 'Rodadas vencidas: ' + round + '. Meta da última rodada: ' + mt + ' alvos (você fez ' + hits + ').'), 2200); }
       }
     };
     function drawTarget(c, g, x, t) {
       if (t.k === 'pato') { c.fillStyle = '#ffd23f'; c.beginPath(); c.ellipse(t.x, t.y + 2, 10, 7, 0, 0, Math.PI * 2); c.fill(); c.beginPath(); c.arc(t.x + 7 * Math.sign(t.vx), t.y - 6, 5, 0, Math.PI * 2); c.fill(); c.fillStyle = '#ff8a2a'; c.fillRect(t.x + 11 * Math.sign(t.vx) - 2, t.y - 6, 4, 2); c.fillStyle = '#15152a'; c.fillRect(t.x + 8 * Math.sign(t.vx), t.y - 8, 1.5, 1.5); c.fillStyle = '#8a6a2a'; c.fillRect(t.x - 1, t.y + 9, 2, 10); return; }
       if (t.k === 'lata') { c.fillStyle = '#c0c6d6'; c.fillRect(t.x - 7, t.y - 10, 14, 20); c.fillStyle = '#e5484d'; c.fillRect(t.x - 7, t.y - 4, 14, 8); c.fillStyle = '#fff'; c.fillRect(t.x - 4, t.y - 2, 8, 3); c.fillStyle = '#8a6a2a'; c.fillRect(t.x - 1, t.y + 10, 2, 9); return; }
-      if (t.k === 'bussola') { g.panel(t.x - 11, t.y - 11, 22, 22, '#ffe0e0', '#e5484d'); if (x) x.ilus(c, 'bussola', t.x, t.y, 16); c.strokeStyle = '#e5484d'; c.lineWidth = 1.5; c.beginPath(); c.arc(t.x, t.y, 13, 0, Math.PI * 2); c.stroke(); return; }
+      if (BAD.includes(t.k)) { g.panel(t.x - 11, t.y - 11, 22, 22, '#ffe0e0', '#e5484d'); if (x) x.ilus(c, t.k, t.x, t.y, 16); c.strokeStyle = '#e5484d'; c.lineWidth = 1.5; c.beginPath(); c.arc(t.x, t.y, 13, 0, Math.PI * 2); c.moveTo(t.x - 9, t.y - 9); c.lineTo(t.x + 9, t.y + 9); c.stroke(); return; }
       if (t.k === 'estrela_brilho' && x) x.glow(c, t.x, t.y, 16, '#ffd23f', 0.8);
       if (!(x && x.ilus(c, t.k, t.x, t.y, 22))) g.circle(t.x, t.y, 10, '#ff4d6d');
     }
