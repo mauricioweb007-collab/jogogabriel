@@ -208,11 +208,34 @@
       if (IN.pressed('pause')) GEO.stage.pauseMenu(ctx);
     };
 
+    /* paredes neon pré-desenhadas uma vez (brilho sem custo por quadro) */
+    let wallsHD = null;
+    function buildWalls() {
+      const X = GEO.gfx, K = 3, blue = energy || bonus;
+      return X.mk(GRID[0].length * CS * K, GRID.length * CS * K, (w) => {
+        w.scale(K, K);
+        GRID.forEach((row, y) => row.split('').forEach((ch, x) => { if (ch !== '#') return; const px = x * CS, py = y * CS; const gr = w.createLinearGradient(0, py, 0, py + CS); gr.addColorStop(0, blue ? '#16466c' : '#46266c'); gr.addColorStop(1, blue ? '#0e2c48' : '#2c1648'); w.fillStyle = gr; w.fillRect(px, py, CS, CS); }));
+        w.shadowColor = blue ? '#3ec1ff' : '#ff4fa8'; w.shadowBlur = 6 * K; w.strokeStyle = blue ? '#7fdcff' : '#ff8fd0'; w.lineWidth = 1.2; w.lineCap = 'round';
+        for (let pass = 0; pass < 2; pass++) {
+          w.beginPath();
+          GRID.forEach((row, y) => row.split('').forEach((ch, x) => {
+            if (ch !== '#') return; const px = x * CS, py = y * CS;
+            if (open(x, y - 1)) { w.moveTo(px, py + 0.6); w.lineTo(px + CS, py + 0.6); }
+            if (open(x, y + 1)) { w.moveTo(px, py + CS - 0.6); w.lineTo(px + CS, py + CS - 0.6); }
+            if (open(x - 1, y)) { w.moveTo(px + 0.6, py); w.lineTo(px + 0.6, py + CS); }
+            if (open(x + 1, y)) { w.moveTo(px + CS - 0.6, py); w.lineTo(px + CS - 0.6, py + CS); }
+          }));
+          w.stroke(); w.shadowBlur = 0; w.strokeStyle = '#ffffff'; w.lineWidth = 0.4;
+        }
+      });
+    }
     sc.draw = function (g) {
-      const c = g.ctx();
+      const c = g.ctx(), X = GEO.gfx && GEO.gfx.ready ? GEO.gfx : null;
       c.fillStyle = energy || bonus ? '#0b1624' : '#1a1030'; c.fillRect(0, 0, E.W, E.H);
+      if (X) { const bg = c.createRadialGradient(E.W / 2, E.H / 2, 20, E.W / 2, E.H / 2, 260); bg.addColorStop(0, energy || bonus ? '#123055' : '#301a55'); bg.addColorStop(1, energy || bonus ? '#050b16' : '#0c0618'); c.fillStyle = bg; c.fillRect(0, 0, E.W, E.H); }
       g.world({ x: -OX, y: -OY });
-      GRID.forEach((row, y) => row.split('').forEach((ch, x) => {
+      if (X) { if (!wallsHD) wallsHD = buildWalls(); X.hd(c, () => c.drawImage(wallsHD, 0, 0, GRID[0].length * CS, GRID.length * CS)); }
+      else GRID.forEach((row, y) => row.split('').forEach((ch, x) => {
         const px = x * CS, py = y * CS;
         if (ch === '#') {
           c.fillStyle = energy || bonus ? '#123a5a' : '#3a1f5a'; c.fillRect(px, py, CS, CS);
@@ -228,16 +251,18 @@
       Object.keys(altarPos).forEach((k) => {
         const a = altarPos[k]; if (!S.altars || !S.altars[k]) return;
         const lit = S._lit && S._lit[k];
-        if (energy) { g.spr('town', lit ? 85 : 84, a.x * CS, a.y * CS); if (lit) g.circle(a.x * CS + 8, a.y * CS + 4, 3, '#ffe066'); }
+        if (energy) { if (!X) { g.spr('town', lit ? 85 : 84, a.x * CS, a.y * CS); if (lit) g.circle(a.x * CS + 8, a.y * CS + 4, 3, '#ffe066'); } }
         else { g.circle(a.x * CS + 8, a.y * CS + 8, 7 + Math.sin(sc.t * 3), '#ffd23f', 2); g.rect(a.x * CS + 4, a.y * CS + 4, 8, 8, '#b07bff'); }
         C.sign(g, a.x * CS + 8, a.y === 1 ? a.y * CS + 18 : a.y * CS - 16, S.altars[k], null, E.W);
       });
-      powers.forEach((pw) => { if (!pw.got) { g.circle(pw.x * CS + 8, pw.y * CS + 8, 4 + Math.sin(sc.t * 6), energy ? '#9ff2ff' : '#ff8fc8'); } });
+      if (X) Object.keys(altarPos).forEach((k) => { const a = altarPos[k]; if (!S.altars || !S.altars[k]) return; const lit = S._lit && S._lit[k]; if (energy) { X.glow(c, a.x * CS + 8, a.y * CS + 8, lit ? 26 : 12, lit ? '#ffe066' : '#6fa0ff', lit ? 0.9 : 0.35); X.ilus(c, lit ? 'casa_jardim' : 'casa', a.x * CS + 8, a.y * CS + 7, 16, { gray: !lit }); } else X.glow(c, a.x * CS + 8, a.y * CS + 8, 18, '#ffd23f', 0.4 + 0.2 * Math.sin(sc.t * 3)); });
+      powers.forEach((pw) => { if (!pw.got) { if (X) X.glow(c, pw.x * CS + 8, pw.y * CS + 8, 14, energy ? '#9ff2ff' : '#ff8fc8', 0.8); g.circle(pw.x * CS + 8, pw.y * CS + 8, 4 + Math.sin(sc.t * 6), energy ? '#9ff2ff' : '#ff8fc8'); } });
       frags.forEach((f) => { if (!f.got) g.img(P.fragmento(Math.floor(sc.t * 4) % 2), f.x * CS + 2, f.y * CS + 2); });
-      items.forEach((it) => { if (!it.done && it !== carry) { g.panel(it.x * CS + 1, it.y * CS + 1, 14, 14, energy ? '#ffe066' : '#fff3d1', '#15152a'); g.text(energy ? '⚡' : it.name.slice(0, 1), it.x * CS + 8, it.y * CS + 3, { size: energy ? 9 : 8, color: '#6d4c8f', align: 'center', shadow: false, font: energy ? 'sans-serif' : undefined }); } });
+      items.forEach((it) => { if (!it.done && it !== carry && X && energy) { X.glow(c, it.x * CS + 8, it.y * CS + 8, 14, '#ffe066', 0.7); X.ilus(c, 'raio', it.x * CS + 8, it.y * CS + 8 + Math.sin(sc.t * 4 + it.x) * 1.5, 15); } else if (!it.done && it !== carry) { g.panel(it.x * CS + 1, it.y * CS + 1, 14, 14, energy ? '#ffe066' : '#fff3d1', '#15152a'); g.text(energy ? '⚡' : it.name.slice(0, 1), it.x * CS + 8, it.y * CS + 3, { size: energy ? 9 : 8, color: '#6d4c8f', align: 'center', shadow: false, font: energy ? 'sans-serif' : undefined }); } });
       foes.forEach((f) => { const im = energy || bonus ? P.virus(Math.floor(sc.t * 4) % 2) : P.sombra(Math.floor(sc.t * 4) % 2, power > 0); g.img(im, f.x + 1, f.y + 1, { alpha: power > 0 ? 0.7 : 1 }); });
+      if (X) X.glow(c, p.x + 8, p.y + 6, 34, energy || bonus ? '#bfe8ff' : '#ffd0f0', 0.35);
       if (!(p.inv > 0 && Math.floor(sc.t * 20) % 2)) g.img(C.gabrielTop(ctx.look, p.dir, true, sc.t), p.x + 1, p.y - 4, { scale: 0.9, flip: p.dir === 'right' });
-      if (carry) { g.panel(p.x + 4, p.y - 12, 10, 10, energy ? '#ffe066' : '#fff3d1', '#15152a'); }
+      if (carry) { if (X && energy) { X.glow(c, p.x + 9, p.y - 8, 10, '#ffe066', 0.8); X.ilus(c, 'raio', p.x + 9, p.y - 8, 11); } else g.panel(p.x + 4, p.y - 12, 10, 10, energy ? '#ffe066' : '#fff3d1', '#15152a'); }
       g.end();
       g.panel(0, 0, E.W, 16, 'rgba(15,18,38,.95)', '#15152a');
       g.text(carry ? 'Levando: ' + carry.name : bonus ? 'Tempo: ' + Math.ceil(bonusT) + ' s' : energy ? 'Leve energia ⚡ às casas' : 'Leve os símbolos aos altares', 6, 5, { size: 6, color: '#ffd23f', maxW: 300 });

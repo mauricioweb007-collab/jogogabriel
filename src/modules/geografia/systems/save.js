@@ -25,7 +25,7 @@
       xp: 0, coins: 0, earned: 0, spent: 0, ledger: [],
       inv: [], equip: {}, fragments: 0, stars: 0,
       q, checks: { ok: 0, wrong: 0 }, concepts: {},
-      stages: {}, chaptersDone: [], finalDone: false, trophies: [], unlockedBonus: [],
+      stages: {}, chaptersDone: [], finalDone: false, trophies: [], unlockedBonus: [], parque: {},
       time: { study: 0, action: 0, total: 0, sessions: 0 },
       reviewLog: [], quickLog: [], geobot: { wins: 0, races: 0 },
       last: null, lastSession: null, summary: null, flags: {}

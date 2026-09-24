@@ -89,14 +89,30 @@
       const gr = c.createLinearGradient(0, 0, 0, E.H); gr.addColorStop(0, '#ffd8a8'); gr.addColorStop(1, '#f6a96b'); c.fillStyle = gr; c.fillRect(0, 0, E.W, E.H);
       // cozinha: azulejos e fogão
       for (let y = 30; y < 150; y += 16) for (let x = (y / 16 % 2) * 8; x < E.W; x += 16) { c.fillStyle = 'rgba(255,255,255,.18)'; c.fillRect(x, y, 14, 14); }
+      const X = GEO.gfx && GEO.gfx.ready ? GEO.gfx : null;
+      if (X) {
+        // janela com o céu da tarde, prateleiras com ingredientes e luz quente
+        c.fillStyle = '#5a3418'; c.fillRect(8, 74, 70, 54); const wg = c.createLinearGradient(0, 78, 0, 124); wg.addColorStop(0, '#6fc3ff'); wg.addColorStop(1, '#ffe2a8'); c.fillStyle = wg; c.fillRect(12, 78, 62, 46);
+        X.glow(c, 58, 92, 22, '#fff0b0', 0.8); c.fillStyle = '#fff6d0'; c.beginPath(); c.arc(58, 92, 6, 0, Math.PI * 2); c.fill();
+        X.hd(c, () => { const pm = X.img.treePalm; if (pm) c.drawImage(pm, 14, 92, 24, 32); });
+        c.fillStyle = '#5a3418'; c.fillRect(42, 78, 2, 46); c.fillRect(12, 100, 62, 2);
+        [[300, 80], [300, 118]].forEach(([sx, sy]) => { c.fillStyle = '#7a4b1f'; c.fillRect(sx, sy + 12, 92, 4); c.fillStyle = '#4a2a10'; c.fillRect(sx, sy + 16, 92, 2); });
+        ['coco', 'milho', 'pimenta', 'cebola', 'alho', 'banana', 'feijao', 'abacaxi', 'peixe', 'mandioca', 'queijo', 'pao'].filter((n) => X.has(n)).slice(0, 10).forEach((n, i) => X.ilus(c, n, 310 + (i % 5) * 18, (i < 5 ? 84 : 122) + Math.sin(sc.t * 2 + i) * 0.6, 15));
+        X.rays(c, 58, 92, 120, '#fff0c0', sc.t, 6);
+      }
       c.fillStyle = '#6b3f22'; c.fillRect(0, 196, E.W, 29); c.fillStyle = '#8b5a2b'; c.fillRect(0, 192, E.W, 6);
+      if (X) { for (let x = 0; x < E.W; x += 22) { c.fillStyle = 'rgba(0,0,0,.12)'; c.fillRect(x, 198, 1, 27); } }
       // três panelas de origem ao fundo
-      [['Portuguesa', '#3ec1ff'], ['Africana', '#f39c12'], ['Indígena', '#2ecc71']].forEach((o, i) => { g.rect(40 + i * 120, 40, 60, 26, '#3a2410'); g.rect(44 + i * 120, 36, 52, 6, o[1]); g.text(o[0], 70 + i * 120, 52, { size: 5, color: '#fff', align: 'center' }); });
-      // sílabas caindo
-      drops.forEach((d) => { g.panel(d.x, d.y, 24, 16, '#7a4b1f', '#3b220b'); g.text(d.s, d.x + 12, d.y + 4, { size: 7, color: '#fff5dc', align: 'center', shadow: false }); });
+      [['Portuguesa', '#3ec1ff'], ['Africana', '#f39c12'], ['Indígena', '#2ecc71']].forEach((o, i) => {
+        if (X) { X.glow(c, 70 + i * 120, 58, 26, o[1], 0.35); X.ilus(c, 'panela', 70 + i * 120, 58, 34, { shadow: true }); g.panel(40 + i * 120, 74, 60, 11, 'rgba(20,12,4,.8)', o[1]); g.text(o[0], 70 + i * 120, 77, { size: 5, color: '#fff', align: 'center' }); return; }
+        g.rect(40 + i * 120, 40, 60, 26, '#3a2410'); g.rect(44 + i * 120, 36, 52, 6, o[1]); g.text(o[0], 70 + i * 120, 52, { size: 5, color: '#fff', align: 'center' });
+      });
+      // sílabas caindo (plaquinhas de madeira com sombra)
+      drops.forEach((d) => { if (X) { c.fillStyle = 'rgba(0,0,0,.18)'; c.fillRect(d.x + 3, d.y + 4, 24, 16); } g.panel(d.x, d.y, 24, 16, '#7a4b1f', '#3b220b'); if (X) g.rect(d.x, d.y, 24, 3, '#9a6630'); g.text(d.s, d.x + 12, d.y + 4, { size: 7, color: '#fff5dc', align: 'center', shadow: false }); });
       // panela do jogador
       g.rect(pot.x - 2, 180, pot.w + 12, 14, '#2a2a33'); g.rect(pot.x, 176, pot.w + 8, 6, W.color); g.rect(pot.x - 6, 182, 6, 4, '#2a2a33'); g.rect(pot.x + pot.w + 8, 182, 6, 4, '#2a2a33');
-      if (!E.reduced) for (let i = 0; i < 3; i++) g.circle(pot.x + 10 + i * 12, 170 - ((sc.t * 20 + i * 10) % 20), 3, 'rgba(255,255,255,.5)');
+      if (X) X.glow(c, pot.x + pot.w / 2 + 4, 194, 20, '#ff8a2a', 0.5 + 0.2 * Math.sin(sc.t * 12));
+      if (!E.reduced) for (let i = 0; i < 3; i++) { const k = ((sc.t * 0.8 + i / 3) % 1), im = X && X.img['puff' + Math.floor(k * 7)]; if (im) { c.save(); c.globalAlpha = 0.5 * (1 - k); X.hd(c, () => c.drawImage(im, pot.x + 4 + i * 12 - 6, 168 - k * 26, 12 + k * 8, 12 + k * 8)); c.restore(); } else g.circle(pot.x + 10 + i * 12, 170 - ((sc.t * 20 + i * 10) % 20), 3, 'rgba(255,255,255,.5)'); }
       g.img(C.gabrielSide(ctx.look, 'idle', sc.t), pot.x + 14, 158, { scale: 0.8 });
       // palavra sendo montada
       g.panel(110, 8, 180, 22, '#1d2247', '#0a0c1c');

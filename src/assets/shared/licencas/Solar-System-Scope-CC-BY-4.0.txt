@@ -1,0 +1,9 @@
+Texturas da Terra (dia e noite) — Solar System Scope (INOVE), https://www.solarsystemscope.com/textures/
+Baseadas em imagens e dados de elevação da NASA.
+Licença: Creative Commons Atribuição 4.0 Internacional (CC BY 4.0) — https://creativecommons.org/licenses/by/4.0/
+
+Arquivos derivados usados no módulo de Geografia (recortados e redimensionados, sem outras alterações):
+  src/modules/geografia/assets/fotos/sat_dia.jpg     (recorte da América do Sul, textura de dia)
+  src/modules/geografia/assets/fotos/sat_noite.jpg   (recorte da América do Sul, luzes das cidades à noite)
+  src/modules/geografia/assets/fotos/terra_1024.jpg  (textura inteira reduzida, usada no globo que gira)
+Obtidas pela cópia pública do repositório three.js (examples/textures/planets/earth_day_4096.jpg e earth_night_4096.jpg).

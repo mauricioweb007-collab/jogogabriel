@@ -146,7 +146,7 @@
 
     sc.draw = function (g) {
       const c = g.ctx(), th = def.theme === 'interior' ? 'interior' : 'estrada';
-      C.sky(g, th, sc.cam.x * 2, 0, sc.t);
+      C.sky(g, th, sc.cam.x * 2, 0, sc.t, { horizon: 100 });
       // pista
       const ty = 96;
       c.fillStyle = th === 'interior' ? '#c98f4d' : '#5aa04a'; c.fillRect(0, ty, E.W, E.H - ty);

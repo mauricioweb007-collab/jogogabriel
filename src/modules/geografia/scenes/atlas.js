@@ -39,6 +39,7 @@
     sc.init = function () { GEO.app.nodePanel(sel); GEO.app.atlasTabs(page); GG.audio.music('atlas'); };
     sc.update = function (dt) {
       sc.t += dt;
+      if (GEO.gfx && GEO.gfx.ready && !E.reduced && Math.random() < dt * 5) { const sp = toC(sel.node); GEO.gfx.sparkle(sp.x + U.rand(-10, 10), sp.y + U.rand(-10, 6), '#fff0b0', 1); }
       walker.x += (walker.tx - walker.x) * Math.min(1, dt * 7); walker.y += (walker.ty - walker.y) * Math.min(1, dt * 7);
       const IN = GG.input, list = nodesOf(page), i = list.indexOf(sel);
       if (IN.pressed('right')) sc.select(list[Math.min(list.length - 1, i + 1)]);
@@ -55,11 +56,17 @@
     };
     sc.draw = function (g) {
       const c = g.ctx(), ch = D.chapters[page - 1];
-      const gr = c.createLinearGradient(0, 0, 0, E.H); gr.addColorStop(0, '#1b2a5a'); gr.addColorStop(1, '#0f1733'); c.fillStyle = gr; c.fillRect(0, 0, E.W, E.H);
-      // ondas do mar
-      for (let y = 20; y < E.H; y += 16) for (let x = ((y * 7) % 32) - 32 + (E.reduced ? 0 : (sc.t * 6) % 32); x < E.W; x += 32) { c.fillStyle = 'rgba(120,180,255,.12)'; c.fillRect(x, y, 10, 1); }
-      // página do atlas (pergaminho)
-      c.fillStyle = '#2b1d14'; c.fillRect(MAPX - 10, MAPY - 6, MAPW + 20, 218); c.fillStyle = '#f3e6c4'; c.fillRect(MAPX - 8, MAPY - 4, MAPW + 16, 214);
+      const X = GEO.gfx && GEO.gfx.ready ? GEO.gfx : null;
+      // fundo: foto de satélite real (dia; na página 3, as luzes da noite mostram onde vive mais gente)
+      if (!(X && X.photo(c, page === 3 ? 'satNoite' : 'satDia', sc.t, page === 3 ? 'rgba(5,8,25,.25)' : 'rgba(8,14,40,.45)'))) {
+        const gr = c.createLinearGradient(0, 0, 0, E.H); gr.addColorStop(0, '#1b2a5a'); gr.addColorStop(1, '#0f1733'); c.fillStyle = gr; c.fillRect(0, 0, E.W, E.H);
+        for (let y = 20; y < E.H; y += 16) for (let x = ((y * 7) % 32) - 32 + (E.reduced ? 0 : (sc.t * 6) % 32); x < E.W; x += 32) { c.fillStyle = 'rgba(120,180,255,.12)'; c.fillRect(x, y, 10, 1); }
+      }
+      // página do atlas (pergaminho com sombra e cantos)
+      if (X) { c.fillStyle = 'rgba(0,0,0,.35)'; c.fillRect(MAPX - 7, MAPY - 1, MAPW + 20, 218); }
+      c.fillStyle = '#2b1d14'; c.fillRect(MAPX - 10, MAPY - 6, MAPW + 20, 218);
+      const pg = c.createRadialGradient(MAPX + MAPW / 2, MAPY + 100, 30, MAPX + MAPW / 2, MAPY + 100, 150); pg.addColorStop(0, '#f8eed2'); pg.addColorStop(1, '#e2cc9a');
+      c.fillStyle = X ? pg : '#f3e6c4'; c.fillRect(MAPX - 8, MAPY - 4, MAPW + 16, 214);
       const fill = (s) => { const base = { 1: ['#f8c77d', '#f6b04a'], 2: ['#f7a8c8', '#e87bb0'], 3: ['#9fd9f5', '#62bde8'] }[page]; return (s.cx + s.cy) % 2 < 1 ? base[0] : base[1]; };
       GG.maps.drawCanvas(c, MAPX, MAPY, MAPW, fill, 'rgba(90,60,30,.35)');
       g.text(ch.page.toUpperCase(), MAPX + MAPW / 2, MAPY + 2, { size: 6, color: '#6d4c2a', align: 'center', shadow: false });
@@ -75,7 +82,11 @@
         c.fillStyle = '#15152a'; c.beginPath(); c.arc(p.x, p.y, r + 2, 0, Math.PI * 2); c.fill();
         c.fillStyle = state === 'locked' ? '#6b6b7a' : state === 'done' ? '#3ddc84' : s.bonus ? '#b07bff' : '#ffd23f'; c.beginPath(); c.arc(p.x, p.y, r, 0, Math.PI * 2); c.fill();
         const icon = state === 'locked' ? '🔒' : { platform: '🏃', topdown: '🧭', shmup: '🚀', race: '🏁', boss: '👾', maze: '🌀', rhythm: '🥁', kitchen: '🍲', city: '🏙️', tower: '🗼' }[s.engine];
-        g.text(icon, p.x, p.y - 6, { size: 10, align: 'center', font: 'sans-serif', shadow: false });
+        if (X) {
+          if (isSel) { X.glow(c, p.x, p.y, 26, '#ffe08a', 0.7 + 0.2 * Math.sin(sc.t * 4)); c.strokeStyle = 'rgba(255,240,180,' + (0.5 + 0.4 * Math.sin(sc.t * 5)) + ')'; c.lineWidth = 1.5; c.beginPath(); c.arc(p.x, p.y, r + 5 + Math.sin(sc.t * 5) * 1.5, 0, Math.PI * 2); c.stroke(); }
+          X.ilus(c, X.stageIcon(s.id), p.x, p.y - (isSel && !E.reduced ? 2 + Math.abs(Math.sin(sc.t * 4)) * 3 : 1), isSel ? 20 : 16, { gray: state === 'locked' });
+          if (state === 'locked') X.ilus(c, 'cadeado', p.x + 7, p.y + 6, 10);
+        } else g.text(icon, p.x, p.y - 6, { size: 10, align: 'center', font: 'sans-serif', shadow: false });
         if (st && st.best) g.text({ bronze: '🥉', prata: '🥈', ouro: '🥇', diamante: '💎' }[st.best.medal], p.x + 9, p.y + 3, { size: 8, font: 'sans-serif', shadow: false });
         if (isSel) C_label(g, p.x, p.y + 13, (s.bonus ? 'Bônus: ' : s.ch + '-' + s.n + ' ') + s.title);
       });
@@ -91,6 +102,7 @@
       g.text(done + '/' + tot + ' fases', 48, 108, { size: 6, color: '#b9bde6', align: 'center' });
       g.rect(12, 120, 72, 6, '#0a0c1c'); g.rect(12, 120, 72 * done / tot, 6, '#3ddc84');
       g.text('↑↓ páginas', 48, 144, { size: 5, color: '#b9bde6', align: 'center' }); g.text('←→ fases', 48, 154, { size: 5, color: '#b9bde6', align: 'center' });
+      if (X) { X.globe(c, 48, 181, 17, sc.t); if (page === 3) g.text('Brasil à noite', 48, 201, { size: 4, color: '#ffe9a8', align: 'center' }); }
     };
     function C_label(g, x, y, t) { const w = Math.min(150, g.textW(t, 6) + 8); g.panel(x - w / 2, y, w, 12, '#fff8e6', '#15152a'); g.text(t, x, y + 3, { size: 6, color: '#2a2233', align: 'center', shadow: false, maxW: w - 4 }); }
     return sc;

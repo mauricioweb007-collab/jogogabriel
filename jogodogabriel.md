@@ -1,7 +1,7 @@
 # Jogo do Gabriel: mapa da franquia
 
 Memória oficial e cumulativa do projeto. Leia inteira antes de planejar ou mudar qualquer coisa.
-Estado conferido nos arquivos em 24/09/2026 (Gabriel Nexus construído e **oculto para a criança**; último commit de código `c198b17`).
+Estado conferido nos arquivos em 24/09/2026 (Gabriel Nexus construído e **oculto para a criança**; Geografia com a **camada gráfica nova e o Parque do Atlas**, seção 8).
 Repositório: `mauricioweb007-collab/jogogabriel`, branch de trabalho `claude/adoring-galileo-w55t2f`.
 Marcações: **[não confirmado]** indica algo não verificado; **[pendente]** indica algo não feito.
 
@@ -48,7 +48,7 @@ Marcações: **[não confirmado]** indica algo não verificado; **[pendente]** i
 | Módulo | Proposta | Estado | Entrada e arquivos principais |
 |---|---|---|---|
 | **Ciências: Missão EcoNexus** (v1.0) | Aventura 2D em vista de cima com a guia Lumi, vila hub, 6 regiões e Arena. **43 questões** (L1-Q1 … L6-Q7). 7 minijogos. | Concluído e **congelado**. | `index.html`, `css/`, `js/`, `tools/`, `docs/ENTREGA.md`, `README.md`. Save `econexus_guardioes_save_v1`. Adaptador (não é arquivo de Ciências): `src/modules/ciencias-legacy-adapter/`. |
-| **Geografia: Brasil em Movimento** (`geografia_2026_09`) | Gaia e o rival GeoBot. 3 capítulos, **16 fases** de estilos diferentes e 3 salas bônus. **45 questões**. | Concluído. Congelado exceto os ganchos mínimos do Nexus (seção 7.2). | `src/modules/geografia/jogar.html`, `main.js` (`GEO.app`), `content/`, `questions/`, `systems/`, `scenes/`, `ENTREGA-GEOGRAFIA.md`. Save `ecoNexus.geografia.v1`. |
+| **Geografia: Brasil em Movimento** (`geografia_2026_09`) | Gaia e o rival GeoBot. 3 capítulos, **16 fases** de estilos diferentes, 3 salas bônus e **Parque do Atlas com 4 minijogos**. **45 questões**. | Concluído. Melhoria gráfica e Parque feitos a pedido do usuário (seção 8). Questões, economia e dificuldade das fases não mudaram. | `src/modules/geografia/jogar.html`, `main.js` (`GEO.app`), `content/`, `questions/`, `systems/`, `scenes/`, `ENTREGA-GEOGRAFIA.md`. Save `ecoNexus.geografia.v1`. |
 | **Gabriel Nexus** (jogo central) | Hub 2.5D na Praça dos Mundos, 21 Nexóticos, Parque, Fliperama, Galeria, Oficina, Casa, Loja e Terminal dos Pais. | Construído e testado (seção 7), mas **oculto para a criança** (seção 5). Os pontos continuam sendo guardados. | `src/nexus/nexus.html`, serviços em `src/franchise/`, Área dos Pais em `src/pais/pais.html`. Perfil `ecoNexus.franchise.v1`. |
 | **Matemática** | — | **[pendente] O jogo NÃO existe.** Só há o mundo "em breve" com o pacote do Gato Gráfico. | `src/modules/matematica/manifest.js` (`enabled:false`, `comingSoon`), `nexoticos.js`. |
 | Exemplo vazio | Registro mínimo (`enabled:false`); cartão "Novas missões chegarão". | Modelo. | `src/modules/exemplo-vazio/manifest.js` |
@@ -102,6 +102,7 @@ PARENT_ACCESS_PASSWORD=… node src/tests/nexus-e2e.cjs          # 43 checagens 
 node src/modules/geografia/tests/features.cjs                  # Geografia: 45 questões, acessibilidade, loja, painel, isolamento
 node src/modules/geografia/tests/e2e.cjs otimo|erros|rapido    # campanha inteira
 node src/modules/geografia/tests/layouts.cjs <pasta>           # 1366x768, 1920x1080, 390x844
+node src/modules/geografia/tests/parque.cjs                    # camada gráfica + Parque do Atlas (19 checagens)
 node src/tests/gen-tabela-geografia.cjs                        # tabela das 45 questões
 ```
 
@@ -149,6 +150,8 @@ node src/tests/gen-tabela-geografia.cjs                        # tabela das 45 q
 - Link único publicado (versão 6).
 - Documentos atualizados: `COMECE-AQUI.md`, `COMO-ADICIONAR-MATERIA.md`, `CREDITOS.md`.
 
+- **Geografia — melhoria gráfica e Parque do Atlas** (seção 8), a pedido do usuário.
+
 **Em andamento:** nada.
 
 **Problemas conhecidos e limitações**
@@ -162,6 +165,9 @@ node src/tests/gen-tabela-geografia.cjs                        # tabela das 45 q
 - O hub mede cerca de 33 quadros/s no Chromium sem GPU dos testes; **[não confirmado]** em celulares reais.
 - Itens herdados: voz (TTS) depende do aparelho; celular em pé fica pequeno nas fases de ação; mapas esquemáticos; estudo rápido rende um pouco mais de moedas que a Aventura em Geografia; recordes contra o GeoBot aparecem como 0:00 nos testes **[não confirmado no jogo real]**; a lista `files` do manifesto de Geografia é informativa (os scripts ficam fixos no `jogar.html`); o `README.md` de Ciências cita caminhos `econexus/…`.
 - A branch `main` só tem o "Initial commit". Não há GitHub Pages.
+- Geografia gráfica: mede de 38 a 58 quadros/s no Chromium sem GPU dos testes (antes, 61). Há **modo leve automático** (abaixo de 34 quadros/s). **[não confirmado]** em tablet e celular reais.
+- Ainda não há **fotos reais** de comidas, festas e lugares (Wikimedia e bancos de imagens estão bloqueados na rede desta sessão). **[pendente]** pedir ao usuário as fotos que ele quiser, ou baixar numa sessão com acesso.
+- Os minijogos do Parque **não** estão no Fliperama do Nexus (o manifesto não os lista), porque o Nexus está oculto.
 
 **Próximo passo concreto**
 - Aguardar o usuário. O mais provável é o **jogo de Matemática**: pedir o material da prova, criar um jogo próprio (novo enredo, ambientes e fases) em `src/modules/matematica/`, preencher o bloco `franchise` do manifesto (7.4) e manter o Nexus oculto até o usuário decidir.
@@ -425,3 +431,82 @@ node src/tests/gen-tabela-geografia.cjs                        # tabela das 45 q
 - **[pendente]** Nexus oculto: falta o usuário decidir como deve ficar a tela antes de liberar.
 - **[pendente]** Jogo de Matemática e os outros 9 Nexóticos de Matemática (pacote futuro).
 - **[não confirmado]** Balanceamento de preços, níveis e desempenho em aparelhos reais: falta uma sessão de jogo com o Gabriel.
+
+---
+
+## 8. Geografia: camada gráfica e Parque do Atlas (24/09/2026)
+
+**Pedido do usuário:** melhorar só Geografia, com imagens e ilustrações reais da internet, gráficos, sprites, animações e efeitos com estilo de jogo profissional, e mais minijogos para a criança.
+
+**O que mudou (só em `src/modules/geografia/`; núcleo `src/core`, Ciências, lançador e Nexus intactos)**
+- **Arquivos novos:**
+  - `gfx/gfx.js` (`GEO.gfx`) e `gfx/gfx.css`.
+  - `scenes/parque.js` (`GEO.parque`).
+  - `tests/parque.cjs`.
+  - `assets/` com `ilustracoes/fluent3d.png` + `fluent3d.js` (índice de 210 nomes), `cenario/*.png`, `efeitos/*.png` e `fotos/sat_dia.jpg`, `sat_noite.jpg`, `terra_1024.jpg`.
+  - Licenças em `src/assets/shared/licencas/`.
+- **Ganchos:** `gfx.js` envolve `GG.engine.start` e `E.fx` **só na página de Geografia**. Toda cena ganha:
+  - vinheta nos cantos;
+  - cartão de abertura animado;
+  - transição em íris;
+  - partículas com brilho;
+  - textos que "saltam".
+- **Cenários pintados em camadas** (`GEO.gfx.sky`, 11 temas):
+  - Silhuetas da Kenney tingidas por tema, com paralaxe.
+  - Sol ou lua com brilho e raios.
+  - Estrelas, aurora, névoa e horizonte de cidade.
+  - Partículas de ambiente: confete e balões, poeira, neve, esporos, borboletas, folhas e pássaros.
+  - Usados por `C.sky` (plataforma, corrida, torre e chefes) e pelos minijogos.
+- **Atlas:**
+  - Fundo com **foto de satélite real** da América do Sul. Na página 3, a **foto noturna** mostra o litoral mais iluminado (decoração, não é questão).
+  - **Globo terrestre girando**.
+  - Fases com **ilustração 3D** (cinza quando bloqueadas).
+  - Brilho e estrelinhas na fase escolhida.
+  - Painel da fase com ilustração grande.
+  - Botão **🎡 Parque** e ícones 3D nos botões e nos contadores.
+- **Fases:**
+  - HUD com corações, estrela, mapa e cronômetro em 3D, que "pulam" ou tremem ao mudar.
+  - Gabriel com sombra, esticar e amassar, e poeira ao pular e pousar.
+  - Fragmento com estrelinhas e anel; dano com flash vermelho.
+  - Resultado com medalha 3D girando com brilho e 1 a 3 estrelas animadas.
+- **Por estilo de fase:**
+  - Nave: sol, reflexo no mar, nuvens, coqueiros e ilhas com cabana.
+  - Cozinha: janela, prateleiras de ingredientes, panelas 3D e vapor.
+  - Ritmo: holofotes no compasso, cortina e notas com instrumentos 3D.
+  - Labirintos: paredes neon pré-desenhadas, casas que acendem e raios 3D.
+  - Exploração: brilho na água, estações com livro flutuando, portal com raios e vaga-lumes.
+  - Cidade: ícones 3D das necessidades, carros, árvores e bairro pronto iluminado.
+  - Sala de estudo: foto de satélite e globo.
+- **Parque do Atlas** (minijogos **sem questões**, sem EcoMoedas e sem XP; recorde e medalha em `S().parque`):
+
+  | Minijogo | Libera com | Como é |
+  |---|---|---|
+  | Memória das Culturas | já liberado | 3 tabuleiros (6, 8 e 10 pares) de instrumentos, comidas, bichos e festas; pontuação em % de aproveitamento |
+  | Voo da Arara | 1 fase | Voo tipo "Flappy" pelas 5 regiões (Norte, Nordeste, Centro-Oeste, Sudeste, Sul), cada uma com cenário próprio; 3 vidas com invencibilidade; frutas e fragmentos |
+  | Cesta da Feira | 3 fases | 60 s pegando comidas; estrela vale mais; nuvem de chuva deixa a cesta lenta; combo até x5 |
+  | Quebra-cabeça do Brasil | 5 fases | Arrastar as 5 regiões (mouse, toque ou teclado: E troca a peça, setas movem, Espaço solta); bônus de rapidez |
+
+  - No modo de teste dos pais, tudo fica liberado.
+  - Os créditos das imagens aparecem no Parque, em "Créditos das imagens".
+- **Desempenho:**
+  - Camadas redimensionadas uma vez para o tamanho da tela.
+  - Raios de sol e vinheta pré-desenhados.
+  - Ícones cinza feitos uma vez.
+  - Foto de fundo guardada em cache.
+  - **Modo leve automático** (`GEO.gfx.lite`) abaixo de 34 quadros/s.
+  - "Reduzir movimento" desliga paralaxe, raios, ambiente e transições.
+- **Não mudou:** questões, textos pedagógicos, economia das fases, dificuldade, mapas das fases e chave do save. O save só ganhou o campo `parque`, que o `SV.load` preenche com `{}` em saves antigos.
+
+**Testes (24/09/2026):**
+- `features` ✓.
+- `e2e` otimo, erros e rapido: 45/45 questões, 16/16 fases, 0 erro.
+- `layouts` OK nas 3 resoluções.
+- `parque` 19/19.
+- Regressão de Ciências idêntica.
+
+**Ideias para depois (só com pedido):**
+- Fotos reais de comidas e festas (o usuário pode enviar).
+- Minijogos no Fliperama do Nexus.
+- Recompensas cosméticas por medalhas do Parque.
+- Mais tabuleiros e temas na Memória.
+- Modo "estados" no Quebra-cabeça.

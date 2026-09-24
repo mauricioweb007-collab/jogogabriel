@@ -30,12 +30,30 @@
     h.appendChild(U.el('div', { class: 'sh-row' }, [hud.title, hud.hearts, hud.frag, hud.score, hud.time, U.el('span', { style: { flex: '1' } }), hear, pause]));
     h.appendChild(hud.goal);
   }
+  const X = () => (GEO.gfx && GEO.gfx.ready ? GEO.gfx : null);
+  /** Troca o conteúdo do item do HUD por ilustração + valor, com "pulo" quando o valor sobe. */
+  function stat(el, icon, emoji, val) {
+    const v = String(val);
+    if (el._v === v) return;
+    const up = el._v != null && parseFloat(v) > parseFloat(el._v);
+    el._v = v; el.textContent = '';
+    if (X()) { el.appendChild(X().el(icon, 18)); el.appendChild(document.createTextNode(' ' + v)); } else el.textContent = emoji + ' ' + v;
+    if (up) { el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
+  }
   ST.updateHud = function (ctx) {
     if (!hud.hearts || !ctx) return;
-    hud.hearts.textContent = '❤'.repeat(Math.max(0, ctx.energy)) + '♡'.repeat(Math.max(0, ctx.maxEnergy - ctx.energy));
-    hud.frag.textContent = '🗺️ ' + ctx.fragments + (ctx.fragTotal ? '/' + ctx.fragTotal : '');
-    hud.score.textContent = '⭐ ' + Math.round(ctx.learnPts + ctx.actionPts);
-    hud.time.textContent = '⏱ ' + U.fmtTime(ctx.time);
+    const hk = ctx.energy + '/' + ctx.maxEnergy;
+    if (hud.hearts._v !== hk) {
+      const lost = hud.hearts._v && parseInt(hud.hearts._v, 10) > ctx.energy;
+      hud.hearts._v = hk; hud.hearts.textContent = '';
+      hud.hearts.setAttribute('aria-label', 'Energia ' + ctx.energy + ' de ' + ctx.maxEnergy);
+      if (X()) for (let i = 0; i < ctx.maxEnergy; i++) hud.hearts.appendChild(X().el('coracao', 18, i < ctx.energy ? 'hp' : 'hp off'));
+      else hud.hearts.textContent = '❤'.repeat(Math.max(0, ctx.energy)) + '♡'.repeat(Math.max(0, ctx.maxEnergy - ctx.energy));
+      if (lost) { hud.hearts.classList.remove('shake'); void hud.hearts.offsetWidth; hud.hearts.classList.add('shake'); }
+    }
+    stat(hud.frag, 'mapa', '🗺️', ctx.fragments + (ctx.fragTotal ? '/' + ctx.fragTotal : ''));
+    stat(hud.score, 'estrela', '⭐', Math.round(ctx.learnPts + ctx.actionPts));
+    stat(hud.time, 'cronometro', '⏱', U.fmtTime(ctx.time));
     hud.goal.textContent = ctx.goalText || ctx.def.goal || '';
   };
   function hideHud() { const h = document.getElementById('stageHud'); if (h) h.classList.add('hide'); }
@@ -109,13 +127,15 @@
   };
   Ctx.prototype.fragment = function (x, y) {
     this.fragments++; S().fragments++; this.actionPts += D.rewards.fragment.pts;
-    GG.audio.sfx('frag'); GG.engine.fx.burst(x, y, ['#ffe9a8', '#f3d78a', '#fff'], 14, 90); GG.engine.fx.float(x, y - 8, '+1 🗺️', '#ffe9a8'); this.hud();
+    GG.audio.sfx('frag'); GG.engine.fx.burst(x, y, ['#ffe9a8', '#f3d78a', '#fff'], 14, 90); GG.engine.fx.float(x, y - 8, '+1 🗺️', '#ffe9a8');
+    if (X()) { X().sparkle(x, y, '#ffe39a', 7); X().ring(x, y, '#fff3c0', 22); }
+    this.hud();
   };
-  Ctx.prototype.coin = function (x, y) { this.actionPts += 1; GG.audio.sfx('coin'); GG.engine.fx.burst(x, y, '#ffd23f', 6, 60); this.hud(); };
+  Ctx.prototype.coin = function (x, y) { this.actionPts += 1; GG.audio.sfx('coin'); GG.engine.fx.burst(x, y, '#ffd23f', 6, 60); if (X()) X().sparkle(x, y, '#ffd23f', 3); this.hud(); };
   Ctx.prototype.addAction = function (p) { this.actionPts += p; this.hud(); };
   /** Dano de ação. Retorna true se a energia acabou (a cena volta ao checkpoint com energia cheia). */
   Ctx.prototype.hurt = function () {
-    this.damage++; this.energy--; GG.audio.sfx('hit'); GG.engine.shake(3, 0.2);
+    this.damage++; this.energy--; GG.audio.sfx('hit'); GG.engine.shake(3, 0.2); if (X()) X().flash('#ff4d4d', 0.28);
     if (this.energy <= 0 && GEO.eco.has('refill') && !this.refillUsed) { this.refillUsed = true; this.energy = this.maxEnergy; UI.toast('🧃 Garrafinha de Energia usada!', 'ok'); this.hud(); return false; }
     if (this.energy <= 0) { this.energy = this.maxEnergy; this.hud(); UI.toast('Voltando ao último checkpoint — nada do que você aprendeu foi perdido.', '', 2600); return true; }
     this.hud(); return false;
@@ -163,6 +183,7 @@
     const scene = GEO.scenes[def.engine](ctx);
     ctx.scene = scene;
     GG.engine.start(scene);
+    if (X()) { X().iris('in'); X().banner(def); }
     if (def.music) GG.audio.music(def.music);
     if (!ctx.resume && def.intro && S().settings.pace !== 'rapido') { scene.paused = false; await ctx.say('gaia', def.intro); }
     if (scene.begin) scene.begin();
@@ -218,8 +239,10 @@
       const def = ctx.def;
       const m = UI.modal({ title: (def.bonus ? '🎁 ' : '🏁 ') + def.title + ' concluída!', noClose: true, wide: true });
       const b = m.body;
-      const medalBox = U.el('div', { class: 'res-medal medal-' + r.medal.id }, [U.el('div', { class: 'res-icon' }, r.medal.icon), U.el('div', null, [U.el('b', { class: 'pix' }, 'Medalha ' + r.medal.t), U.el('div', null, 'Aproveitamento: ' + Math.round(r.pct * 100) + '%'), r.record ? U.el('div', { class: 'res-rec' }, '🏆 Novo recorde pessoal!') : null])]);
+      const medalIcon = X() ? U.el('div', { class: 'res-icon res-3d' }, [U.el('span', { class: 'res-shine' }), X().el({ bronze: 'bronze', prata: 'prata', ouro: 'ouro', diamante: 'diamante' }[r.medal.id] || 'ouro', 64)]) : U.el('div', { class: 'res-icon' }, r.medal.icon);
+      const medalBox = U.el('div', { class: 'res-medal medal-' + r.medal.id }, [medalIcon, U.el('div', null, [U.el('b', { class: 'pix' }, 'Medalha ' + r.medal.t), U.el('div', null, 'Aproveitamento: ' + Math.round(r.pct * 100) + '%'), r.record ? U.el('div', { class: 'res-rec' }, '🏆 Novo recorde pessoal!') : null])]);
       b.appendChild(medalBox);
+      if (X()) { const nS = { bronze: 1, prata: 2, ouro: 3, diamante: 3 }[r.medal.id] || 1; b.appendChild(U.el('div', { class: 'res-stars', 'aria-label': nS + ' de 3 estrelas' }, [0, 1, 2].map((i) => { const e = X().el('estrela', 44, 'st ' + (i < nS ? 'on' : 'off')); e.style.animationDelay = (0.25 + i * 0.28) + 's'; return e; }))); }
       const lp = Math.round(stats.learnPts), ap = Math.round(Math.min(stats.actionPts, Math.round((stats.learnMax || 100) * 0.3)));
       b.appendChild(U.el('table', { class: 'tbl' }, [
         U.el('tr', null, [U.el('td', null, '📚 Pontos de aprendizado'), U.el('td', null, String(lp))]),

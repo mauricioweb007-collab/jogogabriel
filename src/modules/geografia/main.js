@@ -16,7 +16,7 @@
   /* ------------------------------------------------ inicialização */
   A.boot = async function () {
     E.init(document.getElementById('game'));
-    await Promise.all([E.loadSheets(BASE + 'assets/shared/sprites/'), document.fonts ? document.fonts.ready.catch(() => null) : null]);
+    await Promise.all([E.loadSheets(BASE + 'assets/shared/sprites/'), GEO.gfx ? GEO.gfx.load() : null, document.fonts ? document.fonts.ready.catch(() => null) : null]);
     E.resize();
     UI.portraits.gaia = () => P.url(P.gaiaPortrait(), 2);
     UI.portraits.geobot = () => P.url(P.geobotPortrait(), 2);
@@ -114,21 +114,24 @@
     U.$('#ahName', h).textContent = S().name;
     U.$('#ahLv', h).textContent = 'Nv ' + lv.lvl + ' • ' + lv.title;
     U.$('#ahXp', h).style.width = Math.round(lv.pct * 100) + '%';
-    U.$('#ahCoins', h).textContent = '🪙 ' + S().coins;
-    U.$('#ahFrag', h).textContent = '🗺️ ' + S().fragments;
     const cov = GEO.campaign.coverage();
-    U.$('#ahCov', h).textContent = '📘 ' + cov.done + '/' + cov.total;
+    const chip = (sel, icon, emoji, v) => { const el = U.$(sel, h); if (el._v === String(v)) return; el._v = String(v); el.textContent = ''; if (GEO.gfx && GEO.gfx.ready) { el.appendChild(GEO.gfx.el(icon, 18)); el.appendChild(document.createTextNode(' ' + v)); } else el.textContent = emoji + ' ' + v; };
+    chip('#ahCoins', 'moeda', '🪙', S().coins);
+    chip('#ahFrag', 'mapa', '🗺️', S().fragments);
+    chip('#ahCov', 'livro', '📘', cov.done + '/' + cov.total);
     U.$('#ahPace', h).textContent = { aventura: '🎮 Aventura', rapido: '⚡ Estudo rápido', revisao: '📝 Revisão' }[S().settings.pace];
     const fr = GEO.campaign.frame(); const av = U.$('#ahAv', h); av.style.boxShadow = fr ? '0 0 0 3px ' + D.frames.find((f) => f.id === fr).color : '';
   };
   A.atlasHud = function () {
     const h = document.getElementById('atlasHud'); h.classList.remove('hide'); h.innerHTML = '';
     const av = U.el('img', { id: 'ahAv', class: 'ah-av', alt: '', src: P.url(P.front(GEO.eco.look()), 4) });
-    const bt = (icon, label, fn) => U.el('button', { type: 'button', class: 'ah-btn', title: label, 'aria-label': label, onclick: () => { GG.audio.sfx('click'); fn(); } }, [U.el('span', null, icon), U.el('small', null, label)]);
+    const ILB = { '🛒': 'cesta', '🎒': 'mochila', '📓': 'livros', '📝': 'lapis', '🏆': 'trofeu', '👪': 'abraco', '⚙️': 'bussola', '🏠': 'casa', '🎡': 'roda_gigante' };
+    const bt = (icon, label, fn, cls) => U.el('button', { type: 'button', class: 'ah-btn' + (cls ? ' ' + cls : ''), title: label, 'aria-label': label, onclick: () => { GG.audio.sfx('click'); fn(); } }, [GEO.gfx && GEO.gfx.ready && ILB[icon] ? GEO.gfx.el(ILB[icon], 24) : U.el('span', null, icon), U.el('small', null, label)]);
     h.appendChild(U.el('div', { class: 'ah-left' }, [av, U.el('div', null, [U.el('b', { id: 'ahName' }), U.el('div', { id: 'ahLv', class: 'ah-lv' }), U.el('div', { class: 'bar ah-bar' }, U.el('i', { id: 'ahXp' }))]),
       U.el('span', { id: 'ahCoins', class: 'chip' }), U.el('span', { id: 'ahFrag', class: 'chip' }), U.el('span', { id: 'ahCov', class: 'chip', title: 'Questões do livro concluídas' })]));
     h.appendChild(U.el('div', { class: 'ah-btns' }, [
       U.el('button', { type: 'button', id: 'ahPace', class: 'btn small info', onclick: () => A.choosePace(false) }),
+      GEO.parque ? bt('🎡', 'Parque', () => GEO.parque.open(), 'fun') : null,
       bt('🛒', 'Loja', A.shop), bt('🎒', 'Mochila', A.inventory), bt('📓', 'Caderno', A.notebook), bt('📝', 'Revisão', () => GEO.review.run()),
       bt('🏆', 'Troféus', A.trophies), bt('👪', 'Responsável', A.parent), bt('⚙️', 'Ajustes', A.settings), bt('🏠', 'Missões', A.toLauncher)
     ]));
@@ -145,6 +148,7 @@
     const p = document.getElementById('nodePanel'); if (!st) return;
     p.classList.remove('hide'); p.innerHTML = '';
     const state = GEO.campaign.stageState(st.id), rec = S().stages[st.id];
+    if (GEO.gfx && GEO.gfx.ready) { const hero = GEO.gfx.el(GEO.gfx.stageIcon(st.id), 80); if (state === 'locked') hero.style.filter = 'grayscale(1) brightness(.6)'; p.appendChild(U.el('div', { class: 'np-hero' }, hero)); }
     p.appendChild(U.el('div', { class: 'np-style' }, st.style));
     p.appendChild(U.el('h2', { class: 'np-title' }, (st.bonus ? '🎁 ' : st.ch + '-' + st.n + ' ') + st.title));
     if (!st.bonus) p.appendChild(U.el('p', { class: 'np-goal' }, '🎯 ' + st.goal));

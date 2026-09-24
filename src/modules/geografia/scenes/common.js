@@ -23,8 +23,23 @@
   /** Desenha Gabriel lateral centrado em (x, pés em y). */
   C.drawGabriel = function (g, ctx, p, t) {
     const im = C.gabrielSide(ctx.look, p.state || 'idle', t);
+    const c = g.ctx(), fx = p.x + p.w / 2, fy = p.y + p.h;
+    // sombra oval no chão (some no ar)
+    if (p.onGround) { c.fillStyle = 'rgba(0,0,0,.22)'; c.beginPath(); c.ellipse(fx, fy, 7, 2, 0, 0, Math.PI * 2); c.fill(); }
     if (p.inv > 0 && Math.floor(t * 20) % 2) return;
-    g.img(im, Math.round(p.x + p.w / 2 - 9), Math.round(p.y + p.h - 24), { flip: p.face < 0 });
+    const sq = p.sq || 0; // >0 amassa (pouso), <0 estica (pulo)
+    if (!sq || E.reduced) { g.img(im, Math.round(fx - 9), Math.round(fy - 24), { flip: p.face < 0 }); return; }
+    c.save(); c.translate(Math.round(fx), Math.round(fy)); c.scale((p.face < 0 ? -1 : 1) * (1 + sq * 0.35), 1 - sq * 0.3);
+    c.drawImage(im, -9, -24); c.restore();
+  };
+  /** Poeira, esticar/amassar e brilho de pulo/pouso (chamado depois da física). */
+  C.juice = function (b, dt) {
+    const X = GEO.gfx;
+    if (b._wasGround && !b.onGround && b.vy < -100) { b.sq = -0.5; if (X) X.puff(b.x + b.w / 2, b.y + b.h, 2); }
+    if (!b._wasGround && b.onGround && (b._fallV || 0) > 200) { b.sq = Math.min(0.9, b._fallV / 500); if (X) X.puff(b.x + b.w / 2, b.y + b.h, 4); }
+    if (b.onGround && Math.abs(b.vx) > 80 && Math.random() < dt * 6 && X) X.puff(b.x + b.w / 2 - Math.sign(b.vx) * 4, b.y + b.h, 1, -Math.sign(b.vx) * 0.6);
+    b._fallV = b.vy; b._wasGround = b.onGround;
+    if (b.sq) { b.sq += (0 - b.sq) * Math.min(1, dt * 12); if (Math.abs(b.sq) < 0.02) b.sq = 0; }
   };
   /** Mini-GeoBot segue o jogador. */
   C.pet = function () {
@@ -57,16 +72,19 @@
   };
   C.theme = (id) => THEMES[id] || THEMES.festival;
   /** Céu em degradê + faixa de silhuetas com paralaxe (folha bg, 24px). */
-  C.sky = function (g, theme, camX, camY, t) {
+  C.sky = function (g, theme, camX, camY, t, opt) {
     const th = C.theme(theme), c = g.ctx();
-    const gr = c.createLinearGradient(0, 0, 0, E.H); gr.addColorStop(0, th.sky[0]); gr.addColorStop(1, th.sky[1]);
-    c.fillStyle = gr; c.fillRect(0, 0, E.W, E.H);
-    const par = E.reduced ? 0 : 0.25;
-    const base = 120 - (camY || 0) * 0.05;
-    const off = -((camX || 0) * par) % 24;
-    for (let x = off - 24; x < E.W + 24; x += 24) {
-      g.spr('bg', th.bgCol + 8, x, base, { alpha: 0.9 });
-      g.spr('bg', th.bgCol + 16, x, base + 24, { alpha: 0.9 }); g.spr('bg', th.bgCol + 16, x, base + 48, { alpha: 0.9 }); g.spr('bg', th.bgCol + 16, x, base + 72, { alpha: 0.9 }); g.spr('bg', th.bgCol + 16, x, base + 96, { alpha: 0.9 });
+    // Cenário pintado em camadas (gfx/gfx.js). Sem as imagens, usa o fundo antigo.
+    if (!(GEO.gfx && GEO.gfx.ready && GEO.gfx.sky(g, theme, camX, camY, t, opt))) {
+      const gr = c.createLinearGradient(0, 0, 0, E.H); gr.addColorStop(0, th.sky[0]); gr.addColorStop(1, th.sky[1]);
+      c.fillStyle = gr; c.fillRect(0, 0, E.W, E.H);
+      const par = E.reduced ? 0 : 0.25;
+      const base = 120 - (camY || 0) * 0.05;
+      const off = -((camX || 0) * par) % 24;
+      for (let x = off - 24; x < E.W + 24; x += 24) {
+        g.spr('bg', th.bgCol + 8, x, base, { alpha: 0.9 });
+        g.spr('bg', th.bgCol + 16, x, base + 24, { alpha: 0.9 }); g.spr('bg', th.bgCol + 16, x, base + 48, { alpha: 0.9 }); g.spr('bg', th.bgCol + 16, x, base + 72, { alpha: 0.9 }); g.spr('bg', th.bgCol + 16, x, base + 96, { alpha: 0.9 });
+      }
     }
     if (th.deco === 'festa' && !E.reduced) {
       for (let i = 0; i < 18; i++) { const x = ((i * 53 - (camX || 0) * 0.4) % (E.W + 60) + E.W + 60) % (E.W + 60) - 30; c.fillStyle = ['#e5484d', '#3ec1ff', '#2ecc71', '#f1c40f', '#9b59b6'][i % 5]; c.beginPath(); c.moveTo(x, 18); c.lineTo(x + 7, 30); c.lineTo(x + 14, 18); c.fill(); }
@@ -77,10 +95,10 @@
       for (let r = 0; r < 2; r++) { const yy = 26 + r * 30; c.beginPath(); c.moveTo(0, yy); c.lineTo(E.W, yy + 4); c.stroke();
         for (let i = 0; i < 9; i++) { const x = ((i * 61 + r * 30 - (camX || 0) * (0.3 + r * 0.1)) % (E.W + 60) + E.W + 60) % (E.W + 60) - 30; c.fillStyle = '#2a2233'; c.fillRect(x, yy + 2, 16, 20); c.fillStyle = '#efe1bf'; c.fillRect(x + 1, yy + 3, 14, 18); c.fillStyle = '#2a2233'; c.fillRect(x + 3, yy + 8, 10, 8); } }
     }
-    if (th.deco === 'sombra' || th.deco === 'virus' || th.deco === 'mosaico') {
+    if ((th.deco === 'sombra' || th.deco === 'virus' || th.deco === 'mosaico') && !(GEO.gfx && GEO.gfx.ready)) {
       for (let i = 0; i < 30; i++) { const x = (i * 97) % E.W, y = (i * 53) % 110; c.fillStyle = 'rgba(255,255,255,' + (0.2 + 0.2 * Math.sin(t * 2 + i)) + ')'; c.fillRect(x, y, 1, 1); }
     }
-    if (th.deco === 'torre') {
+    if (th.deco === 'torre' && !(GEO.gfx && GEO.gfx.ready)) {
       for (let i = 0; i < 40; i++) { const x = (i * 71) % E.W, y = ((i * 37) - (camY || 0) * 0.1) % E.H; c.fillStyle = 'rgba(255,255,255,.5)'; c.fillRect(x, (y + E.H) % E.H, 1, 1); }
     }
   };
@@ -159,6 +177,7 @@
     });
     b.state = !b.onGround ? 'jump' : Math.abs(b.vx) > 12 ? 'run' : 'idle';
     if (b.inv > 0) b.inv -= dt;
+    if (o.control) C.juice(b, dt);
   };
   C.updateMovers = function (L, dt, time) {
     L.movers.forEach((m) => {
@@ -219,12 +238,15 @@
     const sc = { cam: { x: 0, y: 0 }, t: 0 };
     sc.update = (dt) => { sc.t += dt; };
     sc.draw = (g) => {
-      const c = g.ctx(); const gr = c.createLinearGradient(0, 0, 0, E.H); gr.addColorStop(0, '#2a1f4a'); gr.addColorStop(1, '#141030'); c.fillStyle = gr; c.fillRect(0, 0, E.W, E.H);
+      const c = g.ctx(), X = GEO.gfx && GEO.gfx.ready ? GEO.gfx : null;
+      if (!(X && X.photo(c, 'satDia', sc.t, 'rgba(20,14,50,.55)'))) { const gr = c.createLinearGradient(0, 0, 0, E.H); gr.addColorStop(0, '#2a1f4a'); gr.addColorStop(1, '#141030'); c.fillStyle = gr; c.fillRect(0, 0, E.W, E.H); }
+      if (X) { X.glow(c, 200, 130, 170, '#ffd89a', 0.25); c.fillStyle = 'rgba(0,0,0,.4)'; c.fillRect(44, 65, 320, 150); }
       c.fillStyle = '#6b4f2a'; c.fillRect(40, 60, 320, 150); c.fillStyle = '#f3e6c4'; c.fillRect(48, 66, 150, 136); c.fillRect(202, 66, 150, 136);
       GG.maps.drawCanvas(c, 60, 72, 126, null, 'rgba(0,0,0,.2)');
       g.text('ATLAS VIVO', 277, 80, { size: 8, color: '#6d4c8f', align: 'center', shadow: false });
       g.text((ctx.def && ctx.def.title) || '', 277, 100, { size: 6, color: '#2a2233', align: 'center', shadow: false, maxW: 140 });
       g.img(P.gaia(Math.floor(sc.t * 2) % 2), 262, 130 + Math.sin(sc.t * 2) * 4, { scale: 2 });
+      if (X) { X.globe(c, 330, 34, 22, sc.t); X.ilus(c, 'livros', 72, 44, 30, { shadow: true }); }
     };
     return sc;
   };

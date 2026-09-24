@@ -1,0 +1,55 @@
+/* =====================================================================
+   gfx/gfx.css — acabamento visual de Geografia: ilustrações 3D no HUD,
+   animações de números, medalha com brilho, estrelas do resultado,
+   Parque do Atlas (cartões dos minijogos). Só carregado por jogar.html.
+   ===================================================================== */
+.ilus { display: inline-block; vertical-align: middle; background-image: url(../assets/ilustracoes/fluent3d.png); background-repeat: no-repeat; flex: 0 0 auto; filter: drop-shadow(0 2px 1px rgba(0,0,0,.35)); }
+.ilus.hp.off { filter: grayscale(1) brightness(.45); opacity: .6; }
+.sh-hearts { display: inline-flex; gap: 2px; align-items: center; }
+.sh-hearts.shake { animation: gShake .4s; }
+.sh-stat { display: inline-flex; align-items: center; gap: 2px; background: linear-gradient(#2e3570, #232857); box-shadow: inset 0 0 0 2px var(--line), 0 2px 0 #0a0c1c; }
+.sh-stat.bump, .chip.bump { animation: gBump .35s; }
+#stageHud { background: linear-gradient(rgba(12,14,36,.92), rgba(12,14,36,.75)); backdrop-filter: blur(3px); }
+@keyframes gBump { 0% { transform: scale(1); } 40% { transform: scale(1.25); color: #ffe27a; } 100% { transform: scale(1); } }
+@keyframes gShake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-4px); } 40% { transform: translateX(4px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(2px); } }
+
+/* botões do Atlas com ilustração 3D */
+.ah-btn { background: linear-gradient(#303878, #242a5e); box-shadow: inset 0 0 0 2px var(--line), 0 3px 0 #0a0c1c; transition: transform .12s, box-shadow .12s; }
+.ah-btn:hover { transform: translateY(-2px); box-shadow: inset 0 0 0 2px var(--gold), 0 5px 0 #0a0c1c; }
+.ah-btn:hover .ilus { animation: gWobble .5s; }
+.ah-btn.fun { background: linear-gradient(#ff8a3d, #e8456b); box-shadow: inset 0 0 0 2px #ffd0a0, 0 3px 0 #7a1f35; }
+.ah-btn.fun small { color: #fff; }
+.chip .ilus { margin-right: 2px; }
+@keyframes gWobble { 0%, 100% { transform: rotate(0); } 30% { transform: rotate(-12deg) scale(1.15); } 60% { transform: rotate(8deg) scale(1.1); } }
+
+/* resultado */
+.res-medal { background: radial-gradient(circle at 20% 50%, #3a4290 0, #262c5c 60%); position: relative; overflow: hidden; }
+.res-3d { position: relative; width: 72px; height: 72px; display: grid; place-items: center; animation: gMedal 1s cubic-bezier(.2,1.6,.4,1) both; }
+.res-3d .ilus { width: 64px; height: 64px; }
+.res-shine { position: absolute; inset: -30px; background: conic-gradient(from 0deg, transparent 0 20deg, rgba(255,230,140,.45) 30deg, transparent 40deg 80deg, rgba(255,230,140,.35) 90deg, transparent 100deg 140deg, rgba(255,230,140,.45) 150deg, transparent 160deg 200deg, rgba(255,230,140,.35) 210deg, transparent 220deg 260deg, rgba(255,230,140,.45) 270deg, transparent 280deg 320deg, rgba(255,230,140,.35) 330deg, transparent 340deg); border-radius: 50%; animation: gSpin 6s linear infinite; -webkit-mask: radial-gradient(circle, #000 30%, transparent 70%); mask: radial-gradient(circle, #000 30%, transparent 70%); }
+.res-stars { display: flex; justify-content: center; gap: 10px; margin: 4px 0 10px; }
+.res-stars .st { animation: gStar .5s cubic-bezier(.2,1.8,.4,1) both; }
+.res-stars .st.off { filter: grayscale(1) brightness(.4); opacity: .5; }
+@keyframes gMedal { 0% { transform: scale(0) rotate(-200deg); } 100% { transform: scale(1) rotate(0); } }
+@keyframes gStar { 0% { transform: scale(0) rotate(-90deg); opacity: 0; } 100% { transform: scale(1) rotate(0); opacity: 1; } }
+@keyframes gSpin { to { transform: rotate(360deg); } }
+
+/* painel da fase: ilustração grande */
+.np-hero { display: grid; place-items: center; height: 96px; margin: 4px 0 2px; border-radius: 12px; background: radial-gradient(circle at 50% 60%, rgba(255,210,63,.25), transparent 65%); }
+.np-hero .ilus { width: 80px; height: 80px; animation: gFloat 3s ease-in-out infinite; }
+@keyframes gFloat { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-6px) rotate(3deg); } }
+
+/* Parque do Atlas */
+.pq-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.pq-card { position: relative; border: 0; text-align: left; border-radius: 14px; padding: 12px; color: var(--ink); background: linear-gradient(160deg, var(--c1, #3a4290), var(--c2, #1d2247)); box-shadow: 0 5px 0 #0a0c1c, inset 0 0 0 2px rgba(255,255,255,.18); display: flex; flex-direction: column; gap: 6px; min-height: 190px; overflow: hidden; transition: transform .15s; font: inherit; }
+.pq-card:hover:not(.lock) { transform: translateY(-3px) rotate(-.5deg); }
+.pq-card .pq-art { height: 84px; display: grid; place-items: center; }
+.pq-card .pq-art .ilus { width: 76px; height: 76px; animation: gFloat 3s ease-in-out infinite; }
+.pq-card b { font-family: var(--pix); font-size: 10px; line-height: 1.5; color: #fff; }
+.pq-card span { font-size: .82em; color: #e6e8ff; }
+.pq-card .pq-rec { margin-top: auto; font-weight: 900; color: var(--gold); font-size: .85em; }
+.pq-card.lock { filter: grayscale(.85); opacity: .75; cursor: not-allowed; }
+.pq-card.lock .pq-rec { color: #ffb0b0; }
+.pq-card::after { content: ''; position: absolute; top: -40%; left: -60%; width: 40%; height: 180%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent); transform: rotate(20deg); animation: gSweep 4s ease-in-out infinite; pointer-events: none; }
+@keyframes gSweep { 0%, 60% { left: -60%; } 100% { left: 140%; } }
+body.rm .ilus, body.rm .pq-card, body.rm .pq-card::after, body.rm .res-shine, body.rm .res-3d, body.rm .res-stars .st, body.rm .np-hero .ilus { animation: none !important; }

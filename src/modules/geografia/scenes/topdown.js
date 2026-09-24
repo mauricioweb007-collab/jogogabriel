@@ -177,14 +177,22 @@
         else if (v === 4) g.spr('town', 2, px, py);
       }
       if (LY.theme === 'territorio') { for (let i = 0; i < 3; i++) g.spr('town', 72 + i, (26 + i) * TS, 12 * TS); for (let i = 0; i < 3; i++) g.spr('town', 84 + i, (26 + i) * TS, 13 * TS); P.crowd().slice(6, 9).forEach((pp, i) => g.img(P.front(Object.assign({}, pp, { frame: Math.floor(sc.t * 3 + i) % 2 })), (26 + i) * TS, 15 * TS)); }
+      const X = GEO.gfx && GEO.gfx.ready ? GEO.gfx : null;
+      if (X) { // brilho na água
+        c.save(); c.globalCompositeOperation = 'lighter';
+        for (let y = y0; y <= y0 + 15 && y < H; y++) for (let x = x0; x <= x0 + 26 && x < W; x++) if (map[y][x] === 3 && X.hash(x * 7 + y * 13 + Math.floor(sc.t * 1.5)) > 0.8) { c.fillStyle = 'rgba(255,255,255,.35)'; c.fillRect(x * TS + 4 + X.hash(x + y) * 6, y * TS + 5, 3, 1); }
+        c.restore();
+      }
       stations.forEach((s) => {
         const px = s.x * TS, py = s.y * TS;
+        if (X && !s.done) { X.glow(c, px + 5, py - 4, 30, '#ffe08a', 0.35 + 0.15 * Math.sin(sc.t * 3)); }
         if (s.art === 'cartoes') { for (let i = 0; i < 4; i++) { g.rect(px - 20 + i * 12, py - 14, 10, 16, ['#c0392b', '#f39c12', '#16a085', '#8e44ad'][i]); g.rect(px - 19 + i * 12, py - 13, 8, 5, '#fff8e6'); } }
         else if (s.art === 'varal') { g.line(px - 22, py - 12, px + 26, py - 12, '#6b4f2a', 1); for (let i = 0; i < 3; i++) g.rect(px - 18 + i * 16, py - 11, 12, 10, '#fff3d1'); }
         else if (s.art === 'mesa') { g.rect(px - 16, py - 8, 36, 14, '#8b5a2b'); g.rect(px - 14, py - 12, 32, 12, pieces.some((q) => !q.got) ? '#d9c9a0' : '#f3e6c4'); if (!pieces.some((q) => !q.got)) GG.maps.drawCanvas(c, px - 6, py - 12, 12, null, 'rgba(0,0,0,.1)'); }
         else if (s.art === 'arvore') g.spr('town', 16, px - 8, py - 22, { scale: 2 });
         else if (s.art === 'marco') { g.rect(px + 2, py - 16, 5, 20, '#6b4f2a'); g.rect(px - 2, py - 18, 13, 6, '#ffd23f'); }
-        if (!s.done) g.text('!', px + 5, py - 34 + Math.sin(sc.t * 4) * 2, { size: 10, color: '#ffd23f', align: 'center' });
+        if (!s.done) { if (X) { X.glow(c, px + 5, py - 30 + Math.sin(sc.t * 4) * 2, 10, '#ffd23f', 0.8); X.ilus(c, 'livro', px + 5, py - 30 + Math.sin(sc.t * 4) * 2, 14, { rot: Math.sin(sc.t * 2) * 0.1 }); } else g.text('!', px + 5, py - 34 + Math.sin(sc.t * 4) * 2, { size: 10, color: '#ffd23f', align: 'center' }); }
+        else if (X) X.ilus(c, 'check', px + 5, py - 28, 10);
         C.sign(g, px + 5, py + 8, s.label, s.done ? '#d9ffd9' : '#fff8e6');
       });
       pieces.forEach((q) => { if (!q.got) g.img(P.fragmento(Math.floor(sc.t * 4) % 2), q.x * TS + 1, q.y * TS + 1 + Math.sin(sc.t * 3 + q.x) * 2, { scale: 1.2 }); });
@@ -192,14 +200,18 @@
       slots.forEach((s) => { if (s.filled) { g.rect(s.x * TS + 6, s.y * TS - 4, 4, 16, '#6b4f2a'); g.rect(s.x * TS + 3, s.y * TS - 6, 10, 4, '#3ddc84'); } else g.circle(s.x * TS + 8, s.y * TS + 8, 7 + Math.sin(sc.t * 4), '#ffd23f', 2); });
       frags.forEach((f) => { if (!f.got) g.img(P.fragmento(Math.floor(sc.t * 4) % 2), f.x * TS + 2, f.y * TS + 2 + Math.sin(sc.t * 3 + f.x) * 2); });
       const sx = LY.start[0] * TS, sy = (LY.start[1] - 2) * TS;
+      if (X) X.glow(c, sx + 8, sy + 8, 18, '#7fd0ff', 0.7);
       g.circle(sx + 8, sy + 8, 7, 'rgba(120,200,255,.7)'); g.circle(sx + 8, sy + 8, 4 + Math.sin(sc.t * 5), '#fff'); C.sign(g, sx + 8, sy - 10, 'Portal rápido');
       const ex = LY.exit[0] * TS, ey = LY.exit[1] * TS, open = allDone();
+      if (X && open) { X.glow(c, ex + 8, ey + 8, 26, '#7bff8f', 0.8); X.rays(c, ex + 8, ey + 8, 40, '#c8ffd0', sc.t, 6); }
       g.circle(ex + 8, ey + 8, 10, open ? 'rgba(123,255,143,.8)' : 'rgba(120,120,140,.6)'); if (open) g.circle(ex + 8, ey + 8, 6 + Math.sin(sc.t * 6) * 2, '#fff'); C.sign(g, ex + 8, ey + 20, open ? 'SAÍDA' : 'Saída (conclua as estações)');
       enemies.forEach((e) => g.img(e.t === 'sombra' ? P.sombra(Math.floor(sc.t * 4) % 2, false) : P.nevoa(Math.floor(sc.t * 3) % 2), e.x, e.y + Math.sin(sc.t * 3 + e.x) * 2));
       if (pet) pet.draw(g, sc.t);
+      if (X) { c.fillStyle = 'rgba(0,0,0,.22)'; c.beginPath(); c.ellipse(p.x + 5, p.y + 8, 6, 2, 0, 0, Math.PI * 2); c.fill(); if (p.moving && !E.reduced && Math.random() < 0.15) X.puff(p.x + 5, p.y + 8, 1); }
       if (!(p.inv > 0 && Math.floor(sc.t * 20) % 2)) g.img(C.gabrielTop(ctx.look, p.dir, p.moving, sc.t), p.x - 2, p.y - 12, { flip: p.dir === 'right' });
       if (carrying) { g.rect(p.x + 3, p.y - 24, 4, 10, '#6b4f2a'); g.rect(p.x + 1, p.y - 26, 8, 3, '#ffd23f'); }
       g.end();
+      if (X && !E.reduced) { c.save(); c.globalCompositeOperation = 'lighter'; for (let i = 0; i < 10; i++) { const fx = (X.hash(i) * E.W + Math.sin(sc.t * 0.6 + i) * 20 - sc.cam.x * 0.2 % E.W + E.W) % E.W, fy = (X.hash(i + 9) * E.H + Math.cos(sc.t * 0.5 + i) * 14) % E.H; X.glow(c, fx, fy, 5, '#fff7a0', 0.4 + 0.3 * Math.sin(sc.t * 3 + i)); } c.restore(); }
       if (ctx.arrow) { const t = target(); C.arrow(g, sc.cam, t.x + 8, t.y + 8); }
     };
     sc.dbg = { player: p, stations, busy: () => busy, next() { const t = target(); p.x = t.x + 3; p.y = t.y + 4; return t; } };

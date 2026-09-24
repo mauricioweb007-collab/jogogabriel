@@ -118,21 +118,28 @@
         if (gotOf(d.id, 'energia')) { x.fillStyle = '#555'; x.fillRect(d.x + 2, d.y + 4, 2, 30); x.fillStyle = '#ffe066'; x.fillRect(d.x, d.y + 2, 6, 3); }
       });
     }
+    const RIL = { moradia: 'casa', saneamento: 'agua', transporte: 'onibus', energia: 'lampada', agua: 'gota', luz: 'lampada' };
     sc.draw = function (g) {
-      const c = g.ctx();
+      const c = g.ctx(), X = GEO.gfx && GEO.gfx.ready ? GEO.gfx : null;
       drawCity(c, null);
+      if (X) {
+        // sombras suaves dos quarteirões, árvores 3D e bairros prontos iluminados
+        [[20, 20], [380, 30], [20, 205], [380, 205], [170, 30], [230, 200]].forEach(([tx, ty], i) => X.ilus(c, i % 2 ? 'arvore' : 'coqueiro', tx, ty + Math.sin(sc.t + i) * 0.5, 18, { shadow: true }));
+        DIST.forEach((d) => { if (d.needs.every((n) => got[d.id].includes(n))) { X.glow(c, d.x + d.w / 2, d.y + d.h / 2, d.w * 0.6, '#fff2a0', 0.25 + 0.1 * Math.sin(sc.t * 2)); } });
+      }
       // placas e necessidades
       C.sign(g, CENTRO.x + CENTRO.w / 2, CENTRO.y - 14, CENTRO.name, '#e9dcff');
       DIST.forEach((d) => {
         C.sign(g, d.x + d.w / 2, d.y - 14, d.name, d.needs.every((n) => got[d.id].includes(n)) ? '#d9ffd9' : '#fff8e6');
-        d.needs.forEach((n, i) => { const done = got[d.id].includes(n); g.panel(d.x + d.w - 22 - i * 20, d.y + 2, 18, 14, done ? '#d9ffd9' : '#ffd0d0', '#15152a'); g.text(RES[n].icon, d.x + d.w - 13 - i * 20, d.y + 4, { size: 8, font: 'sans-serif', align: 'center', shadow: false }); if (!done) g.text('!', d.x + d.w - 6 - i * 20, d.y, { size: 6, color: '#e5484d', shadow: false }); });
+        d.needs.forEach((n, i) => { const done = got[d.id].includes(n); g.panel(d.x + d.w - 22 - i * 20, d.y + 2, 18, 14, done ? '#d9ffd9' : '#ffd0d0', '#15152a'); if (!(X && RIL[n] && X.ilus(c, RIL[n], d.x + d.w - 13 - i * 20, d.y + 9, 12, { gray: false }))) g.text(RES[n].icon, d.x + d.w - 13 - i * 20, d.y + 4, { size: 8, font: 'sans-serif', align: 'center', shadow: false }); if (!done) g.text('!', d.x + d.w - 6 - i * 20, d.y, { size: 6, color: '#e5484d', shadow: false }); });
       });
       // central
-      g.panel(HUB.x - 14, HUB.y - 12, 28, 22, '#6d4c8f', '#15152a'); g.text('📦', HUB.x, HUB.y - 8, { size: 9, font: 'sans-serif', align: 'center', shadow: false });
+      g.panel(HUB.x - 14, HUB.y - 12, 28, 22, '#6d4c8f', '#15152a'); if (X) { X.glow(c, HUB.x, HUB.y - 2, 18, '#c8a8ff', 0.5); X.ilus(c, 'obra', HUB.x, HUB.y - 2, 18); } else g.text('📦', HUB.x, HUB.y - 8, { size: 9, font: 'sans-serif', align: 'center', shadow: false });
       C.sign(g, HUB.x, HUB.y + 12, 'Central');
-      cars.forEach((cr) => { g.rect(cr.x, cr.y, cr.vert ? 10 : 20, cr.vert ? 18 : 10, cr.vert ? '#3f6ad8' : '#e5484d'); g.rect(cr.x + 3, cr.y + 2, cr.vert ? 4 : 6, 4, '#bfe8ff'); });
+      cars.forEach((cr) => { if (X && !cr.vert) { X.ilus(c, 'carro', cr.x + 10, cr.y + 4, 18, { shadow: true, flip: (cr.vx || cr.v || 1) > 0 }); return; } g.rect(cr.x, cr.y, cr.vert ? 10 : 20, cr.vert ? 18 : 10, cr.vert ? '#3f6ad8' : '#e5484d'); g.rect(cr.x + 3, cr.y + 2, cr.vert ? 4 : 6, 4, '#bfe8ff'); });
       if (!(p.stun > 0 && Math.floor(sc.t * 20) % 2)) g.img(C.gabrielTop(ctx.look, p.dir, p.moving, sc.t), p.x - 2, p.y - 12, { flip: p.dir === 'right' });
-      if (carry) { g.panel(p.x - 2, p.y - 28, 16, 14, RES[carry].c, '#15152a'); g.text(RES[carry].icon, p.x + 6, p.y - 26, { size: 8, font: 'sans-serif', align: 'center', shadow: false }); }
+      if (carry && X && RIL[carry]) { X.glow(c, p.x + 6, p.y - 21, 12, RES[carry].c, 0.8); X.ilus(c, RIL[carry], p.x + 6, p.y - 21 + Math.sin(sc.t * 6), 14); }
+      else if (carry) { g.panel(p.x - 2, p.y - 28, 16, 14, RES[carry].c, '#15152a'); g.text(RES[carry].icon, p.x + 6, p.y - 26, { size: 8, font: 'sans-serif', align: 'center', shadow: false }); }
       if (ctx.arrow) { const n = need(); if (n) C.arrow(g, { x: 0, y: 0 }, carry ? n.d.x + n.d.w / 2 : HUB.x, carry ? n.d.y + n.d.h / 2 : HUB.y); }
     };
     sc.dbg = { busy: () => busy, deliverNext() { const n = need(); if (!n) return false; carry = n.n; deliver(n.d); return true; } };
