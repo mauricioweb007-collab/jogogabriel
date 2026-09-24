@@ -57,7 +57,8 @@ Marcações: **[não confirmado]** indica algo não verificado; **[pendente]** i
     - Faça antes `read` e `list` com `scope: "files"`.
     - Depois publique com `url` do artifact, `file_path` = `inicio.html` e `files` só com os arquivos alterados. O limite é de 255 arquivos por envio; se passar disso, mande em lotes.
     - Registre a nova versão aqui.
-  - **Versão publicada:** **16** (24/09/2026): **Arcade do Expresso** de Inglês, com 6 jogos bônus (seção 9.9). Arquivos: `src/modules/ingles/arcade.html`, `arcade/*`, `main.js`, `manifest.js`, `painel.js`, `ingles.css`, `systems/save.js`. As imagens e a camada gráfica de Geografia já estavam publicadas.
+  - **Versão publicada:** **17** (24/09/2026): chefes de Geografia com o painel fixo das placas e sem Roleta (seção 8.10). Arquivos: `scenes/boss.js`, `stage.js`, `roleta.js`, `gfx/gfx.css`.
+    - v16: **Arcade do Expresso** de Inglês, com 6 jogos bônus (seção 9.9). Arquivos: `src/modules/ingles/arcade.html`, `arcade/*`, `main.js`, `manifest.js`, `painel.js`, `ingles.css`, `systems/save.js`. As imagens e a camada gráfica de Geografia já estavam publicadas.
     - v15: módulo de **Inglês — Expresso dos Sonhos** (seção 9), com o cartão no lançador e os atalhos na Área dos Pais. Arquivos enviados: `src/modules/ingles/` (sem `tests/`), `modulos.js`, `launcher.js`, `pais.js`. Para publicar, copie os arquivos para o scratchpad e use-o como `root`; o publicador não aceita caminhos fora da pasta de trabalho.
     - v14: Estrada rebalanceada com turbo, Travessia do Rio, Pinball da Floresta e Roleta da Sorte do 100% (seção 8.8).
     - v13: ajustes na Colunas, na Quermesse e na Estrada, e fase 2-3 Ritmos do Brasil refeita (seções 8.6 e 8.7).
@@ -185,7 +186,7 @@ node src/modules/ingles/tests/ingles.cjs otimo|erros           # Inglês: conte�
 - Plataforma v2 (lançador, registro, core, motor de questões).
 - Geografia (45 questões, 16 fases).
 - **Gabriel Nexus** (seção 7): entrada pelo nome, perfil global, ponte de pontuação, 21 Nexóticos, hub e 8 áreas, 4 jogos recreativos, Fliperama com replays das matérias e torneios, Área dos Pais com sandbox. Depois, **ocultado para a criança** a pedido do usuário.
-- Link único publicado, **versão 16** (Arcade de Inglês; v15 = Inglês; antes, v14): Geografia gráfica, Parque, modo arcade, Arcade dos Mundos (17 minijogos no total), Roleta da Sorte do 100%, fase 2-3 como batalha de ritmo e Área dos Pais com todo o conteúdo novo. O histórico de versões está na seção 1.
+- Link único publicado, **versão 17** (chefes de Geografia; v16 = Arcade de Inglês; v15 = Inglês; antes, v14): Geografia gráfica, Parque, modo arcade, Arcade dos Mundos (17 minijogos no total), Roleta da Sorte do 100%, fase 2-3 como batalha de ritmo e Área dos Pais com todo o conteúdo novo. O histórico de versões está na seção 1.
 - Documentos atualizados: `COMECE-AQUI.md`, `COMO-ADICIONAR-MATERIA.md`, `CREDITOS.md`.
 
 - **Geografia: melhoria gráfica, Parque, modo arcade e minijogos** (seção 8, de 8.1 a 8.9), a pedido do usuário.
