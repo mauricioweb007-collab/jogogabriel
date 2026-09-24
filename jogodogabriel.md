@@ -1,7 +1,7 @@
 # Jogo do Gabriel: mapa da franquia
 
 Memória oficial e cumulativa do projeto. Leia inteira antes de planejar ou mudar qualquer coisa.
-Estado conferido nos arquivos em 24/09/2026 (Gabriel Nexus construído e **oculto para a criança**; último commit `c198b17`).
+Estado conferido nos arquivos em 24/09/2026 (Gabriel Nexus construído e **oculto para a criança**; último commit de código `c198b17`).
 Repositório: `mauricioweb007-collab/jogogabriel`, branch de trabalho `claude/adoring-galileo-w55t2f`.
 Marcações: **[não confirmado]** indica algo não verificado; **[pendente]** indica algo não feito.
 
