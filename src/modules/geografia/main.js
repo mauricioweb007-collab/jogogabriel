@@ -350,6 +350,23 @@
     GG.audio.music('vitoria');
     await UI.say('gaia', D.story.chapterDone[n]);
     if (n === 3) await A.final();
+    await A.arcadeUnlocked(n);
+  };
+  /** Recompensa depois do chefe: Arcade do Mundo liberado (3 minijogos só de diversão). */
+  A.arcadeUnlocked = function (n) {
+    const list = GEO.parque && GEO.parque.worldGames ? GEO.parque.worldGames(n) : [];
+    if (!list.length || (GEO.mode && GEO.mode.isReplay && GEO.mode.isReplay())) return Promise.resolve();
+    return new Promise((res) => {
+      GEO.parque.giveTicket(n);
+      const m = UI.modal({ title: '🕹️ Arcade do Mundo ' + n + ' liberado!', wide: true, onClose: res });
+      m.body.appendChild(U.el('p', null, 'Você venceu o chefe! Recompensa: 🎟️ 1 BILHETE GRÁTIS — escolha 1 destes jogos para jogar agora. Depois, cada partida custa ' + GEO.parque.COST + ' EcoMoedas ou 2 perguntas do mundo. Os jogos ficam no botão 🎡 Parque.'));
+      m.body.appendChild(U.el('div', { class: 'pq-grid' }, list.map((g) => U.el('button', { type: 'button', class: 'pq-card', style: { '--c1': g.c1, '--c2': g.c2 }, 'data-game': g.id, onclick: () => { m.close(); setTimeout(() => GEO.parque.enter(g.id), 60); } }, [
+        U.el('div', { class: 'pq-art' }, GEO.gfx && GEO.gfx.ready ? GEO.gfx.el(g.icon, 76) : '🎮'), U.el('b', null, g.title), U.el('i', { class: 'pq-ref' }, 'Estilo ' + g.ref), U.el('span', null, g.desc), U.el('div', { class: 'pq-rec' }, '🎟️ Jogar grátis')]))));
+      const extra = GEO.parque.GAMES.filter((g) => !g.world && g.unlockWorld === n).map((g) => g.title);
+      if (extra.length) m.body.appendChild(U.el('p', { class: 'res-rec' }, '🎡 Também liberado no Parque: ' + extra.join(' e ') + '!'));
+      m.setActions([UI.btn('Guardar o bilhete para depois', 'ghost', () => m.close())]);
+      GG.audio.sfx('win');
+    });
   };
   A.final = async function () {
     const r = GEO.campaign.finishCampaign();

@@ -72,3 +72,9 @@ body.rm .modal.readcard, body.rm .readcard .rc-hint, body.rm .readcard .rc-art .
 /* botão para reler as placas do chefe */
 .boss-read { position: fixed; right: 12px; top: 84px; z-index: 30; box-shadow: 0 0 0 2px #0a0c1c, 0 0 14px rgba(159,242,255,.6); }
 body.in-stage.has-touch .boss-read { top: 70px; }
+/* Arcade dos Mundos */
+.pq-sec { font-family: var(--pix); font-size: 11px; color: var(--gold); margin: 14px 0 8px; line-height: 1.5; }
+.pq-card .pq-ref { font-size: .72em; color: #ffe9a8; font-style: normal; opacity: .9; }
+.pq-wallet { font-weight: 900; color: var(--gold); margin: 4px 0 8px; }
+.pq-entry .pq-entry-art { display: grid; place-items: center; margin: 4px 0; }
+.pq-entry .pq-entry-art .ilus { width: 64px; height: 64px; animation: gFloat 3s ease-in-out infinite; }

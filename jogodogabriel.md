@@ -48,7 +48,8 @@ Marcações: **[não confirmado]** indica algo não verificado; **[pendente]** i
     - Faça antes `read` e `list` com `scope: "files"`.
     - Depois publique com `url` do artifact, `file_path` = `inicio.html` e `files` só com os arquivos alterados. O limite é de 255 arquivos por envio; se passar disso, mande em lotes.
     - Registre a nova versão aqui.
-  - **Versão publicada:** **9** (24/09/2026): Geografia arcade (seção 8.2).
+  - **Versão publicada:** **10** (24/09/2026): Arcade dos Mundos e regras de entrada dos minijogos (seção 8.3).
+    - v9: Geografia arcade (seção 8.2).
     - Labirintos no estilo Pac-Man.
     - Chefes novos.
     - Ritmo Livre refeito.
@@ -165,7 +166,7 @@ node src/tests/gen-tabela-geografia.cjs                        # tabela das 45 q
 - Plataforma v2 (lançador, registro, core, motor de questões).
 - Geografia (45 questões, 16 fases).
 - **Gabriel Nexus** (seção 7): entrada pelo nome, perfil global, ponte de pontuação, 21 Nexóticos, hub e 8 áreas, 4 jogos recreativos, Fliperama com replays das matérias e torneios, Área dos Pais com sandbox. Depois, **ocultado para a criança** a pedido do usuário.
-- Link único publicado (**versão 9**: Geografia gráfica, Parque do Atlas, correções e modo arcade da seção 8.2).
+- Link único publicado (**versão 10**: Geografia gráfica, Parque, modo arcade e Arcade dos Mundos com entrada por moedas ou perguntas).
 - Documentos atualizados: `COMECE-AQUI.md`, `COMO-ADICIONAR-MATERIA.md`, `CREDITOS.md`.
 
 - **Geografia — melhoria gráfica e Parque do Atlas** (seção 8), a pedido do usuário.
@@ -661,3 +662,57 @@ node src/tests/gen-tabela-geografia.cjs                        # tabela das 45 q
   - cartão das placas e as surpresas;
   - robô tocando as 3 rodadas do Ritmo Livre;
   - b2 e b3 chegando ao resultado.
+
+### 8.3 Arcade dos Mundos e entrada dos minijogos (24/09/2026, pedido do usuário)
+**9 minijogos de recompensa, 3 por mundo** (`scenes/arcade1.js`, `arcade2.js` e `arcade3.js`, registrados com `GEO.parque.register`)
+- **Regras gerais:**
+  - duram de 2 a 3 minutos e **não têm perguntas** durante o jogo;
+  - têm 3 vidas ou meta, recorde e medalha;
+  - usam referências de jogos clássicos sem copiar sprites, nomes ou fases.
+
+  | Mundo | Jogo | Estilo | Como é |
+  |---|---|---|---|
+  | 1 | Jangada Radical | Donkey Kong Country (carrinho de mina) / Sonic | Corrida automática no mar com pulo duplo; pedras, troncos, ondas e gaivotas; estrela de invencibilidade |
+  | 1 | Colunas do Mosaico | Columns (Mega Drive) / Puyo Puyo | Peças de 3 caem; 3 iguais em linha ou diagonal; correntes e estrela mágica |
+  | 1 | Quebra-Mosaico | Arkanoid | Mosaicos (bandeira, colorido, coração); poderes: prancha grande, 3 bolinhas, bola lenta e vida |
+  | 2 | Feira Ninja | Fruit Ninja | Cortar frutas deslizando o dedo ou com o facão no teclado; pimenta tira vida; combo e frenesi |
+  | 2 | Quermesse Tiro ao Alvo | Duck Hunt / Yoshi's Safari | Esteiras de alvos, 8 rolhas por carga, meta por rodada; não acertar a placa da Gaia |
+  | 2 | Pega-Névoa no Arraial | acerte a toupeira | Névoas saem das panelas de barro; teclas Q W E / A S D / Z X C; névoa dourada vale mais; não acertar os amigos |
+  | 3 | Estrada Brasil | Top Gear (SNES) / OutRun | Corrida em pseudo-3D pelo litoral, cerrado e cidade; checkpoints dão tempo; turbo; ultrapassagens |
+  | 3 | Invasores da Poluição | Galaga / Space Invaders | Nave solar contra fumaças em formação que mergulham; o céu fica mais azul a cada fumaça limpa |
+  | 3 | Empilha-Prédios | Tower Bloxx / Stack | O guindaste balança; solte na hora certa; PERFEITO faz combo; a parte que fica para fora cai |
+
+**Liberação: só passando pelo mundo** (pedido do usuário)
+- **Mundo 1** (chefe c1s5): Arcade 1 + Memória das Culturas + Voo da Arara.
+- **Mundo 2** (c2s5): Arcade 2 + Cesta da Feira.
+- **Mundo 3** (c3s6): Arcade 3 + Quebra-cabeça do Brasil.
+- **No começo nada está liberado.** No modo de teste dos pais, tudo fica liberado e grátis.
+
+**Entrada de cada partida** (`GEO.parque.enter`)
+- **Chefe vencido:** aparece "🕹️ Arcade do Mundo n liberado!", que dá **1 bilhete grátis** (`S().flags.arcadeTickets[n]`) para escolher 1 dos 3 jogos. O bilhete pode ficar guardado para depois.
+- **Demais partidas:** **70 EcoMoedas** (`GEO.parque.COST`) **ou 2 perguntas rápidas** (afirmações do capítulo do mundo; nos jogos do Parque, de um capítulo já estudado).
+- **Por que 70:** uma fase nova rende entre ~40 e ~60 EcoMoedas (testes: 683 a 1010 moedas em 16 fases), então 70 equivale a cerca de 2 fases. Sem moedas, a opção de responder perguntas fica em destaque.
+- **"Jogar de novo"** também passa pela entrada.
+- **Carteira:** o menu do Parque mostra as moedas e os bilhetes.
+
+**Arquivos:**
+- **Novos:** `scenes/arcade1.js`, `arcade2.js`, `arcade3.js`.
+- **Alterados:**
+  - `scenes/parque.js`: registro, seções por mundo, liberação por chefe, entrada, bilhetes e carteira.
+  - `main.js`: `A.arcadeUnlocked` depois de `chapterComplete`.
+  - `jogar.html` e `gfx/gfx.css`.
+  - `tests/parque.cjs`: liberação por mundo, entrada paga (70 × 4), bilhete grátis, entrada por 2 perguntas e os 9 jogos.
+
+**Testes:**
+- `features` ✓.
+- `e2e` nos 3 perfis ✓.
+- `layouts` ✓.
+- `parque` ✓.
+- Regressão de Ciências ✓.
+- Um script abriu os 9 jogos, jogou com teclas e chegou à tela de fim sem erros.
+
+**Ideias futuras para o usuário decidir:**
+- Placar de recordes da família.
+- Missões diárias do Arcade.
+- Um jogo de pinball (estilo Sonic Spinball).
+- Um jogo estilo Frogger ("Travessia do Rio").

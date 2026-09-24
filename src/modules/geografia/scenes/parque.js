@@ -21,38 +21,88 @@
   const PQ = (GEO.parque = {});
 
   const GAMES = [
-    { id: 'memoria', title: 'Memória das Culturas', icon: 'cartas', c1: '#9b4dca', c2: '#3a1f5a', need: 0, music: 'atlas', medals: [45, 70, 88], unit: '%',
+    { id: 'memoria', title: 'Memória das Culturas', icon: 'cartas', c1: '#9b4dca', c2: '#3a1f5a', boss: 'c1s5', unlockWorld: 1, music: 'atlas', medals: [45, 70, 88], unit: '%',
       desc: 'Vire as cartas e encontre os pares de instrumentos, comidas, bichos e festas do Brasil.', how: 'Toque em duas cartas (ou use as setas e Espaço) para achar os **pares iguais**. São 3 tabuleiros!' },
-    { id: 'arara', title: 'Voo da Arara', icon: 'arara', c1: '#e8456b', c2: '#5a1030', need: 1, music: 'oceano', medals: [150, 300, 480], unit: 'pts',
+    { id: 'arara', title: 'Voo da Arara', icon: 'arara', c1: '#e8456b', c2: '#5a1030', boss: 'c1s5', unlockWorld: 1, music: 'oceano', medals: [150, 300, 480], unit: 'pts',
       desc: 'Voe pelas 5 regiões do Brasil, pegue frutas e desvie das tempestades e das árvores altas.', how: 'Toque na tela ou aperte **Espaço** para a arara bater as asas. Voe pelas **5 regiões** do Brasil!' },
-    { id: 'cesta', title: 'Cesta da Feira', icon: 'cesta', c1: '#ff9a3d', c2: '#7a3a10', need: 3, music: 'festa', medals: [220, 420, 650], unit: 'pts',
+    { id: 'cesta', title: 'Cesta da Feira', icon: 'cesta', c1: '#ff9a3d', c2: '#7a3a10', boss: 'c2s5', unlockWorld: 2, music: 'festa', medals: [220, 420, 650], unit: 'pts',
       desc: 'As comidas estão caindo das barracas! Pegue tudo com a cesta e faça combos.', how: 'Mova a cesta com **← →** ou arrastando o dedo. Pegue as comidas e as estrelas; fuja das **nuvens de chuva**!' },
-    { id: 'quebra', title: 'Quebra-cabeça do Brasil', icon: 'quebra', c1: '#2e9e6a', c2: '#123f2c', need: 5, music: 'atlas', medals: [250, 400, 520], unit: 'pts',
+    { id: 'quebra', title: 'Quebra-cabeça do Brasil', icon: 'quebra', c1: '#2e9e6a', c2: '#123f2c', boss: 'c3s6', unlockWorld: 3, music: 'atlas', medals: [250, 400, 520], unit: 'pts',
       desc: 'As regiões do mapa se soltaram! Arraste cada uma para o lugar certo.', how: 'Arraste cada **região** para o contorno do mapa. No teclado: **E** troca a peça, as setas movem e **Espaço** solta.' }
   ];
   PQ.GAMES = GAMES;
   const rec = () => { const s = S(); s.parque = s.parque || {}; return s.parque; };
   const stagesDone = () => D.stages.filter((s) => S().stages[s.id] && S().stages[s.id].done).length;
-  PQ.unlocked = (g) => !!(GEO.mode && GEO.mode.isTest && GEO.mode.isTest()) || stagesDone() >= g.need;
+  const stageDone = (id) => !!(S().stages[id] && S().stages[id].done);
+  PQ.unlocked = (g) => !!(GEO.mode && GEO.mode.isTest && GEO.mode.isTest()) || (g.boss ? stageDone(g.boss) : stagesDone() >= g.need);
+  const lockText = (g) => (g.boss ? '🔒 Termine o Mundo ' + (g.world || g.unlockWorld) + ' (vença o chefe)' : '🔒 Conclua ' + g.need + ' fase' + (g.need > 1 ? 's' : ''));
+  /** Registra um minijogo novo (Arcade dos Mundos: scenes/arcade*.js). */
+  PQ.register = function (g, maker) { if (!GAMES.find((x) => x.id === g.id)) GAMES.push(g); MAKE[g.id] = maker; };
+  PQ.worldGames = (w) => GAMES.filter((g) => g.world === w);
   const medalOf = (g, score) => (score >= g.medals[2] ? 'ouro' : score >= g.medals[1] ? 'prata' : score >= g.medals[0] ? 'bronze' : null);
   const MEDAL = { bronze: ['🥉', 'Bronze'], prata: ['🥈', 'Prata'], ouro: ['🥇', 'Ouro'] };
 
   /* ================================================================ menu do parque */
-  PQ.open = function () {
+  /* ---------------------------------------------------------------- ENTRADA (pedido do usuário, set/2026)
+     Cada partida custa PQ.COST EcoMoedas de Geografia (≈ o que se ganha em ~2 fases novas: uma fase
+     rende de ~40 a ~60) OU 2 perguntas rápidas do tema do mundo. Vencer um chefe dá 1 BILHETE GRÁTIS
+     para um jogo do Arcade daquele mundo. No modo de teste dos pais, tudo é grátis. */
+  PQ.COST = 70;
+  const tickets = () => { const f = (S().flags = S().flags || {}); f.arcadeTickets = f.arcadeTickets || {}; return f.arcadeTickets; };
+  PQ.tickets = (w) => tickets()[w] || 0;
+  PQ.giveTicket = (w) => { tickets()[w] = (tickets()[w] || 0) + 1; GEO.save.persist(); };
+  const isTest = () => !!(GEO.mode && GEO.mode.isTest && GEO.mode.isTest());
+  /** Duas perguntas rápidas (afirmações do capítulo) para entrar sem gastar moedas. */
+  async function twoQuestions(g) {
+    const done = [1, 2, 3].filter((n) => D.stages.some((st) => st.ch === n && stageDone(st.id)));
+    for (let i = 0; i < 2; i++) {
+      const ch = g.world || U.pick(done.length ? done : [1]);
+      const all = D.statements[ch] || [];
+      const sts = U.shuffle(U.shuffle(all.filter((x) => x.v)).slice(0, 1).concat(U.shuffle(all.filter((x) => !x.v)).slice(0, 2)));
+      const r = await GG.quiz.quick({ prompt: 'Pergunta ' + (i + 1) + ' de 2 — qual afirmação está **correta**?', type: 'mc', keepOrder: true, options: sts.map((x) => ({ t: x.t, ok: x.v, fb: x.fb })) }, { title: '🎟️ Entrada do minijogo', subject: 'Geografia', chips: [g.title, 'Capítulo ' + ch], doneLabel: i ? 'Jogar! ▶' : 'Próxima ▶' });
+      GEO.campaign.recordCheck(r.attempts === 1, 'Entrada de minijogo — capítulo ' + ch);
+    }
+  }
+  /** Entrada: bilhete grátis → joga; senão, escolher entre moedas e 2 perguntas. */
+  PQ.enter = function (id) {
+    const g = GAMES.find((x) => x.id === id); if (!g) return;
+    if (isTest()) { PQ.play(id); return; }
+    if (g.world && PQ.tickets(g.world) > 0) { tickets()[g.world]--; GEO.save.persist(); UI.toast('🎟️ Bilhete grátis usado! Boa diversão.', 'gold', 2200); PQ.play(id); return; }
+    const coins = S().coins, can = coins >= PQ.COST;
+    const m = UI.modal({ title: '🎟️ Entrar em ' + g.title, cls: 'small pq-entry' });
+    m.body.appendChild(U.el('div', { class: 'pq-entry-art' }, X() ? X().el(g.icon, 64) : '🎮'));
+    m.body.appendChild(U.el('p', null, 'Escolha como entrar nesta partida:'));
+    m.body.appendChild(U.el('p', { class: 'tip' }, 'Suas EcoMoedas: ' + coins + ' 🪙 • entrada: ' + PQ.COST + ' 🪙' + (can ? '' : ' (faltam ' + (PQ.COST - coins) + ')')));
+    const pay = UI.btn('🪙 Pagar ' + PQ.COST + ' EcoMoedas', can ? 'pri' : 'ghost', () => {
+      if (!can) { UI.toast('Moedas insuficientes — jogue fases ou responda 2 perguntas.', '', 2200); return; }
+      const s = S(); s.coins -= PQ.COST; s.spent += PQ.COST; s.ledger.push({ t: Date.now(), r: 'Entrada: ' + g.title, xp: 0, c: -PQ.COST }); GEO.save.persist(); GEO.hud && GEO.hud.update();
+      GG.audio.sfx('coin'); m.close(); PQ.play(id);
+    });
+    if (!can) pay.setAttribute('aria-disabled', 'true');
+    const ask = UI.btn('📝 Responder 2 perguntas' + (g.world ? ' do Mundo ' + g.world : ''), can ? '' : 'pri', async () => { m.close(); await twoQuestions(g); PQ.play(id); });
+    m.setActions([UI.btn('Cancelar', 'ghost', () => m.close()), ask, pay]);
+  };
+  let lastView = null;
+  /** Abre o Parque. only = número do mundo para mostrar só o Arcade daquele mundo. */
+  PQ.open = function (only) {
     if (UI.blocking()) return;
-    const m = UI.modal({ title: '🎡 Parque do Atlas — minijogos', wide: true });
-    m.body.appendChild(U.el('p', { class: 'tip' }, 'Jogos só de diversão: valem recorde e medalha. Novos jogos abrem conforme você conclui fases.'));
-    const grid = U.el('div', { class: 'pq-grid' });
-    GAMES.forEach((g) => {
+    lastView = only || null;
+    const m = UI.modal({ title: only ? '🕹️ Arcade do Mundo ' + only : '🎡 Parque do Atlas — minijogos', wide: true });
+    m.body.appendChild(U.el('p', { class: 'tip' }, only ? 'Recompensa por vencer o chefe: jogos rápidos só de diversão, sem perguntas. Bata seus recordes!' : 'Os minijogos são prêmios: cada MUNDO terminado (chefe vencido) libera novos jogos. Avance no Atlas para ganhar todos!'));
+    const card = (g) => {
       const open = PQ.unlocked(g), r = rec()[g.id];
       const art = X() ? X().el(g.icon, 76) : U.el('span', { style: { fontSize: '48px' } }, '🎮');
-      grid.appendChild(U.el('button', { type: 'button', class: 'pq-card' + (open ? '' : ' lock'), style: { '--c1': g.c1, '--c2': g.c2 }, 'aria-disabled': String(!open), 'data-game': g.id,
-        onclick: () => { if (!open) { UI.toast('🔒 Conclua ' + g.need + ' fase(s) do Atlas para liberar.'); return; } GG.audio.sfx('click'); m.close(); PQ.play(g.id); } }, [
-        U.el('div', { class: 'pq-art' }, art), U.el('b', null, g.title), U.el('span', null, g.desc),
-        U.el('div', { class: 'pq-rec' }, open ? (r && r.best != null ? 'Recorde: ' + r.best + ' ' + g.unit + (r.medal ? ' ' + MEDAL[r.medal][0] : '') : '▶ Novo!') : '🔒 Conclua ' + g.need + ' fase' + (g.need > 1 ? 's' : ''))
-      ]));
-    });
-    m.body.appendChild(grid);
+      return U.el('button', { type: 'button', class: 'pq-card' + (open ? '' : ' lock'), style: { '--c1': g.c1, '--c2': g.c2 }, 'aria-disabled': String(!open), 'data-game': g.id,
+        onclick: () => { if (!open) { UI.toast(lockText(g) + ' para liberar.'); return; } GG.audio.sfx('click'); m.close(); PQ.enter(g.id); } }, [
+        U.el('div', { class: 'pq-art' }, art), U.el('b', null, g.title), g.ref ? U.el('i', { class: 'pq-ref' }, 'Estilo ' + g.ref) : null, U.el('span', null, g.desc),
+        U.el('div', { class: 'pq-rec' }, open ? (r && r.best != null ? 'Recorde: ' + r.best + ' ' + g.unit + (r.medal ? ' ' + MEDAL[r.medal][0] : '') : '▶ Novo!') : lockText(g))
+      ]);
+    };
+    const tk = [1, 2, 3].filter((w) => PQ.tickets(w) > 0).map((w) => 'Mundo ' + w + ': ' + PQ.tickets(w));
+    m.body.appendChild(U.el('p', { class: 'pq-wallet' }, '🪙 ' + S().coins + ' EcoMoedas • entrada: ' + PQ.COST + ' 🪙 ou 2 perguntas' + (tk.length ? ' • 🎟️ bilhetes grátis — ' + tk.join(', ') : '')));
+    const section = (title, list) => { if (!list.length) return; m.body.appendChild(U.el('h3', { class: 'pq-sec' }, title)); m.body.appendChild(U.el('div', { class: 'pq-grid' }, list.map(card))); };
+    if (!only) section('🎡 Parque do Atlas', GAMES.filter((g) => !g.world));
+    [1, 2, 3].filter((w) => !only || w === only).forEach((w) => section('🕹️ Arcade do Mundo ' + w + ' — ' + D.chapters[w - 1].title, PQ.worldGames(w)));
     m.body.appendChild(U.el('details', { class: 'tip', style: { marginTop: '10px' } }, [U.el('summary', null, 'Créditos das imagens'),
       U.el('p', null, 'Ilustrações 3D: Fluent Emoji (Microsoft, licença MIT). Cenários, partículas e árvores: Kenney (CC0). Fotos de satélite da Terra (dia e noite) e globo: Solar System Scope, com dados da NASA (CC BY 4.0). Mapa do Brasil: Victor Cazanave, @svg-maps/brazil (CC BY 4.0).')]));
     m.setActions([UI.btn('Voltar ao Atlas', 'pri', () => m.close())]);
@@ -72,7 +122,7 @@
     const h = document.getElementById('stageHud'); h.innerHTML = ''; h.classList.remove('hide');
     this.hud = { score: U.el('div', { class: 'sh-stat' }), extra: U.el('div', { class: 'sh-stat', style: { display: 'none' } }), lives: U.el('div', { class: 'sh-hearts' }), goal: U.el('div', { class: 'sh-goal' }) };
     const pause = U.el('button', { type: 'button', class: 'icon-btn', 'aria-label': 'Pausa', title: 'Pausa (Esc)', onclick: () => PQ.pause() }, '⏸');
-    h.appendChild(U.el('div', { class: 'sh-row' }, [U.el('div', { class: 'sh-title' }, [U.el('span', { class: 'sh-ch pix' }, 'PARQUE'), ' ', X() ? X().el(g.icon, 22) : '🎡', ' ' + g.title]), this.hud.lives, this.hud.score, this.hud.extra, U.el('span', { style: { flex: '1' } }), pause]));
+    h.appendChild(U.el('div', { class: 'sh-row' }, [U.el('div', { class: 'sh-title' }, [U.el('span', { class: 'sh-ch pix' }, g.world ? 'ARCADE' : 'PARQUE'), ' ', X() ? X().el(g.icon, 22) : '🎡', ' ' + g.title]), this.hud.lives, this.hud.score, this.hud.extra, U.el('span', { style: { flex: '1' } }), pause]));
     h.appendChild(this.hud.goal);
   }
   Api.prototype.add = function (n) { this.score = Math.max(0, Math.round(this.score + n)); this.refresh(); };
@@ -98,7 +148,7 @@
     const scene = MAKE[id](api);
     cur.scene = scene;
     E.start(scene);
-    if (X()) { X().iris('in'); X().banner({ id: 'pq_' + id, icon: g.icon, title: g.title, style: 'Minijogo do Parque do Atlas' }); }
+    if (X()) { X().iris('in'); X().banner({ id: 'pq_' + id, icon: g.icon, title: g.title, style: g.world ? 'Arcade do Mundo ' + g.world + (g.ref ? ' • estilo ' + g.ref : '') : 'Minijogo do Parque do Atlas' }, g.world ? 'ARCADE DO MUNDO ' + g.world : null); }
     GG.audio.music(g.music);
     api.refresh();
     if (!skipIntro) await UI.say('gaia', [g.how]);
@@ -115,7 +165,7 @@
     GG.engine.stop(); cur = null;
     document.getElementById('stageHud').classList.add('hide');
     GEO.app.showAtlas();
-    if (reopen) setTimeout(() => PQ.open(), 60);
+    if (reopen) setTimeout(() => PQ.open(lastView), 60);
   };
   function finish(api, note) {
     const g = api.g, score = api.score, r = rec(), old = r[g.id] || { best: null, plays: 0, medal: null };
@@ -132,7 +182,7 @@
       if (note) m.body.appendChild(U.el('p', { class: 'tip' }, note));
       const nxt = g.medals.find((v) => v > score);
       m.body.appendChild(U.el('p', { class: 'tip' }, nxt ? 'Próxima medalha com ' + nxt + ' ' + g.unit + '.' : 'Você conquistou a medalha máxima! 🥇'));
-      m.setActions([UI.btn('🗺️ Atlas', 'ghost', () => { m.close(); PQ.exit(false); }), UI.btn('🎡 Parque', '', () => { m.close(); PQ.exit(true); }), UI.btn('🔁 Jogar de novo', 'pri', () => { m.close(); PQ.play(g.id, true); })]);
+      m.setActions([UI.btn('🗺️ Atlas', 'ghost', () => { m.close(); PQ.exit(false); }), UI.btn('🎡 Parque', '', () => { m.close(); PQ.exit(true); }), UI.btn('🔁 Jogar de novo', 'pri', () => { m.close(); PQ.exit(false); setTimeout(() => PQ.enter(g.id), 80); })]);
     }, medal ? 700 : 250);
   }
   /** Ouve arrastar/soltar enquanto a cena estiver ativa (remove ao sair). */
@@ -145,6 +195,7 @@
     });
     const ex = sc.exit; sc.exit = function () { offs.forEach((o) => o()); if (ex) ex.call(sc); };
   }
+  PQ.pointer = pointer;
   const MAKE = {};
 
   /* ================================================================ 1. MEMÓRIA DAS CULTURAS */
