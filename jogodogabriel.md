@@ -1,7 +1,7 @@
 # Jogo do Gabriel: mapa da franquia
 
 Memória oficial e cumulativa do projeto. Leia inteira antes de planejar ou mudar qualquer coisa.
-Estado conferido nos arquivos em 24/09/2026 (etapa **Gabriel Nexus** concluída).
+Estado conferido nos arquivos em 24/09/2026 (Gabriel Nexus construído e **oculto para a criança**; último commit `c198b17`).
 Repositório: `mauricioweb007-collab/jogogabriel`, branch de trabalho `claude/adoring-galileo-w55t2f`.
 Marcações: **[não confirmado]** indica algo não verificado; **[pendente]** indica algo não feito.
 
@@ -15,6 +15,7 @@ Marcações: **[não confirmado]** indica algo não verificado; **[pendente]** i
 - Um jogo novo **não precisa** continuar o enredo anterior nem repetir formatos de fase.
 - Jogos anteriores são **referência** e fonte opcional de código, arte e soluções.
 - Cada módulo novo busca uma experiência própria e sobe o nível de qualidade.
+- Código e recursos de módulos anteriores podem ser reaproveitados ou melhorados quando fizer sentido, **sem obrigar** os jogos a seguir o mesmo formato.
 - **Gabriel Nexus** (seção 7) é o **jogo central permanente**: recebe pontos e desbloqueios das matérias e vira coleção, casa e diversão. Ele **não é matéria**: não tem questões escolares novas.
 
 **Regras pedagógicas (permanentes)**
@@ -31,7 +32,6 @@ Marcações: **[não confirmado]** indica algo não verificado; **[pendente]** i
 - HTML/CSS/JS puros, sem build, offline e abrindo o arquivo direto (`file://`) em Chrome, Edge ou Firefox.
 - Não coleta dados pessoais. Não há compras reais, anúncios, assinatura nem loot box paga.
 - Arte e música são originais, fornecidas pelo responsável ou de licença livre, registradas em `CREDITOS.md`.
-- **Gabriel Nexus OCULTO para a criança (decisão do usuário, 24/09/2026):** `GG.FR.nexusVisible = false` em `src/franchise/config.js`. O lançador não mostra o cartão/toasts do Nexus e o resultado de fase de Geografia não mostra a linha do Nexus. Os pontos continuam sendo guardados em segundo plano, a Área dos Pais funciona e, no modo de teste dos pais, o Nexus aparece. Para reativar: mudar para `true`.
 - **Um único save infantil por navegador.** O nome é só personalização: não existe conta, senha ou seleção de perfis para a criança.
 
 **Regras de git (permanentes)**
@@ -39,7 +39,7 @@ Marcações: **[não confirmado]** indica algo não verificado; **[pendente]** i
 - O repositório `diario` foi a "pasta errada": nada vai para ele.
 - Não abrir PR sem pedido. Não citar identificador de modelo em commits nem arquivos.
 - **Nunca** gravar a senha dos pais em texto puro no repositório.
-- **Link para jogar:** sempre atualizar o MESMO artifact (https://claude.ai/artifact/5G4dYdvU9XW6oNCWXvPV7i), aberto a quem tem o link — decisão do usuário. Publicar com `inicio.html` como página, todos os arquivos de jogo (sem testes/ferramentas) e `ciencias.html` = cópia de `index.html` (o artifact não aceita o caminho `index.html`).
+- **Link para jogar (decisão do usuário):** sempre atualizar o MESMO artifact, https://claude.ai/artifact/5G4dYdvU9XW6oNCWXvPV7i (aberto a quem tem o link; hoje na **versão 6**). Página = `inicio.html`; arquivos = `css/`, `js/`, `src/` sem testes/ferramentas/licenças `.md`, mais `inicio.html` e `ciencias.html` (cópia de `index.html`, pois o artifact não aceita o caminho `index.html`). Em atualização, basta enviar os arquivos alterados.
 
 ---
 
@@ -49,7 +49,7 @@ Marcações: **[não confirmado]** indica algo não verificado; **[pendente]** i
 |---|---|---|---|
 | **Ciências: Missão EcoNexus** (v1.0) | Aventura 2D em vista de cima com a guia Lumi, vila hub, 6 regiões e Arena. **43 questões** (L1-Q1 … L6-Q7). 7 minijogos. | Concluído e **congelado**. | `index.html`, `css/`, `js/`, `tools/`, `docs/ENTREGA.md`, `README.md`. Save `econexus_guardioes_save_v1`. Adaptador (não é arquivo de Ciências): `src/modules/ciencias-legacy-adapter/`. |
 | **Geografia: Brasil em Movimento** (`geografia_2026_09`) | Gaia e o rival GeoBot. 3 capítulos, **16 fases** de estilos diferentes e 3 salas bônus. **45 questões**. | Concluído. Congelado exceto os ganchos mínimos do Nexus (seção 7.2). | `src/modules/geografia/jogar.html`, `main.js` (`GEO.app`), `content/`, `questions/`, `systems/`, `scenes/`, `ENTREGA-GEOGRAFIA.md`. Save `ecoNexus.geografia.v1`. |
-| **Gabriel Nexus** (jogo central) | Hub 2.5D na Praça dos Mundos, 21 Nexóticos, Parque, Fliperama, Galeria, Oficina, Casa, Loja e Terminal dos Pais. | Concluído (seção 7). | `src/nexus/nexus.html`, serviços em `src/franchise/`, Área dos Pais em `src/pais/pais.html`. Perfil `ecoNexus.franchise.v1`. |
+| **Gabriel Nexus** (jogo central) | Hub 2.5D na Praça dos Mundos, 21 Nexóticos, Parque, Fliperama, Galeria, Oficina, Casa, Loja e Terminal dos Pais. | Construído e testado (seção 7), mas **oculto para a criança** (seção 5). Os pontos continuam sendo guardados. | `src/nexus/nexus.html`, serviços em `src/franchise/`, Área dos Pais em `src/pais/pais.html`. Perfil `ecoNexus.franchise.v1`. |
 | **Matemática** | — | **[pendente] O jogo NÃO existe.** Só há o mundo "em breve" com o pacote do Gato Gráfico. | `src/modules/matematica/manifest.js` (`enabled:false`, `comingSoon`), `nexoticos.js`. |
 | Exemplo vazio | Registro mínimo (`enabled:false`); cartão "Novas missões chegarão". | Modelo. | `src/modules/exemplo-vazio/manifest.js` |
 | Inglês e outras | — | **[pendente]** Nenhum material entregue. | — |
@@ -64,7 +64,7 @@ Marcações: **[não confirmado]** indica algo não verificado; **[pendente]** i
 | Bônus (sem questões) | b1 Corrida Relâmpago, b2 Ritmo Livre, b3 Labirinto Relâmpago |
 
 **Entrada e lançador**
-- `inicio.html`: tela de entrada (**só o nome**, sobre o cenário `06_cenario_login` e o logo **original** do Colégio Kodomo). Depois vem "Qual missão você quer jogar?", com o cartão do Nexus e um cartão por matéria.
+- `inicio.html`: tela de entrada (**só o nome**, sobre o cenário `06_cenario_login` e o logo **original** do Colégio Kodomo). Depois vem "Qual missão você quer jogar?", só com as matérias (Ciências, Geografia, Matemática "em breve", "Novas missões chegarão") e o botão discreto "Área dos Pais". O cartão do Nexus só aparece se `GG.FR.nexusVisible` for `true` ou no modo de teste dos pais.
 - O nome fica em `sessionStorage['ecoNexus.entrou']` durante a aba, para não pedir de novo.
 - **Prompts originais** não estão no repositório. O do Nexus veio num pacote zip (prompt, catálogo, personagens e cenários); os assets usados estão no repo.
 
@@ -91,7 +91,7 @@ src/tests/                  regressão de Ciências, testes do Nexus, tabela de 
 
 **Motor:** canvas lógico 400x225 pixel-perfect, 60 Hz, pausa com `GG.ui.blocking()`. O Nexus usa um desenho próprio em alta resolução (DOM e canvas), não o motor pixel. `GG.store` recusa gravar a chave de Ciências.
 
-**Rodar:** abrir `inicio.html`. Online, o lançador usa `ciencias.html` se existir (cópia só no artifact publicado). Artifact publicado: **v5 (24/09/2026), já com o Nexus**, em https://claude.ai/artifact/5G4dYdvU9XW6oNCWXvPV7i.
+**Rodar:** abrir `inicio.html`. Online, o lançador usa `ciencias.html` se existir (cópia só no artifact publicado). Artifact publicado: versão 6 (Nexus oculto), ver regra na seção 1.
 
 **Testes** (Node 18+ e Playwright; aqui: `/opt/node22/lib/node_modules/playwright`, Chromium em `/opt/pw-browsers`; use `NODE_PATH=/opt/node22/lib/node_modules`). A senha vem da variável de ambiente, nunca do repositório:
 
@@ -107,7 +107,7 @@ node src/tests/gen-tabela-geografia.cjs                        # tabela das 45 q
 
 **Últimos resultados (24/09/2026):**
 - Regressão de Ciências: 32/32 arquivos idênticos, audit limpo, 74 checagens ✓, save idêntico.
-- `nexus-unit` 467/467 e `nexus-e2e` 43/43.
+- `nexus-unit` 467/467 e `nexus-e2e` 43/43 (o e2e agora confere que o Nexus está **oculto** no lançador).
 - Geografia: `features` ✓; e2e nos 3 perfis com 45/45 questões, 16/16 fases, final e troféu, 0 erro; `layouts` OK nas 3 resoluções.
 
 **Lições de ambiente:** `pkill -f` mata o próprio shell (use PID). Não passe testes longos por `| tail` (a saída fica presa); grave em log.
@@ -134,7 +134,7 @@ node src/tests/gen-tabela-geografia.cjs                        # tabela das 45 q
 
 - **Ciências:** guia Lumi; vila com 6 regiões e arena; 3 folhas de energia; XP, EcoMoedas e loja de 58 itens; caderno com 24 fichas; área do responsável com conta de multiplicação.
 - **Geografia:** Gaia e GeoBot (falas de até 3 balões); tema "Atlas Vivo"; 16 fases arcade e 3 chefes; modo estudo rápido; a cena de Carybé é ilustração original.
-- **Gabriel Nexus:** narrador Micróbio Miojo; hub na arte da Praça dos Mundos; áreas liberadas por Nível do Nexus; Moedas Nexus separadas das moedas de cada matéria; Cristais de Decoração só da coleta e das expedições.
+- **Gabriel Nexus:** **oculto para a criança por enquanto** (decisão do usuário: a tela com tudo junto não ficou boa). Chave única: `GG.FR.nexusVisible = false` em `src/franchise/config.js`; ela esconde o cartão e os avisos do Nexus no lançador e a linha "🌀 Gabriel Nexus" no resultado das fases de Geografia. Os pontos seguem sendo registrados em segundo plano, e o Nexus continua acessível no modo de teste dos pais. Para liberar: `true` e republicar. Outras escolhas: narrador Micróbio Miojo; hub na arte da Praça dos Mundos; áreas liberadas por Nível do Nexus; Moedas Nexus separadas das moedas de cada matéria; Cristais de Decoração só da coleta e das expedições.
 - **Próximo módulo:** tudo em aberto (história, guia, mecânicas, visual), conforme o material entregue.
 
 ---
@@ -145,7 +145,8 @@ node src/tests/gen-tabela-geografia.cjs                        # tabela das 45 q
 - Ciências v1.0 (43 questões).
 - Plataforma v2 (lançador, registro, core, motor de questões).
 - Geografia (45 questões, 16 fases).
-- **Gabriel Nexus completo** (seção 7): entrada pelo nome, perfil global, ponte de pontuação, 21 Nexóticos, hub e 8 áreas, 4 jogos recreativos, Fliperama com replays das matérias e torneios, Área dos Pais com sandbox.
+- **Gabriel Nexus** (seção 7): entrada pelo nome, perfil global, ponte de pontuação, 21 Nexóticos, hub e 8 áreas, 4 jogos recreativos, Fliperama com replays das matérias e torneios, Área dos Pais com sandbox. Depois, **ocultado para a criança** a pedido do usuário.
+- Link único publicado (versão 6).
 - Documentos atualizados: `COMECE-AQUI.md`, `COMO-ADICIONAR-MATERIA.md`, `CREDITOS.md`.
 
 **Em andamento:** nada.
@@ -162,10 +163,11 @@ node src/tests/gen-tabela-geografia.cjs                        # tabela das 45 q
 - Itens herdados: voz (TTS) depende do aparelho; celular em pé fica pequeno nas fases de ação; mapas esquemáticos; estudo rápido rende um pouco mais de moedas que a Aventura em Geografia; recordes contra o GeoBot aparecem como 0:00 nos testes **[não confirmado no jogo real]**; a lista `files` do manifesto de Geografia é informativa (os scripts ficam fixos no `jogar.html`); o `README.md` de Ciências cita caminhos `econexus/…`.
 - A branch `main` só tem o "Initial commit". Não há GitHub Pages.
 
-**Próximos passos (só quando o usuário pedir)**
-1. Jogo de **Matemática** com o material da prova. Depois, preencher o manifesto (7.4) e criar o pacote `matematica-v2` com os outros Nexóticos.
-2. Outras matérias pelo mesmo contrato.
-3. PR para `main`; GitHub Pages (só com pedido).
+**Próximo passo concreto**
+- Aguardar o usuário. O mais provável é o **jogo de Matemática**: pedir o material da prova, criar um jogo próprio (novo enredo, ambientes e fases) em `src/modules/matematica/`, preencher o bloco `franchise` do manifesto (7.4) e manter o Nexus oculto até o usuário decidir.
+
+**Depois (só com pedido)**
+- Redesenhar e liberar o Nexus (`nexusVisible: true`); pacote `matematica-v2` com os outros Nexóticos; outras matérias; PR para `main`; GitHub Pages.
 
 ---
 
@@ -174,7 +176,7 @@ node src/tests/gen-tabela-geografia.cjs                        # tabela das 45 q
 ### 7.1 Objetivo e funcionamento
 - Jogo central da franquia. Cada estudo nas matérias gera **energia** (Pontuação de Carreira) e **Moedas Nexus**. Com elas, o Nexus cresce, chegam Nexóticos, a casa é decorada e o Fliperama enche.
 - O Nexus **não** tem questões novas, **não** altera questões e **não** é obrigatório para avançar nas matérias.
-- **Fluxo:** `inicio.html` (nome) → lançador → `src/nexus/nexus.html`.
+- **Fluxo (quando visível):** `inicio.html` (nome) → lançador → `src/nexus/nexus.html`. Hoje a criança não vê o cartão; o endereço direto continua funcionando.
   - Na 1ª visita há história com o narrador Micróbio Miojo, o resumo "Suas aventuras anteriores trouxeram X pontos e Y moedas" (lido das marcas de migração) e o presente de boas-vindas: um Nexótico Comum ainda não conquistado, ou 10 fragmentos.
 - **Hub 2.5D** na arte `02_cenario_praca_dos_mundos` (sem esticar: escala "cover" com arraste). O código fica em `src/nexus/hub.js`.
   - Os portais desenhados viraram portais reais: Ciências (folha), Geografia (globo), Matemática (cubos, em breve) e Mundos futuros (espiral).
@@ -221,7 +223,7 @@ node src/tests/gen-tabela-geografia.cjs                        # tabela das 45 q
   - `jogodogabriel.md`.
 
 **Alterados**
-- `inicio.html`, `src/launcher/launcher.js`, `launcher.css`: entrada pelo nome e cartão do Nexus.
+- `inicio.html`, `src/launcher/launcher.js`, `launcher.css`: entrada pelo nome e cartão do Nexus (oculto por `nexusVisible`).
 - `src/core/audio.js`: `addSong`, `songs`, `jingle` (só acréscimos).
 - `src/modules/modulos.js`: linha da Matemática.
 - `src/modules/ciencias-legacy-adapter/manifest.js`: bloco `franchise`. Não é arquivo de Ciências.
@@ -231,7 +233,7 @@ node src/tests/gen-tabela-geografia.cjs                        # tabela das 45 q
   - `systems/save.js`: `SV.KEY` vem do modo.
   - `systems/campaign.js`: `unlocked()` libera tudo em replay e teste.
   - `main.js`: `replayStart`, `testStart`, `testQuestion`; `toLauncher` volta ao Fliperama no replay.
-  - `scenes/stage.js`: linha "🌀 Gabriel Nexus" no resultado, `replayResults`, e sair do replay volta ao Nexus.
+  - `scenes/stage.js`: linha "🌀 Gabriel Nexus" no resultado (escondida enquanto `nexusVisible` for `false`), `replayResults`, e sair do replay volta ao Nexus.
   - História, questões, dificuldade, mapas e economia não mudaram.
 - Testes de Geografia e regressão (`features.cjs`, `layouts.cjs`, `ciencias-regressao.cjs`): passam pela tela de nome.
 - Docs: `COMECE-AQUI.md`, `COMO-ADICIONAR-MATERIA.md`, `CREDITOS.md`.
@@ -420,5 +422,6 @@ node src/tests/gen-tabela-geografia.cjs                        # tabela das 45 q
 - O nome é sugerido a partir dos saves existentes.
 
 ### 7.10 Pendências reais do Nexus
+- **[pendente]** Nexus oculto: falta o usuário decidir como deve ficar a tela antes de liberar.
 - **[pendente]** Jogo de Matemática e os outros 9 Nexóticos de Matemática (pacote futuro).
 - **[não confirmado]** Balanceamento de preços, níveis e desempenho em aparelhos reais: falta uma sessão de jogo com o Gabriel.
