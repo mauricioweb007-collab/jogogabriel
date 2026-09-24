@@ -46,3 +46,65 @@ O módulo de Ciências usa apenas desenhos e sons feitos por código no próprio
 | Melodias curtas de cada Nexótico | Fichas e comemorações | Criadas para o projeto | campo `sound` dos pacotes |
 
 O mockup da Área dos Pais (07) foi usado só como referência visual; a interface é HTML acessível.
+
+## Inglês — Gabriel e o Expresso dos Sonhos (24/09/2026)
+
+As ilustrações ficam em `src/modules/ingles/assets/img/` (PNG de 128 px, salvos no projeto: nada é carregado da internet). Acesso em 24/09/2026.
+
+- **Fluent Emoji 3D** — Microsoft, licença **MIT** (`src/assets/shared/licencas/Fluent-Emoji-MIT.txt`). Baixadas uma a uma do repositório oficial e reduzidas para 128 px, sem outras alterações. Cada figura ilustra uma palavra que está no `ingles.pdf` (ex.: `banco.png` → *bank*; `microscopio.png` → *biology*); o texto da questão continua sendo o do livro, e cada imagem tem texto alternativo.
+- **`avental.png`** (*apron*, pág. 8) — desenho original feito para o projeto, porque não existe emoji de avental.
+- Nenhuma foto, personagem protegido, marca ou arte de outro jogo. As imagens do livro (escaneadas) **não** foram copiadas para o jogo.
+- Voz em inglês: leitura do próprio navegador (Web Speech), só com frases do livro; não é o áudio oficial do livro, que não está no projeto.
+
+| Arquivo | Fluent Emoji | Origem |
+|---|---|---|
+| `aeroporto.png` | Airplane departure | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Airplane%20departure |
+| `alambique.png` | Alembic | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Alembic |
+| `atomo.png` | Atom symbol | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Atom%20symbol |
+| `aviao.png` | Airplane | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Airplane |
+| `bairro.png` | Houses | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Houses |
+| `balao_fala.png` | Speech balloon | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Speech%20balloon |
+| `banco.png` | Bank | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Bank |
+| `bilhete.png` | Ticket | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Ticket |
+| `bolhas.png` | Bubbles | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Bubbles |
+| `cachorro.png` | Dog | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Dog |
+| `carro_voador.png` | Flying saucer | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Flying%20saucer |
+| `cart.png` | Racing car | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Racing%20car |
+| `check.png` | Check mark button | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Check%20mark%20button |
+| `cometa.png` | Comet | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Comet |
+| `coracoes.png` | Two hearts | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Two%20hearts |
+| `correio.png` | Post office | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Post%20office |
+| `cozinheiro.png` | Cook | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Cook |
+| `curativo.png` | Adhesive bandage | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Adhesive%20bandage |
+| `dente.png` | Tooth | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Tooth |
+| `enfermeira.png` | Woman health worker | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Woman%20health%20worker |
+| `engenheiro.png` | Construction worker | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Construction%20worker |
+| `entrevista.png` | Microphone | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Microphone |
+| `escritorio.png` | Office building | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Office%20building |
+| `estetoscopio.png` | Stethoscope | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Stethoscope |
+| `estrela.png` | Glowing star | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Glowing%20star |
+| `galaxia.png` | Milky way | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Milky%20way |
+| `gaveta.png` | File cabinet | https://github.com/microsoft/fluentui-emoji/tree/main/assets/File%20cabinet |
+| `guia.png` | Triangular flag | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Triangular%20flag |
+| `lavanderia.png` | Basket | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Basket |
+| `locomotiva.png` | Locomotive | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Locomotive |
+| `lupa.png` | Magnifying glass tilted left | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Magnifying%20glass%20tilted%20left |
+| `microscopio.png` | Microscope | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Microscope |
+| `missao.png` | Bullseye | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Bullseye |
+| `mulher.png` | Woman | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Woman |
+| `musculo.png` | Flexed biceps | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Flexed%20biceps |
+| `museu.png` | Classical building | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Classical%20building |
+| `nervoso.png` | Anxious face with sweat | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Anxious%20face%20with%20sweat |
+| `parque_aquatico.png` | Playground slide | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Playground%20slide |
+| `passaro.png` | Bird | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Bird |
+| `piloto.png` | Pilot | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Pilot |
+| `policial.png` | Police officer | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Police%20officer |
+| `profissional_saude.png` | Health worker | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Health%20worker |
+| `relogio.png` | Hourglass done | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Hourglass%20done |
+| `rua.png` | Motorway | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Motorway |
+| `sonhos.png` | Thought balloon | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Thought%20balloon |
+| `taxi.png` | Oncoming taxi | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Oncoming%20taxi |
+| `trofeu.png` | Trophy | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Trophy |
+| `tubo.png` | Test tube | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Test%20tube |
+| `tv.png` | Television | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Television |
+| `x.png` | Cross mark | https://github.com/microsoft/fluentui-emoji/tree/main/assets/Cross%20mark |

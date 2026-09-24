@@ -10,6 +10,7 @@ O projeto agora tem **várias matérias**. Cada matéria é uma missão independ
    - **Gabriel Nexus — O Mundo dos Nexóticos** (jogo central: coleção, casa, Fliperama; os pontos de estudo viram Moedas Nexus);
    - **Ciências — Missão EcoNexus** (versão 1.0, igual a antes; também abre direto por `index.html`);
    - **Geografia — Brasil em Movimento**;
+   - **Inglês — Gabriel e o Expresso dos Sonhos** (estudo curto para a prova, com respostas escritas);
    - Matemática aparece como “em breve” (o jogo ainda não existe).
 
 **Área dos Pais:** botão discreto “Área dos Pais” na entrada, no lançador e no Nexus (`src/pais/pais.html`). Pede só a senha dos responsáveis.
@@ -34,6 +35,7 @@ node src/modules/geografia/tests/features.cjs         # 45 questões, ritmo, ace
 node src/modules/geografia/tests/e2e.cjs otimo        # joga a campanha inteira (também: erros, rapido)
 node src/modules/geografia/tests/layouts.cjs pasta    # capturas em 1366x768, 1920x1080 e 390x844
 node src/tests/gen-tabela-geografia.cjs               # tabela das 45 questões
+node src/modules/ingles/tests/ingles.cjs otimo        # Inglês: corretor, campanha, Área dos Pais, sandbox (também: erros)
 ```
 
 Documentos: `jogodogabriel.md` (memória do projeto), `ENTREGA-GEOGRAFIA.md` (entrega completa), `COMO-ADICIONAR-MATERIA.md` (novas matérias) e `CREDITOS.md` (licenças). A documentação da versão 1.0 de Ciências continua em `README.md` e `docs/ENTREGA.md`.

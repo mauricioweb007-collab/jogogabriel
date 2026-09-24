@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#231a5c">
+  <meta name="description" content="Inglês — Gabriel e o Expresso dos Sonhos: estudo curto para a prova do 4º ano, com respostas escritas.">
+  <title>Inglês — Gabriel e o Expresso dos Sonhos</title>
+  <link rel="icon" href="assets/img/locomotiva.png">
+  <link rel="stylesheet" href="../../assets/shared/fonts/fonts.css">
+  <link rel="stylesheet" href="../../ui/ui.css">
+  <link rel="stylesheet" href="../../franchise/franchise.css">
+  <link rel="stylesheet" href="ingles.css">
+</head>
+<body class="ing">
+  <div class="sky" aria-hidden="true"></div>
+  <header id="hud" class="hud"></header>
+  <main id="app" class="scr" tabindex="-1" aria-live="polite"></main>
+  <div id="osk" class="osk hide" aria-label="Teclado na tela"></div>
+  <div id="loading"><div class="pix">Chamando o Expresso…</div></div>
+  <noscript><p style="padding:20px;font:18px sans-serif">Este jogo precisa de JavaScript ativado no navegador.</p></noscript>
+
+  <!-- Núcleo compartilhado da plataforma -->
+  <script src="../../core/util.js"></script>
+  <script src="../../core/storage.js"></script>
+  <script src="../../core/input.js"></script>
+  <script src="../../core/audio.js"></script>
+  <script src="../../core/pixel.js"></script>
+  <script src="../../ui/ui.js"></script>
+  <!-- Registro de módulos (este módulo se registra) -->
+  <script src="../registry.js"></script>
+  <script>window.ING = { data: {} };</script>
+  <script src="content/banco.js"></script>
+  <script src="content/atos.js"></script>
+  <script src="manifest.js"></script>
+  <!-- Integração com o Gabriel Nexus (perfil global, ponte de pontuação, replay e modo de teste) -->
+  <script src="../../franchise/config.js"></script>
+  <script src="../../franchise/sha256.js"></script>
+  <script src="../../franchise/store.js"></script>
+  <script src="../../franchise/parent-auth.js"></script>
+  <script src="../../franchise/profile.js"></script>
+  <script src="../../franchise/modules.js"></script>
+  <script src="../../franchise/bridge.js"></script>
+  <script src="../../franchise/replay.js"></script>
+  <!-- Módulo de Inglês -->
+  <script src="systems/checker.js"></script>
+  <script src="systems/save.js"></script>
+  <script src="minigames.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>

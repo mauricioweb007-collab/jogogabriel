@@ -37,6 +37,16 @@
         GG.maps.drawCanvas(x, 42, 4, 80, (s) => ({ norte: '#86d17a', nordeste: '#f7b267', centro: '#f4e285', sudeste: '#8ecae6', sul: '#c9b2ff' }[s.region]), 'rgba(0,0,0,.25)');
         P.crowd().slice(0, 6).forEach((pp, i) => x.drawImage(P.front(pp), 6 + i * 24 + (i > 2 ? 32 : 0), 66, 14, 20));
         x.drawImage(P.gaia(0), 124, 10, 24, 24);
+      } else if (m.theme.art === 'ingles') {
+        const g = x.createLinearGradient(0, 0, 0, 90); g.addColorStop(0, '#1a1350'); g.addColorStop(1, '#4a2380'); x.fillStyle = g; x.fillRect(0, 0, 160, 90);
+        x.fillStyle = 'rgba(255,255,255,.8)'; for (let i = 0; i < 26; i++) x.fillRect((i * 47) % 160, (i * 23) % 56, 1, 1);
+        x.fillStyle = '#ffd23f'; P.circ(x, 134, 16, 8);
+        x.fillStyle = '#c9a24d'; x.fillRect(0, 76, 160, 3); x.fillStyle = '#6b4a1c'; for (let i = 0; i < 160; i += 10) x.fillRect(i, 79, 5, 4);
+        x.fillStyle = '#e5484d'; x.fillRect(40, 52, 50, 22); x.fillStyle = '#6a4cff'; x.fillRect(92, 58, 34, 16); x.fillStyle = '#2c1b6b'; x.fillRect(30, 60, 12, 14); x.fillRect(50, 40, 8, 12);
+        x.fillStyle = '#fff5dc'; x.fillRect(64, 56, 10, 8); x.fillRect(98, 61, 8, 6); x.fillRect(112, 61, 8, 6);
+        x.fillStyle = '#15152a'; [48, 64, 82, 100, 118].forEach((cx) => P.circ(x, cx, 75, 4));
+        x.fillStyle = 'rgba(255,255,255,.7)'; P.circ(x, 54, 34, 4); P.circ(x, 60, 28, 5); P.circ(x, 68, 22, 6);
+        x.fillStyle = '#ffd23f'; x.font = 'bold 13px sans-serif'; x.fillText('ABC', 8, 22);
       } else if (m.theme.art === 'matematica') {
         const g = x.createLinearGradient(0, 0, 0, 90); g.addColorStop(0, '#3a1747'); g.addColorStop(1, '#7a2a6a'); x.fillStyle = g; x.fillRect(0, 0, 160, 90);
         ['#ff5d8f', '#ffd23f', '#3ddc84', '#3ec1ff', '#b07bff'].forEach((c, i) => { x.fillStyle = c; const h = 16 + i * 11; x.fillRect(22 + i * 24, 78 - h, 16, h); });

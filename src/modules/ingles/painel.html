@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex">
+  <title>Inglês — Painel do Responsável</title>
+  <link rel="icon" href="assets/img/locomotiva.png">
+  <link rel="stylesheet" href="../../assets/shared/fonts/fonts.css">
+  <link rel="stylesheet" href="../../ui/ui.css">
+  <link rel="stylesheet" href="../../franchise/franchise.css">
+  <link rel="stylesheet" href="../../pais/pais.css">
+  <style>
+    body.pais { overflow: auto; }
+    .ip-wrap { max-width: 1200px; margin: 0 auto; padding: 16px; }
+    .ip-wrap h1 { font-size: 1.4em; }
+    .ip-wrap select, .ip-wrap input[type=text] { font: inherit; padding: 6px 8px; border-radius: 8px; }
+    .dt td { vertical-align: top; }
+    .dt td.en { font-weight: 800; }
+    .typed { font-size: .85em; color: var(--ink2); }
+    .typed .ok { color: #7ff0a8; } .typed .no { color: #ff9b9b; }
+    .tr-box { display: flex; flex-direction: column; gap: 8px; }
+    .tr-out { padding: 8px 10px; border-radius: 8px; background: rgba(255,255,255,.08); }
+  </style>
+</head>
+<body class="pais">
+  <main class="ip-wrap" id="ip" aria-live="polite"><p>Carregando…</p></main>
+  <script src="../../core/util.js"></script>
+  <script src="../../core/storage.js"></script>
+  <script src="../../core/input.js"></script>
+  <script src="../../core/audio.js"></script>
+  <script src="../../ui/ui.js"></script>
+  <script src="../../franchise/config.js"></script>
+  <script src="../../franchise/sha256.js"></script>
+  <script src="../../franchise/store.js"></script>
+  <script src="../../franchise/parent-auth.js"></script>
+  <script>window.ING = { data: {} };</script>
+  <script src="content/banco.js"></script>
+  <script src="content/atos.js"></script>
+  <script src="systems/checker.js"></script>
+  <script src="painel.js"></script>
+</body>
+</html>

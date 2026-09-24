@@ -1,7 +1,7 @@
 # Jogo do Gabriel: mapa da franquia
 
 Memória oficial e cumulativa do projeto. Leia inteira antes de planejar ou mudar qualquer coisa.
-Estado conferido nos arquivos em 24/09/2026 (Gabriel Nexus construído e **oculto para a criança**; Geografia com a **camada gráfica nova e o Parque do Atlas**, seção 8).
+Estado conferido nos arquivos em 24/09/2026 (Gabriel Nexus construído e **oculto para a criança**; Geografia com a **camada gráfica nova e o Parque do Atlas**, seção 8; **Inglês — Expresso dos Sonhos** criado, seção 9).
 Repositório: `mauricioweb007-collab/jogogabriel`, branch de trabalho `claude/adoring-galileo-w55t2f`.
 Marcações: **[não confirmado]** indica algo não verificado; **[pendente]** indica algo não feito.
 
@@ -84,7 +84,8 @@ Marcações: **[não confirmado]** indica algo não verificado; **[pendente]** i
 | **Gabriel Nexus** (jogo central) | Hub 2.5D na Praça dos Mundos, 21 Nexóticos, Parque, Fliperama, Galeria, Oficina, Casa, Loja e Terminal dos Pais. | Construído e testado (seção 7), mas **oculto para a criança** (seção 5). Os pontos continuam sendo guardados. | `src/nexus/nexus.html`, serviços em `src/franchise/`, Área dos Pais em `src/pais/pais.html`. Perfil `ecoNexus.franchise.v1`. |
 | **Matemática** | — | **[pendente] O jogo NÃO existe.** Só há o mundo "em breve" com o pacote do Gato Gráfico. | `src/modules/matematica/manifest.js` (`enabled:false`, `comingSoon`), `nexoticos.js`. |
 | Exemplo vazio | Registro mínimo (`enabled:false`); cartão "Novas missões chegarão". | Modelo. | `src/modules/exemplo-vazio/manifest.js` |
-| Inglês e outras | — | **[pendente]** Nenhum material entregue. | — |
+| **Inglês: Gabriel e o Expresso dos Sonhos** (`ingles_2026_09`, moduleId `ingles`) | Estela, a estrela-maquinista; 3 estações (Cidade Cósmica, Aeroporto das Profissões, Laboratório dos Sonhos) + Passagem de Volta. **Curto e de estudo** (≈30–40 min): 61 questões na campanha + 113 extras opcionais = **174 questões** das 11 páginas do `ingles.pdf`. Só 3 minijogos. Resposta **escrita**. | Concluído (seção 9). | `src/modules/ingles/jogar.html`, `main.js` (`ING.app`), `content/`, `systems/`, `minigames.js`, `painel.html`. Save `ecoNexus.ingles.v1`. |
+| Outras matérias | — | **[pendente]** Nenhum material entregue. | — |
 
 **Fases de Geografia** (`content/capitulos.js`)
 
@@ -119,7 +120,7 @@ src/tools/nexus-senha.cjs   gera o hash da senha dos pais
 src/tests/                  regressão de Ciências, testes do Nexus, tabela de Geografia
 ```
 
-**Namespaces:** `EN` Ciências · `GG` plataforma e franquia · `GEO` Geografia · `NX` Gabriel Nexus.
+**Namespaces:** `EN` Ciências · `GG` plataforma e franquia · `GEO` Geografia · `ING` Inglês · `NX` Gabriel Nexus.
 
 **Motor:** canvas lógico 400x225 pixel-perfect, 60 Hz, pausa com `GG.ui.blocking()`. O Nexus usa um desenho próprio em alta resolução (DOM e canvas), não o motor pixel. `GG.store` recusa gravar a chave de Ciências.
 
@@ -137,6 +138,7 @@ node src/modules/geografia/tests/layouts.cjs <pasta>           # 1366x768, 1920x
 node src/modules/geografia/tests/parque.cjs                    # camada gráfica + Parque do Atlas (19 checagens)
 node src/modules/geografia/tests/pais-teste.cjs                # Área dos Pais: todo minijogo/menu/tela de Geografia abre no modo de teste (sandbox)
 node src/tests/gen-tabela-geografia.cjs                        # tabela das 45 questões
+node src/modules/ingles/tests/ingles.cjs otimo|erros           # Inglês: conteúdo/corretor, campanha inteira, salvar/continuar, pontos, Área dos Pais, sandbox, replay (83 checagens)
 ```
 
 **Últimos resultados (24/09/2026):**
@@ -169,6 +171,7 @@ node src/tests/gen-tabela-geografia.cjs                        # tabela das 45 q
 - **Ciências:** guia Lumi; vila com 6 regiões e arena; 3 folhas de energia; XP, EcoMoedas e loja de 58 itens; caderno com 24 fichas; área do responsável com conta de multiplicação.
 - **Geografia:** Gaia e GeoBot (falas de até 3 balões); tema "Atlas Vivo"; 16 fases arcade e 3 chefes; modo estudo rápido; a cena de Carybé é ilustração original.
 - **Gabriel Nexus:** **oculto para a criança por enquanto** (decisão do usuário: a tela com tudo junto não ficou boa). Chave única: `GG.FR.nexusVisible = false` em `src/franchise/config.js`; ela esconde o cartão e os avisos do Nexus no lançador e a linha "🌀 Gabriel Nexus" no resultado das fases de Geografia. Os pontos seguem sendo registrados em segundo plano, e o Nexus continua acessível no modo de teste dos pais. Para liberar: `true` e republicar. Outras escolhas: narrador Micróbio Miojo; hub na arte da Praça dos Mundos; áreas liberadas por Nível do Nexus; Moedas Nexus separadas das moedas de cada matéria; Cristais de Decoração só da coleta e das expedições.
+- **Inglês:** guia Estela (estrela-maquinista, falas de até 3 balões); visual “noite estrelada + bilhetes”; jogo **curto e de estudo** por pedido do usuário (menos fases e minijogos que Geografia); resposta sempre escrita primeiro; alternativas só como ajuda; nada de moedas/loja próprias (os pontos vão para o Nexus).
 - **Próximo módulo:** tudo em aberto (história, guia, mecânicas, visual), conforme o material entregue.
 
 ---
@@ -197,6 +200,8 @@ node src/tests/gen-tabela-geografia.cjs                        # tabela das 45 q
     - Roleta da Sorte no 100% de acerto.
   - **Código reaproveitável:** `docs/MINIGAMES-CODIGO.md` (gerador em `src/tools/gen-minigames-md.cjs`).
 
+- **Inglês — Gabriel e o Expresso dos Sonhos** (seção 9): módulo independente, 174 questões das 11 páginas do `ingles.pdf` (61 na campanha curta + 113 extras), 3 minijogos, integração com lançador, Nexus (pontos) e Área dos Pais (sandbox e painel próprio).
+
 **Em andamento:** nada.
 
 **Problemas conhecidos e limitações**
@@ -220,7 +225,7 @@ node src/tests/gen-tabela-geografia.cjs                        # tabela das 45 q
 - **Personagem:** os sprites do Gabriel ainda são **desenhados por código**. O usuário recebeu os PNGs para redesenhar (seção 8.9). **[pendente]** trocar pelas imagens dele quando ele mandar.
 
 **Próximo passo concreto**
-- Aguardar o usuário. Pendências dele: os **novos desenhos do Gabriel** (seção 8.9) e o retorno sobre a dificuldade dos minijogos. Depois, o mais provável é o **jogo de Matemática**: pedir o material da prova, criar um jogo próprio (novo enredo, ambientes e fases) em `src/modules/matematica/`, preencher o bloco `franchise` do manifesto (7.4) e manter o Nexus oculto até o usuário decidir.
+- Aguardar o retorno do usuário sobre o **Inglês** (ritmo e dificuldade com o Gabriel; seção 9.8). Pendências dele: os **novos desenhos do Gabriel** (seção 8.9) e o retorno sobre a dificuldade dos minijogos. Depois, o mais provável é o **jogo de Matemática**: pedir o material da prova, criar um jogo próprio (novo enredo, ambientes e fases) em `src/modules/matematica/`, preencher o bloco `franchise` do manifesto (7.4) e manter o Nexus oculto até o usuário decidir.
 
 **Depois (só com pedido)**
 - Redesenhar e liberar o Nexus (`nexusVisible: true`); pacote `matematica-v2` com os outros Nexóticos; outras matérias; PR para `main`; GitHub Pages.
@@ -916,3 +921,80 @@ A sessão dos pais é simulada no `sessionStorage`; a senha não é usada nem gu
   - foi recomendado ao usuário trocar a chave no painel da ElevenLabs, porque ela ficou escrita no chat.
 - **Se ele pedir de novo:** só com os arquivos de áudio gerados fora do jogo, nunca com a chave no jogo.
 
+
+---
+
+## 9. Inglês — Gabriel e o Expresso dos Sonhos (24/09/2026)
+
+**Pedido do usuário:** um jogo **novo e separado** para a prova de Inglês do 4º ano, baseado **só** no `ingles.pdf` (11 páginas, livro “Places / Unit 7 Professions / More professions and dreams”), reaproveitando o que fosse possível de Geografia, com o módulo na **Área dos Pais** para testar. Durante a entrega, o usuário pediu: **“não precisa ter 180 questões… que tenha todo o material e não fique muito extenso”** e **“um game mais curto que o de Geografia, com menos fases e menos minijogos, mais voltado ao estudo”**. Por isso: campanha com 61 questões (todas as seções do livro), o resto do livro como **extras opcionais**, e só 3 minijogos.
+
+### 9.1 História e roteiro
+- Na noite anterior à prova, a **Estela** (estrela-maquinista) sai do caderno de Inglês: o **Expresso dos Sonhos** perdeu 3 **Bilhetes-Palavra**. Falas de até 3 balões (`UI.say('estela', …)`).
+- **Mapa:** linha do trem com 3 estações + Passagem de Volta. Cada estação libera a seguinte (no teste dos pais, tudo liberado).
+
+| Ato | Estação | Páginas | Passos (campanha) | Questões |
+|---|---|---|---|---|
+| 1 | Cidade Cósmica | 1–3 (Places) | explicação lugares + would like to → **Associação: Places** → MATCH, GOT IT? → explicação really/usually/never/under/or → LET'S TALK, Write sentences, Guess the words, Complete (box), Draw (identificar), Guess the words → 🎫 | 18 |
+| 2 | Aeroporto das Profissões | 4–7 (Professions) | texto de John e Linda (4 blocos + quadrinhos, com voz) → Building sentences → explicação profissões → MATCH, GOT IT?, LET'S TALK, Answer the questions → **Caça-Palavras** → Word search (escrever), Complete (Professions) → explicação **pergunta com would** → Interrogative, Listen and complete (leitura) → 🎫 | 20 |
+| 3 | Laboratório dos Sonhos | 8–11 (subjects, dreams) | explicação matérias/profissões/sonhos → **Associação: Subjects** → MATCH, GOT IT?, LET'S TALK, Match and write, GOT IT?, LET'S TALK, Odd one out, Complete (Dreams) → explicação **negativa com wouldn’t** → Negative, Corresponding words, Number the sentences → 🎫 | 23 |
+| — | Passagem de Volta | todas | 8 desafios, priorizando as questões com erro/dica | 8 (revisão) |
+
+- **Extras do livro:** depois de cada estação, o mapa mostra “📚 Extras do livro — <estação> (feitas/total)”, com o resto das questões (8 por vez). Valem pontos, mas são **opcionais**.
+- **Revisão rápida** (depois da viagem): filtros por página, assunto (ato), tipo e “só as que tiveram erro”; 10 por vez; não muda pontos.
+- **Recompensas:** Bilhete da Cidade Cósmica, Distintivo das Profissões, Chave do Laboratório dos Sonhos, Skin do Expresso e Moldura de caderno (registradas em `S.rewards`; o Nexus continua oculto).
+- **Duração medida:** o robô de teste faz tudo em ~70 s sem ler; **[não confirmado]** com a criança. Estimativa: 61 questões curtas (~20–25 s cada) + 7 explicações + 3 minijogos de 1–3 min ≈ **30–40 min**.
+
+### 9.2 Conteúdo (matriz de cobertura)
+- **Fonte:** `content/banco.js` (`ING.data.questions`), uma entrada por questão impressa, com `page`, `sec`, `section` (título original), `kind`, `prompt` (enunciado **igual ao livro**), `pt` (instrução curta), respostas aceitas (`blanks`, `accept`, `personal`, `target`, `order`), `why` (explicação) e `options` (alternativas só de ajuda).
+- **174 questões, 28 seções, 11 páginas:** p1 MATCH 6, LET'S TALK 8, GOT IT? 8 • p2 Write sentences 5, Guess the words 5, Complete box 6 • p3 Draw 4 (virou “identifique e escreva”), Guess the words 5 • p4 Building sentences 1 • p5 MATCH 9, GOT IT? 8, LET'S TALK 6 • p6 Answer 5, Word search 6, Complete (Professions) 6 • p7 Interrogative 6, Listen and complete 8 • p8 MATCH 10, GOT IT? 8, LET'S TALK 8 • p9 Match and write 10, GOT IT? 8, LET'S TALK 8 • p10 Odd one 4, Complete (Dreams) 5, Negative 5 • p11 Corresponding words 5, Number the sentences 1.
+- **Campanha × extras:** em `content/atos.js`, cada bloco tem `pick` (números da seção que entram na campanha); `D.core` = 61 ids; `q.core` marca cada questão.
+- **Matriz completa na tela:** Área dos Pais → Modo de teste → Inglês → “📋 Matriz de cobertura…” (`src/modules/ingles/painel.html`), com filtros e exportação CSV.
+- **Conferido no PDF (imagens das páginas):** números dos MATCH; gabarito do “Listen and complete” (p7: would love, grow up, doctor, airplane, **Who** is the chef, Would you like, would like, to be a pilot); ordem do “Number the sentences” (p11: I have a big dream → … → We have many dreams); “They would study ___” aceita biology/physics/chemistry/math/Portuguese (todas no PDF); “There are many good **subjects**”.
+- **Decisões para não inventar conteúdo:** “Draw” virou identificação escrita (não dá para corrigir desenho); os 2 Listening viraram leitura/ordenação e dizem que **não** é o áudio do livro; “Building sentences” (sem enunciado impresso) usa a pergunta do próprio texto: *What would you like to be when you grow up?*; em “___ is the ___?” aceita **Who**/Where (o livro só tem a lacuna).
+- **Respostas manuscritas do Gabriel não são gabarito.** Ex.: em p1 GOT IT? 4 ele escreveu “like to”; o gabarito é *usually*, mas “like to”, “would like to” e “never” também são aceitos por serem corretos.
+
+### 9.3 Correção e dicas (`systems/checker.js`, funções puras, testadas no Node)
+- Ignora maiúsculas, espaços extras e pontuação; `would not` = `wouldn't`, `do not` = `don't`, `I am` = `I'm`, `he is` = `he's`.
+- **Vocabulário (`tol`)**: aceita 1 letra errada se a palavra tiver 5+ letras e não empatar com outra resposta; avisa “Atenção à escrita”.
+- **Estruturas:** nunca aceita falta de `would`, `like`, `to`, `wouldn't`, `do`, `is`, `are`… A mensagem aponta a palavra: “Quase! Falta a palavra **to** depois de **like**.”; “Na pergunta, **Would** vai para o começo.”; “Na negativa, troque **would** por **wouldn’t**.”
+- **Pessoais (`C.PERSONAL`):** regras por tipo de pergunta: `yn-would` (Yes, I would / No, I wouldn't), `yn-do`, `yn-am`, `yn-is-he`, `yn-would-they`, `want-be` (I would like to be a/an …), `want-go`, `want-study`, `job-she`/`job-he`, `prefer-air`, `prefer-subject`, `dream`, `dream-about`, `drawer`. “yes” sozinho não vale; responder “Yes, I would” a uma pergunta com **Do** explica a diferença.
+- **Frases livres (Write sentences):** precisa ter a palavra-alvo e 3+ palavras.
+- **Fluxo (`ING.app.ask`):** escrever → 1º erro: explicação do ponto (`why`) → 2º: dica 1 (nº de palavras + 1ª letra) → 3º: dica 2 (letras embaralhadas ou estrutura `W____ s__ l___…`) → 4º (ou 3º clique em 💡): **alternativas** (palavras) ou **cartões da Oficina de frases** (frases longas) → depois de acertar, a criança **digita a resposta completa** uma vez. Só o trecho errado fica vermelho; nada é apagado. Ordenação: a cada erro/dica, as primeiras frases ficam fixas no lugar.
+- **Níveis:** 1 = de primeira sem dica; 2 = depois de erro/dica, sem alternativas; 3 = usou alternativas. As lacunas têm todas a mesma largura (não entregam o tamanho da resposta).
+
+### 9.4 Minijogos (só 3; `minigames.js`, `ING.mg.play`)
+| Id | Ato | Base reaproveitada | Como é |
+|---|---|---|---|
+| `assoc_lugares` | 1 | Memória das Culturas (Geografia) | 16 cartas: figura ↔ palavra (8 pares de Places). 4 corações: só perde quando o **par da 1ª carta já tinha aparecido**. Depois, escreve 3 palavras sem ver. |
+| `caca` | 2 | grade nova (não havia caça-palavras) | Grade 15×11 fixa (semente) só com FLIGHT ATTENDANT, PILOT, DOCTOR, VETERINARIAN, CHEF, DRIVER. Arrastar, tocar 1ª e última letra, ou setas + Espaço. Dica acende a 1ª letra. |
+| `assoc_lab` | 3 | igual ao 1 | apron, nurse, engineer, dentist, police officer, biology, physics, chemistry. |
+
+- Placar 0–100; 1ª vez de cada um vale **20 pontos** de bônus (evento `ingles:achievement:minijogo-<id>`); replays não somam.
+- Fliperama: `ingles_<id>` liberado quando jogado; replay em `jogar.html?replay=<id>&token=…` (save `ecoNexus.replay.ingles.v1`, resultado em `GG.replay`, sem pontos).
+- Código também em `docs/MINIGAMES-CODIGO.md` (gerador atualizado para incluir `src/modules/ingles/minigames.js`).
+- A “corrida do Expresso” e a “rota dos sonhos” do prompt **não** foram feitas, por pedido do usuário (menos minijogos).
+
+### 9.5 Save, pontos e Nexus
+- Save `ecoNexus.ingles.v1` (`systems/save.js`): `q[id] = {seen, done, tier, attempts, errors, hints, alt, first, typed[últimas 8], time, reviewOk, reviewWrong}`, `acts[a1..a3] = {step, qi, done}` (continua na **mesma questão**), `tickets`, `finalDone`, `final`, `mg`, `rewards`, `settings`, `time`.
+- Modos (`ING.mode`): normal; replay; teste (`?teste=1` + `ato`, `passo`, `questao`, `minijogo`, `licao`, `final`, `revisao`, `tela=mapa|intro|bilhete-1..3|fim`, todos validados). O sandbox usa `ecoNexus.teste.ecoNexus.ingles.v1`.
+- **Pontos (`scoreAdapter`)**: por questão 40 + 30 (sem alternativas) + 30 (de primeira); ato 200 (mission); Passagem de Volta 500 (boss) + campanha 300; minijogo 20 (1ª vez). Robô “ótimo”: 7.560 pontos; robô “erros”: 7.050. Eventos estáveis → sem duplicar (testado recarregando).
+- `GG.bridge.sync` roda ao ganhar cada bilhete e no fim; o lançador também sincroniza.
+- O nome vem do perfil global (entrada só com o nome, sem senha).
+
+### 9.6 Área dos Pais
+- **Manifesto (`manifest.js`)**: `questionBank` (as 174, grupo “Pág. N • Ato X • seção”, `kind`, respostas aceitas, modelo, explicação, dicas), `statsFor` devolve também `typed`; `testTargets` (3 atos, final, revisão); `testExtras` com **22 itens**: painel, 8 telas, 7 explicações, 3 minijogos, 3 atos; `answerInGame: true`; `testHomeLabel`.
+- **Mudanças genéricas em `src/pais/pais.js`** (sem `if` de matéria): botão “▶ Responder como aluno” para qualquer módulo com `answerInGame`; ficha da questão mostra **“O que a criança digitou”** quando o banco traz `typed`; filtro **Tipo** quando o banco traz `kind`; rótulo do botão inicial vem de `testHomeLabel` (Geografia continua “Atlas”).
+- **Painel próprio** `src/modules/ingles/painel.html` (exige a sessão dos pais): números gerais; atalhos para qualquer passo, explicação, minijogo, mapa, final e revisão no **sandbox** (inicia o modo de teste sozinho); **reiniciar só o sandbox de Inglês**; **matriz de cobertura** com filtros (página, ato, tipo, campanha/extra, situação), o que a criança digitou e exportação CSV; **“Testar”** cada questão no corretor (resposta certa, errada, parcial, dicas 1/2 e alternativas) **sem gravar nada**.
+- No jogo em teste: ferramentas por questão (preencher certo/errado/parcial, próxima dica), painel com ato/passo/questão, +1 bilhete, zerar bilhetes, telas de bilhete e final.
+
+### 9.7 Arquivos
+- **Novos:** `src/modules/ingles/` → `manifest.js`, `jogar.html`, `ingles.css`, `main.js`, `minigames.js`, `painel.html`, `painel.js`, `content/banco.js`, `content/atos.js`, `systems/checker.js`, `systems/save.js` (modo + save), `assets/img/*.png` (50 Fluent Emoji MIT + `avental.png` original), `tests/ingles.cjs`.
+- **Alterados (mínimo):** `src/modules/modulos.js` (1 linha), `src/launcher/launcher.js` (arte do cartão “ingles”), `src/pais/pais.js` (3 ganchos genéricos da 9.6), `src/tools/gen-minigames-md.cjs` + `docs/MINIGAMES-CODIGO.md`, `CREDITOS.md`, `COMECE-AQUI.md`, este arquivo.
+- **Não mudou:** Ciências (hash dos 32 arquivos), Geografia (nenhum arquivo), Nexus, core e UI compartilhados.
+- **Música:** `expresso` e `estacao` (originais, via `GG.audio.addSong`). **Voz em inglês:** Web Speech `en-US`, só para textos do livro (botões 🔊).
+- **Acessibilidade:** botões grandes; teclado na tela ⌨️ (automático em toque); Enter confere; foco visível; ajustes de texto grande, contraste e menos movimento (`UI.settings`); ✔/✖ além das cores; texto alternativo em todas as figuras.
+
+### 9.8 Testes e pendências
+- `node src/modules/ingles/tests/ingles.cjs otimo` e `erros`: **83 checagens** (conteúdo e corretor; campanha inteira jogada por robô, com minijogos; continuar do ponto salvo; pontos sem duplicar; lançador 100% e 3 bilhetes; Geografia intacta; 22 atalhos da Área dos Pais no sandbox; painel com 174 linhas e filtros; testar corretor; ficha com o que a criança digitou; Oficina de frases; save real idêntico; replay sem pontos; console sem erros).
+- **[não confirmado]** tempo real com o Gabriel e se as regras das respostas pessoais aceitam tudo que ele escrever de forma coerente (ex.: frases fora dos padrões). Se aparecer uma resposta boa recusada, é só acrescentar o padrão em `C.PERSONAL`.
+- **[pendente, se o usuário quiser]** áudio oficial do livro (não está no projeto); Nexóticos de Inglês (nenhum pacote entregue).

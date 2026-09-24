@@ -145,14 +145,17 @@
     const m = GG.modules.get(mod), qb = m.franchise.questionBank, S = realSave(m);
     const filters = U.el('div', { class: 'filters' }, mods.map((x) => btn(x.franchise.icon + ' ' + x.franchise.title, x.franchise.moduleId === mod ? 'pri small' : 'small', () => { const vv = $('pView'); vv.innerHTML = ''; questoes(vv, { mod: x.franchise.moduleId }); })));
     const sel = U.el('select', { 'aria-label': 'Filtrar por situação' }, ['todas', 'não vista', 'vista', 'concluída', 'dominada', 'com erro'].map((x) => U.el('option', { value: x }, x)));
-    sel.value = opts.status; sel.addEventListener('change', () => { const vv = $('pView'); vv.innerHTML = ''; questoes(vv, { mod, status: sel.value }); });
+    sel.value = opts.status; sel.addEventListener('change', () => { const vv = $('pView'); vv.innerHTML = ''; questoes(vv, { mod, status: sel.value, kind: opts.kind }); });
     filters.appendChild(U.el('label', null, ' Situação: ')); filters.appendChild(sel);
+    const kinds = Array.from(new Set(B[mod].map((q) => q.kind).filter(Boolean)));
+    if (kinds.length) { const sk = U.el('select', { 'aria-label': 'Filtrar por tipo' }, [U.el('option', { value: '' }, 'todos os tipos')].concat(kinds.map((k) => U.el('option', { value: k }, (B[mod].find((q) => q.kind === k) || {}).type || k)))); sk.value = opts.kind || ''; sk.addEventListener('change', () => { const vv = $('pView'); vv.innerHTML = ''; questoes(vv, { mod, status: sel.value, kind: sk.value }); }); filters.appendChild(U.el('label', null, ' Tipo: ')); filters.appendChild(sk); }
     v.appendChild(filters);
     const list = B[mod];
     const rows = [], idx = [];
     list.forEach((q, i) => {
       const s = qb.statsFor(S, q.id); const [t, k] = statusOf(s);
       if (opts.status !== 'todas' && !(opts.status === t || (opts.status === 'com erro' && s && s.errors > 0))) return;
+      if (opts.kind && q.kind !== opts.kind) return;
       idx.push(i);
       rows.push([q.id, q.title, q.group || '', st(t, k), s ? String(s.attempts) : '0', s ? String(s.errors) : '0', s && s.hints ? 'sim' : 'não', s && s.guided ? 'sim' : 'não', s && s.first ? '✅' : '—']);
     });
@@ -190,6 +193,7 @@
       s ? U.el('p', { class: 'tip' }, sandbox ? 'Sandbox — tentativas: ' + s.attempts + ' • erros: ' + s.errors + ' • pistas: ' + s.hints : 'Tentativas: ' + s.attempts + ' • erros: ' + s.errors + ' • pista: ' + (s.hints ? 'sim' : 'não') + ' • guiada: ' + (s.guided ? 'sim' : 'não') + ' • de primeira: ' + (s.first ? 'sim' : 'não')) : null,
       U.el('div', null, [U.el('div', { class: 'lbl' }, 'Enunciado'), U.el('p', { html: U.rich(q.prompt || '') })]),
       q.where ? U.el('div', null, [U.el('div', { class: 'lbl' }, 'Onde aparece'), U.el('p', null, q.where)]) : null,
+      !sandbox && s && s.typed && s.typed.length ? U.el('div', null, [U.el('div', { class: 'lbl' }, 'O que a criança digitou (últimas tentativas)'), U.el('ul', null, s.typed.slice(-8).map((x) => U.el('li', null, (x.ok ? '✔ ' : '✖ ') + x.v + (x.copy ? ' (cópia do modelo)' : ''))))]) : null,
       U.el('div', { class: 'ans' }, [U.el('div', { class: 'lbl' }, 'Gabarito (somente responsáveis)'), U.el('p', { html: U.rich(q.answer || q.model || '—') })].concat(q.model && q.model !== q.answer ? [U.el('p', { class: 'tip', html: 'Resposta-modelo: ' + U.rich(q.model) })] : [])),
       U.el('div', null, [U.el('div', { class: 'lbl' }, 'Critérios de correção')].concat(criteria(q))),
       q.why ? U.el('div', null, [U.el('div', { class: 'lbl' }, 'Explicação'), U.el('p', { html: U.rich(q.why) })]) : null,
@@ -207,7 +211,7 @@
       ss.addEventListener('change', () => { simSet(mod, q.id, { state: ss.value }); UI.toast('Estado no sandbox: ' + ss.value, 'ok'); });
       acts.push(ss);
       const te = m.franchise.testEntry;
-      if (te && mod === 'geografia') acts.push(btn('▶ Responder como aluno', 'small info', () => { location.href = ROOT + te({ questao: q.id }); }));
+      if (te && (mod === 'geografia' || m.franchise.answerInGame)) acts.push(btn('▶ Responder como aluno', 'small info', () => { location.href = ROOT + te({ questao: q.id }); }));
       if (te && mod === 'ciencias') acts.push(btn('▶ Abrir região no jogo', 'small info', () => { location.href = ROOT + te({ preset: 'completo', mapa: q.raw.map || q.raw.region }); }));
     }
     acts.push(btn('Fechar', 'ghost small', () => dlg.close()));
@@ -289,7 +293,7 @@
       const F = m.franchise; const s = U.el('select', { 'aria-label': 'Fase / região de ' + F.title }, (F.testTargets || []).map((t) => U.el('option', { value: t.id }, t.t)));
       const box = U.el('div', { class: 'kpi' }, [U.el('b', null, F.icon + ' ' + F.title), s]);
       if (m.franchise.moduleId === 'ciencias') box.appendChild(U.el('div', { class: 'row' }, [btn('Jogo novo', 'small', () => { location.href = ROOT + F.testEntry({ preset: 'novo' }); }), btn('Tudo concluído', 'small', () => { location.href = ROOT + F.testEntry({ preset: 'completo' }) + '&reset=1'; }), btn('Ir para a região', 'small pri', () => { location.href = ROOT + F.testEntry({ preset: 'completo', mapa: s.value }); })]));
-      else box.appendChild(U.el('div', { class: 'row' }, [btn('Atlas', 'small', () => { location.href = ROOT + F.testEntry({}); }), btn('Ir para a fase', 'small pri', () => { location.href = ROOT + F.testEntry({ fase: s.value }); })]));
+      else box.appendChild(U.el('div', { class: 'row' }, [btn(F.testHomeLabel || 'Atlas', 'small', () => { location.href = ROOT + F.testEntry({}); }), btn('Ir para a fase', 'small pri', () => { location.href = ROOT + F.testEntry({ fase: s.value }); })]));
       // conteúdo extra do módulo (minijogos, menus, telas de recompensa): lista vinda do manifesto
       if ((F.testExtras || []).length) {
         const ex = [];
